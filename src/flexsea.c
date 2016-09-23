@@ -260,9 +260,9 @@ void rx_cmd_test(uint8_t *buf)
 
 			numb = tx_cmd_test(buf[P_XID], CMD_WRITE, test_payload, \
 								PAYLOAD_BUF_LEN, mod, tmp_val2);
-			numb = comm_gen_str(test_payload, comm_str_485, numb);
+			numb = comm_gen_str(test_payload, comm_str_485_1, numb);
 			numb = COMM_STR_BUF_LEN;
-			rs485_reply_ready(comm_str_485, numb);
+			rs485_reply_ready(comm_str_485_1, numb);
 
 			#endif //BOARD_TYPE_FLEXSEA_EXECUTE
 
@@ -275,9 +275,9 @@ void rx_cmd_test(uint8_t *buf)
 
 			numb = tx_cmd_test(buf[P_XID], CMD_WRITE, test_payload, \
 								PAYLOAD_BUF_LEN, 123, 234);
-			numb = comm_gen_str(test_payload, comm_str_485, numb);
+			numb = comm_gen_str(test_payload, comm_str_485_1, numb);
 			numb = COMM_STR_BUF_LEN;
-			rs485_reply_ready(comm_str_485, numb);
+			rs485_reply_ready(comm_str_485_1, numb);
 
 			#endif //BOARD_TYPE_FLEXSEA_EXECUTE
 
