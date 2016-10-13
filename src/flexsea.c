@@ -66,7 +66,7 @@ uint8_t test_comm_mod_1 = 0, test_comm_mod_2 = 0;
 uint32_t packet_received_1 = 0, packet_received_2 = 0;
 
 //Function pointer array:
-void (*flexsea_payload_ptr[128]) (uint8_t *buf);
+void (*flexsea_payload_ptr[MAX_CMD_CODE]) (uint8_t *buf);
 
 //****************************************************************************
 // Private Function Prototype(s)
@@ -101,6 +101,71 @@ void uint16_to_bytes(uint32_t x, uint8_t *b0, uint8_t *b1)
 	*b1 = (uint8_t) (x & 0xFF);
 }
 
+void SPLIT_16(uint16_t var, uint8_t *buf, uint16_t *index)
+{
+    buf[*index] = (uint8_t) ((var >> 8) & 0xFF);
+    buf[(*index)+1] = (uint8_t) (var & 0xFF);
+    (*index) += 2;
+}
+
+void SPLIT_32(uint32_t var, uint8_t *buf, uint16_t *index)
+{
+    buf[(*index)] = (uint8_t) ((var >> 24) & 0xFF);
+    buf[(*index)+1] = (uint8_t) ((var >> 16) & 0xFF);
+    buf[(*index)+2] = (uint8_t) ((var >> 8) & 0xFF);
+    buf[(*index)+3] = (uint8_t) (var & 0xFF);
+    (*index) += 4;
+}
+
+uint16_t REBUILD_UINT16(uint8_t *buf, uint16_t *index)
+{
+    uint16_t tmp = 0;
+
+    tmp = (((uint16_t)buf[(*index)] << 8) + ((uint16_t)buf[(*index)+1] ));
+    (*index) += 2;
+    return tmp;
+}
+
+uint32_t REBUILD_UINT32(uint8_t *buf, uint16_t *index)
+{
+    uint32_t tmp = 0;
+
+    tmp = (((uint32_t)buf[(*index)] << 24) + ((uint32_t)buf[(*index)+1] << 16) \
+            + ((uint32_t)buf[(*index)+2] << 8) + ((uint32_t)buf[(*index)+3]));
+    (*index) += 4;
+    return tmp;
+}
+
+void test_SPLIT_REBUILD(void)
+{
+    uint8_t buffer[24];
+    uint16_t index = 0;
+    uint8_t myVal8[5] = {0,0,0,0,0};
+    uint16_t myVal16[5] = {0,0,0,0,0};
+    uint32_t myVal32[5] = {0,0,0,0,0};
+
+    //Encoding:
+    buffer[index++] = 0x11;
+    buffer[index++] = 0x22;
+    SPLIT_32(0x33445566, buffer, &index);
+    buffer[index++] = 0x77;
+    SPLIT_16(0x8899, buffer, &index);
+    SPLIT_16(0xAABB, buffer, &index);
+    SPLIT_16(0xCCDD, buffer, &index);
+    SPLIT_16(0xDDEE, buffer, &index);
+
+    //Decoding
+    index = 0;
+    myVal8[0] = buffer[index++];
+    myVal8[1] = buffer[index++];
+    myVal32[0] = REBUILD_UINT32(buffer, &index);
+    myVal8[2] = buffer[index++];
+    myVal16[0] = REBUILD_UINT16(buffer, &index);
+    myVal16[1] = REBUILD_UINT16(buffer, &index);
+    myVal16[2] = REBUILD_UINT16(buffer, &index);
+    myVal16[3] = REBUILD_UINT16(buffer, &index);
+}
+
 //ToDo: look at inline functions
 
 //Can be used to fill a buffer of any length with any value
@@ -118,7 +183,8 @@ void fill_uint8_buf(uint8_t *buf, uint32_t len, uint8_t filler)
 //Make sure to enable the printf statements.
 void test_flexsea_stack(void)
 {
-    uint8_t i = 0, res = 0, bytes = 0;
+    uint8_t i = 0, bytes = 0;
+    volatile uint8_t res = 0;
 
     //We are using a command that Plan can receive to test the parser too:
     bytes = tx_cmd_test(FLEXSEA_PLAN_1, CMD_WRITE, test_payload, PAYLOAD_BUF_LEN, 100, 200);

@@ -44,22 +44,18 @@ extern "C" {
 unsigned int flexsea_error(unsigned int err_code);
 void uint32_to_bytes(uint32_t x, uint8_t *b0, uint8_t *b1, uint8_t *b2, uint8_t *b3);
 void uint16_to_bytes(uint32_t x, uint8_t *b0, uint8_t *b1);
+
+void SPLIT_16(uint16_t var, uint8_t *buf, uint16_t *index);
+uint16_t REBUILD_UINT16(uint8_t *buf, uint16_t *index);
+void SPLIT_32(uint32_t var, uint8_t *buf, uint16_t *index);
+uint32_t REBUILD_UINT32(uint8_t *buf, uint16_t *index);
+void test_SPLIT_REBUILD(void);
+
 void fill_uint8_buf(uint8_t *buf, uint32_t len, uint8_t filler);
 uint32_t tx_cmd_test(uint8_t receiver, uint8_t cmd_type, uint8_t *buf, \
                             uint32_t len, int16_t val1, int16_t val2);
 void rx_cmd_test(uint8_t *buf);
 void test_flexsea_stack(void);
-
-//****************************************************************************
-// Shared variable(s)
-//****************************************************************************
-
-extern int16_t test_comm_val2_1, test_comm_val2_2;
-extern uint8_t test_comm_mod_1, test_comm_mod_2;
-extern uint32_t packet_received_1, packet_received_2;
-
-//Function pointer array:
-extern void (*flexsea_payload_ptr[128]) (uint8_t *buf);
 
 //****************************************************************************
 // Definition(s):
@@ -72,6 +68,7 @@ extern void (*flexsea_payload_ptr[128]) (uint8_t *buf);
 #define COMM_STR_BUF_LEN            	48		//Number of bytes in a comm. string
 #define PACKAGED_PAYLOAD_LEN			48		//Temporary
 #define PAYLOAD_BUFFERS             	4		//Max # of payload strings we expect to find
+#define MAX_CMD_CODE                    127
 //ToDo: Should be in 'system'
 
 //Board ID related defines:
@@ -105,6 +102,17 @@ extern void (*flexsea_payload_ptr[128]) (uint8_t *buf);
 
 #define KEEP							0
 #define CHANGE							1
+
+//****************************************************************************
+// Shared variable(s)
+//****************************************************************************
+
+extern int16_t test_comm_val2_1, test_comm_val2_2;
+extern uint8_t test_comm_mod_1, test_comm_mod_2;
+extern uint32_t packet_received_1, packet_received_2;
+
+//Function pointer array:
+extern void (*flexsea_payload_ptr[MAX_CMD_CODE]) (uint8_t *buf);
 
 //****************************************************************************
 // Macro(s):
