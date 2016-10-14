@@ -66,7 +66,7 @@ unsigned char test_payload[PAYLOAD_BUF_LEN];
 int16_t test_comm_val2_1 = 0, test_comm_val2_2 = 0;
 uint8_t test_comm_mod_1 = 0, test_comm_mod_2 = 0;
 uint32_t packet_received_1 = 0, packet_received_2 = 0;
-#endif	#ifdef ENABLE_COMM_MANUAL_TEST_FCT
+#endif	//#ifdef ENABLE_COMM_MANUAL_TEST_FCT
 
 //Function pointer array:
 void (*flexsea_payload_ptr[MAX_CMD_CODE]) (uint8_t *buf);
@@ -75,7 +75,9 @@ void (*flexsea_payload_ptr[MAX_CMD_CODE]) (uint8_t *buf);
 // Private Function Prototype(s)
 //****************************************************************************
 
+#ifdef ENABLE_COMM_MANUAL_TEST_FCT
 static void clear_rx_command(uint8_t x, uint8_t y, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN]);
+#endif //ENABLE_COMM_MANUAL_TEST_FCT
 
 //****************************************************************************
 // Public Function(s)
@@ -160,6 +162,7 @@ void fill_uint8_buf(uint8_t *buf, uint32_t len, uint8_t filler)
 // Private Function(s)
 //****************************************************************************
 
+#ifdef ENABLE_COMM_MANUAL_TEST_FCT
 //Empties the buffer - used by the test function
 static void clear_rx_command(uint8_t x, uint8_t y, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN])
 {
@@ -174,9 +177,7 @@ static void clear_rx_command(uint8_t x, uint8_t y, uint8_t rx_cmd[][PACKAGED_PAY
 	}
 }
 
-#ifdef __cplusplus
-}
-#endif
+#endif //ENABLE_COMM_MANUAL_TEST_FCT
 
 //****************************************************************************
 // Manual Test Function(s)
@@ -436,4 +437,8 @@ void rx_cmd_test(uint8_t *buf)
 }
 */
 
-#endif ENABLE_COMM_MANUAL_TEST_FCT
+#endif //ENABLE_COMM_MANUAL_TEST_FCT
+
+#ifdef __cplusplus
+}
+#endif

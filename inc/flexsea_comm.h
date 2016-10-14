@@ -17,9 +17,9 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************
 	[Lead developper] Jean-Francois (JF) Duval, jfduval at dephy dot com.
-	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab 
+	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab
 	Biomechatronics research group <http://biomech.media.mit.edu/>
-	[Contributors] 
+	[Contributors]
 *****************************************************************************
 	[This file] flexsea_comm: Data-Link layer of the FlexSEA protocol
 *****************************************************************************
@@ -114,7 +114,7 @@ uint8_t unpack_payload_4(void);
 // Structure(s):
 //****************************************************************************
 
-//ToDo: should this be here?
+//ToDo: should this be here? Not sure this is used anymore... FIX
 
 struct sc_data_s
 {

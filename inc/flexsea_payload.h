@@ -17,11 +17,11 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************
 	[Lead developper] Jean-Francois (JF) Duval, jfduval at dephy dot com.
-	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab 
+	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab
 	Biomechatronics research group <http://biomech.media.mit.edu/>
-	[Contributors] 
+	[Contributors]
 *****************************************************************************
-	[This file] flexsea_payload: deals with the "intelligent" data packaged 
+	[This file] flexsea_payload: deals with the "intelligent" data packaged
 	in a comm_str
 *****************************************************************************
 	[Change log] (Convention: YYYY-MM-DD | author | comment)
@@ -53,7 +53,6 @@ extern uint8_t payload_str[PAYLOAD_BUF_LEN];
 // Public Function Prototype(s):
 //****************************************************************************
 
-//unsigned int payload_parse_str(unsigned char *cp_str);
 unsigned int payload_parse_str(uint8_t *cp_str);
 uint8_t sent_from_a_slave(uint8_t *buf);
 void prepare_empty_payload(uint8_t from, uint8_t to, uint8_t *buf, uint32_t len);

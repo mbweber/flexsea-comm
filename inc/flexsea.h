@@ -145,6 +145,38 @@ extern void (*flexsea_payload_ptr[MAX_CMD_CODE]) (uint8_t *buf);
 #define READ			1
 #define WRITE			0
 
+//Macros used to simplify the flexsea-system RX functions:
+#define RX_STARTOF_READ				if(IS_CMD_RW(buf[P_CMD1]) == READ){ \
+									uint32_t numb = 0; (void)numb;
+#define RX_ENDOF_READ				}
+#define RX_STARTOF_WRITE			else if(IS_CMD_RW(buf[P_CMD1]) == WRITE){
+#define RX_ENDOF_WRITE				}
+#define RX_STARTOF_W_FROM_SLAVE		if(sent_from_a_slave(buf)){
+#define RX_ENDOF_W_FROM_SLAVE		}
+#define RX_STARTOF_W_FROM_MASTER	else{
+#define RX_ENDOF_W_FROM_MASTER		}
+#define TX_CMD_DEFAULT				buf[P_XID], CMD_WRITE, tmp_payload_xmit,\
+									PAYLOAD_BUF_LEN
+#define COMM_GEN_STR_DEFAULT		do{numb = comm_gen_str(tmp_payload_xmit,\
+									comm_str_485_1, numb); \
+									numb = COMM_STR_BUF_LEN; \
+									}while(0);
+									//Fixed length for now to accomodate the DMA
+
+//Macros used to simplify the flexsea-system TX functions:
+#define TX_INIT(cmds)			uint32_t bytes = 0; \
+								prepare_empty_payload(board_id, receiver, \
+									buf, len); \
+								do{buf[P_CMDS] = cmds;}while(0);
+#define TX_STARTOF_READ			if(cmd_type == CMD_READ){ \
+								do{buf[P_CMD1] = CMD_R(CMD_RICNU);}while(0);
+#define TX_ENDOF_READ			do{bytes = index;}while(0);}
+#define TX_STARTOF_WRITE		else if(cmd_type == CMD_WRITE){ \
+								do{buf[P_CMD1] = CMD_W(CMD_RICNU);}while(0);
+#define TX_ENDOF_WRITE			do{bytes = index;}while(0);}
+#define TX_CLOSING				else{flexsea_error(SE_INVALID_READ_TYPE); \
+									bytes = 0;} return bytes;
+
 //Conditional printf() statement - debugging only
 #ifdef USE_DEBUG_PRINTF
 	#define DEBUG_PRINTF(...) printf(__VA_ARGS__)
