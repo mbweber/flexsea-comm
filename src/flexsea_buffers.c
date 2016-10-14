@@ -17,15 +17,15 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************
 	[Lead developper] Jean-Francois (JF) Duval, jfduval at dephy dot com.
-	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab 
+	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab
 	Biomechatronics research group <http://biomech.media.mit.edu/>
-	[Contributors] 
+	[Contributors]
 *****************************************************************************
 	[This file] flexsea_buffers: everything related to the reception buffers
 *****************************************************************************
 	[Change log] (Convention: YYYY-MM-DD | author | comment)
 	* 2016-09-09 | jfduval | Initial GPL-3.0 release
-	*
+	* 2016-10-14 | jfduval | Cleaned code org, moved test to end.
 ****************************************************************************/
 
 //This code currently supports 4 buffers, with generic names. Enable the buffers
@@ -89,22 +89,123 @@ static void update_rx_buf_4(uint8_t byte_array, uint8_t new_byte, uint8_t *new_a
 #endif	//ENABLE_FLEXSEA_BUF_4
 
 //****************************************************************************
-// Private function(s)
+// Public Function(s)
 //****************************************************************************
 
-void test_upd(void)
+#ifdef ENABLE_FLEXSEA_BUF_1
+
+//Add one byte to buffer #1
+void update_rx_buf_byte_1(uint8_t new_byte)
 {
-	uint8_t byte = 1;
-	uint8_t array[RX_BUF_LEN];
-	uint32_t idx = 0;
-	
-	while(1)
-	{
-		update_rx_buf_byte(array, &idx, byte);
-        update_rx_buf_1(UPDATE_BYTE, byte, array, 1);
-		byte++;
-	}
+	uint8_t empty_array[1] = {0};
+	update_rx_buf_1(UPDATE_BYTE, new_byte, empty_array, 0);
 }
+
+//Add an array of bytes to buffer #1
+void update_rx_buf_array_1(uint8_t *new_array, uint32_t len)
+{
+	update_rx_buf_1(UPDATE_ARRAY, 0, new_array, len);
+}
+
+#endif	//ENABLE_FLEXSEA_BUF_1
+
+#ifdef ENABLE_FLEXSEA_BUF_2
+
+//Add one byte to buffer #2
+void update_rx_buf_byte_2(uint8_t new_byte)
+{
+	uint8_t empty_array[1] = {0};
+	update_rx_buf_2(UPDATE_BYTE, new_byte, empty_array, 0);
+}
+
+//Add an array of bytes to buffer #2
+void update_rx_buf_array_2(uint8_t *new_array, uint32_t len)
+{
+	update_rx_buf_2(UPDATE_ARRAY, 0, new_array, len);
+}
+
+#endif	//ENABLE_FLEXSEA_BUF_2
+
+#ifdef ENABLE_FLEXSEA_BUF_3
+
+//Add one byte to buffer #3
+void update_rx_buf_byte_3(uint8_t new_byte)
+{
+	uint8_t empty_array[1] = {0};
+	update_rx_buf_3(UPDATE_BYTE, new_byte, empty_array, 0);
+}
+
+//Add an array of bytes to buffer #3
+void update_rx_buf_array_3(uint8_t *new_array, uint32_t len)
+{
+	update_rx_buf_3(UPDATE_ARRAY, 0, new_array, len);
+}
+
+#endif	//ENABLE_FLEXSEA_BUF_3
+
+#ifdef ENABLE_FLEXSEA_BUF_4
+
+//Add one byte to buffer #4
+void update_rx_buf_byte_4(uint8_t new_byte)
+{
+	uint8_t empty_array[1] = {0};
+	update_rx_buf_4(UPDATE_BYTE, new_byte, empty_array, 0);
+}
+
+//Add an array of bytes to buffer #4
+void update_rx_buf_array_4(uint8_t *new_array, uint32_t len)
+{
+	update_rx_buf_4(UPDATE_ARRAY, 0, new_array, len);
+}
+
+#endif	//ENABLE_FLEXSEA_BUF_4
+
+#ifdef __cplusplus
+}
+#endif
+
+//If the Header isn't in [0] we 'unwrap' the array and save it in 'new_array'
+uint8_t unwrap_buffer(uint8_t *array, uint8_t *new_array, uint32_t len)
+{
+	uint8_t i = 0, j = 0, retval = 0, idx = 0;
+
+	if(array[0] != HEADER)	//Quick check
+	{
+		for(i = 1; i < len; i++)
+		{
+			if(array[i] == HEADER)
+			{
+				//We found the header
+				idx = i;
+				for(j = 0; j < len; j++)
+				{
+					new_array[j] = array[idx];
+					idx++;
+					idx %= len;
+				}
+
+				retval = i;
+				break;
+			}
+		}
+	}
+	else
+	{
+		//No need to unwrap, copy & exit
+		for(i = 0; i < len; i++)
+		{
+			//new_array = array
+			new_array[i] = array[i];
+		}
+		retval = 0;
+	}
+
+	return retval;
+}
+
+//****************************************************************************
+// Private function(s)
+//****************************************************************************
 
 //Add one byte to the FIFO buffer
 //Do not call that function directly, call update_rx_buf_byte_n() where n is your communication port/buffer name
@@ -184,45 +285,6 @@ static void update_rx_buf_array(uint8_t *buf, uint32_t *idx, uint8_t *new_data, 
 	}
 }
 
-//If the Header isn't in [0] we 'unwrap' the array and save it in 'new_array'
-uint8_t unwrap_buffer(uint8_t *array, uint8_t *new_array, uint32_t len)
-{
-	uint8_t i = 0, j = 0, retval = 0, idx = 0;
-	
-	if(array[0] != HEADER)	//Quick check
-	{
-		for(i = 1; i < len; i++)
-		{
-			if(array[i] == HEADER)
-			{
-				//We found the header
-				idx = i;
-				for(j = 0; j < len; j++)
-				{
-					new_array[j] = array[idx];
-					idx++;
-					idx %= len;
-				}
-				
-				retval = i;
-				break;
-			}
-		}
-	}
-	else
-	{
-		//No need to unwrap, copy & exit
-		for(i = 0; i < len; i++)
-		{
-			//new_array = array
-			new_array[i] = array[i];
-		}
-		retval = 0;
-	}
-	
-	return retval;
-}
-
 #ifdef ENABLE_FLEXSEA_BUF_1
 
 //Wraps update_rx_buf_byte()/update_rx_buf_array() for buffer #1. Keeps track of the index.
@@ -234,7 +296,7 @@ static void update_rx_buf_1(uint8_t byte_array, uint8_t new_byte, uint8_t *new_a
 	if(byte_array == UPDATE_BYTE)
 	{
 		//Updating buffer with one byte
-        update_rx_buf_byte(rx_buf_1, &idx_1, new_byte);
+		update_rx_buf_byte(rx_buf_1, &idx_1, new_byte);
 	}
 	else if(byte_array == UPDATE_ARRAY)
 	{
@@ -332,77 +394,23 @@ static void update_rx_buf_4(uint8_t byte_array, uint8_t new_byte, uint8_t *new_a
 #endif	//ENABLE_FLEXSEA_BUF_4
 
 //****************************************************************************
-// Public Function(s)
+// Manual Test Function(s)
 //****************************************************************************
 
-#ifdef ENABLE_FLEXSEA_BUF_1
+#ifdef ENABLE_COMM_MANUAL_TEST_FCT
 
-//Add one byte to buffer #1
-void update_rx_buf_byte_1(uint8_t new_byte)
+void test_upd(void)
 {
-	uint8_t empty_array[1] = {0};
-    update_rx_buf_1(UPDATE_BYTE, new_byte, empty_array, 0);
+	uint8_t byte = 1;
+	uint8_t array[RX_BUF_LEN];
+	uint32_t idx = 0;
+
+	while(1)
+	{
+		update_rx_buf_byte(array, &idx, byte);
+		update_rx_buf_1(UPDATE_BYTE, byte, array, 1);
+		byte++;
+	}
 }
 
-//Add an array of bytes to buffer #1
-void update_rx_buf_array_1(uint8_t *new_array, uint32_t len)
-{
-	update_rx_buf_1(UPDATE_ARRAY, 0, new_array, len);
-}
-	
-#endif	//ENABLE_FLEXSEA_BUF_1
-
-#ifdef ENABLE_FLEXSEA_BUF_2
-
-//Add one byte to buffer #2
-void update_rx_buf_byte_2(uint8_t new_byte)
-{
-	uint8_t empty_array[1] = {0};
-	update_rx_buf_2(UPDATE_BYTE, new_byte, empty_array, 0);
-}
-
-//Add an array of bytes to buffer #2
-void update_rx_buf_array_2(uint8_t *new_array, uint32_t len)
-{
-	update_rx_buf_2(UPDATE_ARRAY, 0, new_array, len);
-}
-
-#endif	//ENABLE_FLEXSEA_BUF_2
-
-#ifdef ENABLE_FLEXSEA_BUF_3
-
-//Add one byte to buffer #3
-void update_rx_buf_byte_3(uint8_t new_byte)
-{
-	uint8_t empty_array[1] = {0};
-	update_rx_buf_3(UPDATE_BYTE, new_byte, empty_array, 0);
-}
-
-//Add an array of bytes to buffer #3
-void update_rx_buf_array_3(uint8_t *new_array, uint32_t len)
-{
-	update_rx_buf_3(UPDATE_ARRAY, 0, new_array, len);
-}
-
-#endif	//ENABLE_FLEXSEA_BUF_3
-
-#ifdef ENABLE_FLEXSEA_BUF_4
-
-//Add one byte to buffer #4
-void update_rx_buf_byte_4(uint8_t new_byte)
-{
-	uint8_t empty_array[1] = {0};
-	update_rx_buf_4(UPDATE_BYTE, new_byte, empty_array, 0);
-}
-
-//Add an array of bytes to buffer #4
-void update_rx_buf_array_4(uint8_t *new_array, uint32_t len)
-{
-	update_rx_buf_4(UPDATE_ARRAY, 0, new_array, len);
-}
-
-#endif	//ENABLE_FLEXSEA_BUF_4
-
-#ifdef __cplusplus
-}
-#endif
+#endif //ENABLE_COMM_MANUAL_TEST_FCT

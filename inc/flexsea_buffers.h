@@ -17,9 +17,9 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************
 	[Lead developper] Jean-Francois (JF) Duval, jfduval at dephy dot com.
-	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab 
+	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab
 	Biomechatronics research group <http://biomech.media.mit.edu/>
-	[Contributors] 
+	[Contributors]
 *****************************************************************************
 	[This file] flexsea_buffers: everything related to the reception buffers
 *****************************************************************************
@@ -81,8 +81,11 @@ void update_rx_buf_byte_4(uint8_t new_byte);
 void update_rx_buf_array_4(uint8_t *new_array, uint32_t len);
 #endif	//ENABLE_FLEXSEA_BUF_4
 
-void test_upd(void);
 uint8_t unwrap_buffer(uint8_t *array, uint8_t *new_array, uint32_t len);
+
+#ifdef ENABLE_COMM_MANUAL_TEST_FCT
+void test_upd(void);
+#endif //ENABLE_COMM_MANUAL_TEST_FCT
 
 //****************************************************************************
 // Definition(s):

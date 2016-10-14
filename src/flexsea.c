@@ -17,15 +17,15 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************
 	[Lead developper] Jean-Francois (JF) Duval, jfduval at dephy dot com.
-	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab 
+	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab
 	Biomechatronics research group <http://biomech.media.mit.edu/>
-	[Contributors] 
+	[Contributors]
 *****************************************************************************
 	[This file] flexsea: Master file for the FlexSEA stack.
 *****************************************************************************
 	[Change log] (Convention: YYYY-MM-DD | author | comment)
 	* 2016-09-09 | jfduval | Initial GPL-3.0 release
-	*
+	* 2016-10-14 | jfduval | New macros & functions to simplify RX/TX fcts
 ****************************************************************************/
 
 // FlexSEA: Flexible & Scalable Electronics Architecture
@@ -61,9 +61,12 @@ extern "C" {
 //****************************************************************************
 
 unsigned char test_payload[PAYLOAD_BUF_LEN];
+
+#ifdef ENABLE_COMM_MANUAL_TEST_FCT
 int16_t test_comm_val2_1 = 0, test_comm_val2_2 = 0;
 uint8_t test_comm_mod_1 = 0, test_comm_mod_2 = 0;
 uint32_t packet_received_1 = 0, packet_received_2 = 0;
+#endif	#ifdef ENABLE_COMM_MANUAL_TEST_FCT
 
 //Function pointer array:
 void (*flexsea_payload_ptr[MAX_CMD_CODE]) (uint8_t *buf);
@@ -86,6 +89,7 @@ unsigned int flexsea_error(unsigned int err_code)
 }
 
 //From 1 uint32 to 4 uint8
+//TODO: being replaced by SPLIT_32(), eliminate once the transition is complete
 void uint32_to_bytes(uint32_t x, uint8_t *b0, uint8_t *b1, uint8_t *b2, uint8_t *b3)
 {
 	*b0 = (uint8_t) ((x >> 24) & 0xFF);
@@ -95,78 +99,51 @@ void uint32_to_bytes(uint32_t x, uint8_t *b0, uint8_t *b1, uint8_t *b2, uint8_t 
 }
 
 //From 1 uint16 to 2 uint8
+//TODO: being replaced by SPLIT_16(), eliminate once the transition is complete
 void uint16_to_bytes(uint32_t x, uint8_t *b0, uint8_t *b1)
 {
 	*b0 = (uint8_t) ((x >> 8) & 0xFF);
 	*b1 = (uint8_t) (x & 0xFF);
 }
 
-void SPLIT_16(uint16_t var, uint8_t *buf, uint16_t *index)
+//Splits 1 uint16 in 2 bytes, stores them in buf[index] and increments index
+inline void SPLIT_16(uint16_t var, uint8_t *buf, uint16_t *index)
 {
-    buf[*index] = (uint8_t) ((var >> 8) & 0xFF);
-    buf[(*index)+1] = (uint8_t) (var & 0xFF);
-    (*index) += 2;
+	buf[*index] = (uint8_t) ((var >> 8) & 0xFF);
+	buf[(*index)+1] = (uint8_t) (var & 0xFF);
+	(*index) += 2;
 }
 
-void SPLIT_32(uint32_t var, uint8_t *buf, uint16_t *index)
-{
-    buf[(*index)] = (uint8_t) ((var >> 24) & 0xFF);
-    buf[(*index)+1] = (uint8_t) ((var >> 16) & 0xFF);
-    buf[(*index)+2] = (uint8_t) ((var >> 8) & 0xFF);
-    buf[(*index)+3] = (uint8_t) (var & 0xFF);
-    (*index) += 4;
-}
-
+//Inverse of SPLIT_16()
 uint16_t REBUILD_UINT16(uint8_t *buf, uint16_t *index)
 {
-    uint16_t tmp = 0;
+	uint16_t tmp = 0;
 
-    tmp = (((uint16_t)buf[(*index)] << 8) + ((uint16_t)buf[(*index)+1] ));
-    (*index) += 2;
-    return tmp;
+	tmp = (((uint16_t)buf[(*index)] << 8) + ((uint16_t)buf[(*index)+1] ));
+	(*index) += 2;
+	return tmp;
 }
 
+//Splits 1 uint32 in 4 bytes, stores them in buf[index] and increments index
+inline void SPLIT_32(uint32_t var, uint8_t *buf, uint16_t *index)
+{
+	buf[(*index)] = (uint8_t) ((var >> 24) & 0xFF);
+	buf[(*index)+1] = (uint8_t) ((var >> 16) & 0xFF);
+	buf[(*index)+2] = (uint8_t) ((var >> 8) & 0xFF);
+	buf[(*index)+3] = (uint8_t) (var & 0xFF);
+	(*index) += 4;
+}
+
+//Inverse of SPLIT_32()
 uint32_t REBUILD_UINT32(uint8_t *buf, uint16_t *index)
 {
-    uint32_t tmp = 0;
+	uint32_t tmp = 0;
 
-    tmp = (((uint32_t)buf[(*index)] << 24) + ((uint32_t)buf[(*index)+1] << 16) \
-            + ((uint32_t)buf[(*index)+2] << 8) + ((uint32_t)buf[(*index)+3]));
-    (*index) += 4;
-    return tmp;
+	tmp = (((uint32_t)buf[(*index)] << 24) + ((uint32_t)buf[(*index)+1] << 16) \
+			+ ((uint32_t)buf[(*index)+2] << 8) + ((uint32_t)buf[(*index)+3]));
+	(*index) += 4;
+	return tmp;
 }
-
-void test_SPLIT_REBUILD(void)
-{
-    uint8_t buffer[24];
-    uint16_t index = 0;
-    uint8_t myVal8[5] = {0,0,0,0,0};
-    uint16_t myVal16[5] = {0,0,0,0,0};
-    uint32_t myVal32[5] = {0,0,0,0,0};
-
-    //Encoding:
-    buffer[index++] = 0x11;
-    buffer[index++] = 0x22;
-    SPLIT_32(0x33445566, buffer, &index);
-    buffer[index++] = 0x77;
-    SPLIT_16(0x8899, buffer, &index);
-    SPLIT_16(0xAABB, buffer, &index);
-    SPLIT_16(0xCCDD, buffer, &index);
-    SPLIT_16(0xDDEE, buffer, &index);
-
-    //Decoding
-    index = 0;
-    myVal8[0] = buffer[index++];
-    myVal8[1] = buffer[index++];
-    myVal32[0] = REBUILD_UINT32(buffer, &index);
-    myVal8[2] = buffer[index++];
-    myVal16[0] = REBUILD_UINT16(buffer, &index);
-    myVal16[1] = REBUILD_UINT16(buffer, &index);
-    myVal16[2] = REBUILD_UINT16(buffer, &index);
-    myVal16[3] = REBUILD_UINT16(buffer, &index);
-}
-
-//ToDo: look at inline functions
 
 //Can be used to fill a buffer of any length with any value
 void fill_uint8_buf(uint8_t *buf, uint32_t len, uint8_t filler)
@@ -179,49 +156,112 @@ void fill_uint8_buf(uint8_t *buf, uint32_t len, uint8_t filler)
 	}
 }
 
+//****************************************************************************
+// Private Function(s)
+//****************************************************************************
+
+//Empties the buffer - used by the test function
+static void clear_rx_command(uint8_t x, uint8_t y, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN])
+{
+	unsigned char i = 0, j = 0;
+
+	for(i = 0; i < x; i++)
+	{
+		for(j = 0; j < y; j++)
+		{
+			rx_cmd[i][j] = 0;
+		}
+	}
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+//****************************************************************************
+// Manual Test Function(s)
+//****************************************************************************
+
+#ifdef ENABLE_COMM_MANUAL_TEST_FCT
+
+void test_SPLIT_REBUILD(void)
+{
+	uint8_t buffer[24];
+	uint16_t index = 0;
+	uint8_t myVal8[5] = {0,0,0,0,0};
+	uint16_t myVal16[5] = {0,0,0,0,0};
+	uint32_t myVal32[5] = {0,0,0,0,0};
+
+	//Encoding:
+	buffer[index++] = 0x11;
+	buffer[index++] = 0x22;
+	SPLIT_32(0x33445566, buffer, &index);
+	buffer[index++] = 0x77;
+	SPLIT_16(0x8899, buffer, &index);
+	SPLIT_16(0xAABB, buffer, &index);
+	SPLIT_16(0xCCDD, buffer, &index);
+	SPLIT_16(0xDDEE, buffer, &index);
+
+	//Decoding
+	index = 0;
+	myVal8[0] = buffer[index++];
+	myVal8[1] = buffer[index++];
+	myVal32[0] = REBUILD_UINT32(buffer, &index);
+	myVal8[2] = buffer[index++];
+	myVal16[0] = REBUILD_UINT16(buffer, &index);
+	myVal16[1] = REBUILD_UINT16(buffer, &index);
+	myVal16[2] = REBUILD_UINT16(buffer, &index);
+	myVal16[3] = REBUILD_UINT16(buffer, &index);
+}
+
+/*
+ * TODO: testing a fake command isn't very useful, what I need is to test the
+ * real ones. This code will likely be removed soon, and automated tests will
+ * do what it did.
+ *
 //Quick way to debug the comm functions with the debugger and the terminal.
 //Make sure to enable the printf statements.
 void test_flexsea_stack(void)
 {
-    uint8_t i = 0, bytes = 0;
-    volatile uint8_t res = 0;
+	uint8_t i = 0, bytes = 0;
+	uint8_t res = 0;
 
-    //We are using a command that Plan can receive to test the parser too:
-    bytes = tx_cmd_test(FLEXSEA_PLAN_1, CMD_WRITE, test_payload, PAYLOAD_BUF_LEN, 100, 200);
-    //(this fills payload_str[])
+	//We are using a command that Plan can receive to test the parser too:
+	bytes = tx_cmd_test(FLEXSEA_PLAN_1, CMD_WRITE, test_payload, PAYLOAD_BUF_LEN, 100, 200);
+	//(this fills payload_str[])
 
-    DEBUG_PRINTF("bytes = %i\n", bytes);
+	DEBUG_PRINTF("bytes = %i\n", bytes);
 
-    //Clear current payload:
-    clear_rx_command(PAYLOAD_BUFFERS, PACKAGED_PAYLOAD_LEN, rx_command_1);
+	//Clear current payload:
+	clear_rx_command(PAYLOAD_BUFFERS, PACKAGED_PAYLOAD_LEN, rx_command_1);
 
-    //Build comm_str
-    res = comm_gen_str(test_payload, comm_str_1, bytes);
+	//Build comm_str
+	res = comm_gen_str(test_payload, comm_str_1, bytes);
 
-    DEBUG_PRINTF("comm_str[]: >> %s <<\n", (char*)comm_str_spi);
-    DEBUG_PRINTF("res = %i\n", res);
+	DEBUG_PRINTF("comm_str[]: >> %s <<\n", (char*)comm_str_spi);
+	DEBUG_PRINTF("res = %i\n", res);
 
-    DEBUG_PRINTF("\nrx_buf_spi[]: >> %s <<\n", (char*)rx_buf_spi);
+	DEBUG_PRINTF("\nrx_buf_spi[]: >> %s <<\n", (char*)rx_buf_spi);
 
-    //Feed it to the input buffer
-    for(i = 0; i < PACKAGED_PAYLOAD_LEN; i++)
-    {
-        update_rx_buf_byte_1(comm_str_1[i]);
-    }
+	//Feed it to the input buffer
+	for(i = 0; i < PACKAGED_PAYLOAD_LEN; i++)
+	{
+		update_rx_buf_byte_1(comm_str_1[i]);
+	}
 
-    DEBUG_PRINTF("rx_buf_spi[]: >> %s <<\n", (char*)rx_buf_spi);
+	DEBUG_PRINTF("rx_buf_spi[]: >> %s <<\n", (char*)rx_buf_spi);
 
-    //Try to decode
-    res = unpack_payload_1();
+	//Try to decode
+	res = unpack_payload_1();
 
-    DEBUG_PRINTF("Found %i payload(s).\n", res);
+	DEBUG_PRINTF("Found %i payload(s).\n", res);
 
-    //Can we parse it?
+	//Can we parse it?
 
-    res = payload_parse_str(rx_command_1[0]);
+	res = payload_parse_str(rx_command_1[0]);
 
-    //If it works, the console/terminal should display
-    //"Received CMD_TEST. Val1 = 200, Val2 = 100."
+	//If it works, the console/terminal should display
+	//"Received CMD_TEST. Val1 = 200, Val2 = 100."
 }
 
 //Transmission of a TEST command
@@ -394,25 +434,6 @@ void rx_cmd_test(uint8_t *buf)
 		}
 	}
 }
+*/
 
-//****************************************************************************
-// Private Function(s)
-//****************************************************************************
-
-//Empties the buffer - used by the flexes test function
-static void clear_rx_command(uint8_t x, uint8_t y, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN])
-{
-    unsigned char i = 0, j = 0;
-
-    for(i = 0; i < x; i++)
-    {
-        for(j = 0; j < y; j++)
-        {
-        	rx_cmd[i][j] = 0;
-        }
-    }
-}
-
-#ifdef __cplusplus
-}
-#endif
+#endif ENABLE_COMM_MANUAL_TEST_FCT

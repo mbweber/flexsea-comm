@@ -17,9 +17,9 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *****************************************************************************
 	[Lead developper] Jean-Francois (JF) Duval, jfduval at dephy dot com.
-	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab 
+	[Origin] Based on Jean-Francois Duval's work at the MIT Media Lab
 	Biomechatronics research group <http://biomech.media.mit.edu/>
-	[Contributors] 
+	[Contributors]
 *****************************************************************************
 	[This file] flexsea: Master file for the FlexSEA stack.
 *****************************************************************************
@@ -37,6 +37,9 @@ extern "C" {
 
 #include <stdint.h>
 
+//#define ENABLE_COMM_MANUAL_TEST_FCT	//Enable to use test code
+//#define USE_DEBUG_PRINTF			//Enable this to debug with the terminal
+
 //****************************************************************************
 // Prototype(s):
 //****************************************************************************
@@ -44,58 +47,60 @@ extern "C" {
 unsigned int flexsea_error(unsigned int err_code);
 void uint32_to_bytes(uint32_t x, uint8_t *b0, uint8_t *b1, uint8_t *b2, uint8_t *b3);
 void uint16_to_bytes(uint32_t x, uint8_t *b0, uint8_t *b1);
-
 void SPLIT_16(uint16_t var, uint8_t *buf, uint16_t *index);
 uint16_t REBUILD_UINT16(uint8_t *buf, uint16_t *index);
 void SPLIT_32(uint32_t var, uint8_t *buf, uint16_t *index);
 uint32_t REBUILD_UINT32(uint8_t *buf, uint16_t *index);
-void test_SPLIT_REBUILD(void);
 
 void fill_uint8_buf(uint8_t *buf, uint32_t len, uint8_t filler);
-uint32_t tx_cmd_test(uint8_t receiver, uint8_t cmd_type, uint8_t *buf, \
-                            uint32_t len, int16_t val1, int16_t val2);
-void rx_cmd_test(uint8_t *buf);
-void test_flexsea_stack(void);
+
+#ifdef ENABLE_COMM_MANUAL_TEST_FCT
+void test_SPLIT_REBUILD(void);
+//uint32_t tx_cmd_test(uint8_t receiver, uint8_t cmd_type, uint8_t *buf,
+//							uint32_t len, int16_t val1, int16_t val2);
+//void rx_cmd_test(uint8_t *buf);
+//void test_flexsea_stack(void);
+#endif //ENABLE_COMM_MANUAL_TEST_FCT
 
 //****************************************************************************
 // Definition(s):
 //****************************************************************************
 
 //Buffers and packets:
-#define RX_BUF_LEN                  	100		//Reception buffer (flexsea_comm)
-#define PAYLOAD_BUF_LEN             	36		//Number of bytes in a payload string
+#define RX_BUF_LEN						100		//Reception buffer (flexsea_comm)
+#define PAYLOAD_BUF_LEN					36		//Number of bytes in a payload string
 #define PAYLOAD_BYTES					(PAYLOAD_BUF_LEN - 4)
-#define COMM_STR_BUF_LEN            	48		//Number of bytes in a comm. string
+#define COMM_STR_BUF_LEN				48		//Number of bytes in a comm. string
 #define PACKAGED_PAYLOAD_LEN			48		//Temporary
-#define PAYLOAD_BUFFERS             	4		//Max # of payload strings we expect to find
-#define MAX_CMD_CODE                    127
+#define PAYLOAD_BUFFERS					4		//Max # of payload strings we expect to find
+#define MAX_CMD_CODE					127
 //ToDo: Should be in 'system'
 
 //Board ID related defines:
-#define ID_MATCH                    	1		//Addressed to me
-#define ID_SUB1_MATCH               	2		//Addressed to a board on slave bus #1
-#define ID_SUB2_MATCH               	3		//Addressed to a board on slave bus #2
-#define ID_UP_MATCH               		4		//Addressed to my master
-#define ID_NO_MATCH                 	0
+#define ID_MATCH						1		//Addressed to me
+#define ID_SUB1_MATCH					2		//Addressed to a board on slave bus #1
+#define ID_SUB2_MATCH					3		//Addressed to a board on slave bus #2
+#define ID_UP_MATCH						4		//Addressed to my master
+#define ID_NO_MATCH						0
 
 //Communication ports:
 #define PORT_SUB1						0
 #define PORT_SUB2						1
-#define PORT_SPI                        2
-#define PORT_USB                        3
+#define PORT_SPI						2
+#define PORT_USB						3
 
 //Communication protocol payload fields:
-#define P_XID                      		0		//Emitter ID
-#define P_RID                      		1		//Receiver ID
-#define P_CMDS                     		2		//Number of Commands sent
-#define P_CMD1                     		3		//First command
-#define P_DATA1                    		4		//First data
+#define P_XID							0		//Emitter ID
+#define P_RID							1		//Receiver ID
+#define P_CMDS							2		//Number of Commands sent
+#define P_CMD1							3		//First command
+#define P_DATA1							4		//First data
 
 //Parser definitions:
-#define PARSE_DEFAULT               	0
-#define PARSE_ID_NO_MATCH          	    1
-#define PARSE_SUCCESSFUL            	2
-#define PARSE_UNKNOWN_CMD           	3
+#define PARSE_DEFAULT					0
+#define PARSE_ID_NO_MATCH				1
+#define PARSE_SUCCESSFUL				2
+#define PARSE_UNKNOWN_CMD				3
 
 #define CMD_READ						1
 #define CMD_WRITE						2
@@ -106,10 +111,6 @@ void test_flexsea_stack(void);
 //****************************************************************************
 // Shared variable(s)
 //****************************************************************************
-
-extern int16_t test_comm_val2_1, test_comm_val2_2;
-extern uint8_t test_comm_mod_1, test_comm_mod_2;
-extern uint32_t packet_received_1, packet_received_2;
 
 //Function pointer array:
 extern void (*flexsea_payload_ptr[MAX_CMD_CODE]) (uint8_t *buf);
@@ -143,9 +144,6 @@ extern void (*flexsea_payload_ptr[MAX_CMD_CODE]) (uint8_t *buf);
 #define IS_CMD_RW(x)	(x & 0x01)
 #define READ			1
 #define WRITE			0
-
-//Enable this to debug with the terminal:
-//#define USE_DEBUG_PRINTF
 
 //Conditional printf() statement - debugging only
 #ifdef USE_DEBUG_PRINTF
