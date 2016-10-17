@@ -76,6 +76,13 @@ void test_SPLIT_REBUILD(void);
 #define MAX_CMD_CODE					127
 //ToDo: Should be in 'system'
 
+//Packet types:
+#define RX_PTYPE_READ			0
+#define RX_PTYPE_WRITE			1
+#define RX_PTYPE_REPLY			2
+#define RX_PTYPE_INVALID		3
+#define RX_PTYPE_MAX_INDEX		2
+
 //Board ID related defines:
 #define ID_MATCH						1		//Addressed to me
 #define ID_SUB1_MATCH					2		//Addressed to a board on slave bus #1
@@ -113,7 +120,7 @@ void test_SPLIT_REBUILD(void);
 //****************************************************************************
 
 //Function pointer array:
-extern void (*flexsea_payload_ptr[MAX_CMD_CODE]) (uint8_t *buf);
+extern void (*flexsea_payload_ptr[MAX_CMD_CODE][RX_PTYPE_MAX_INDEX+1]) (uint8_t *buf);
 
 //****************************************************************************
 // Macro(s):
@@ -146,8 +153,8 @@ extern void (*flexsea_payload_ptr[MAX_CMD_CODE]) (uint8_t *buf);
 //Read, Write, or Read&Write?
 #define WRITE			0
 #define READ			1
-#define READWRITE		2
 
+/*
 //Macros used to simplify the flexsea-system RX functions:
 #define RX_STARTOF_READ				if(IS_CMD_RW(buf[P_CMD1]) == READ){ \
 									uint32_t numb = 0; (void)numb;
@@ -182,6 +189,7 @@ extern void (*flexsea_payload_ptr[MAX_CMD_CODE]) (uint8_t *buf);
 #define TX_ENDOF_WRITE			do{bytes = index;}while(0);}
 #define TX_CLOSING				else{flexsea_error(SE_INVALID_READ_TYPE); \
 									bytes = 0;} return bytes;
+*/
 
 //Conditional printf() statement - debugging only
 #ifdef USE_DEBUG_PRINTF

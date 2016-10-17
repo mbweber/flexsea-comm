@@ -69,7 +69,7 @@ uint32_t packet_received_1 = 0, packet_received_2 = 0;
 #endif	//#ifdef ENABLE_COMM_MANUAL_TEST_FCT
 
 //Function pointer array:
-void (*flexsea_payload_ptr[MAX_CMD_CODE]) (uint8_t *buf);
+void (*flexsea_payload_ptr[MAX_CMD_CODE][RX_PTYPE_MAX_INDEX+1]) (uint8_t *buf);
 
 //****************************************************************************
 // Private Function Prototype(s)

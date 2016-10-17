@@ -64,8 +64,9 @@ static void route_to_slave(uint8_t port, uint8_t *buf, uint32_t len);
 //ToDo fix: for now, supports only one command per string
 unsigned int payload_parse_str(uint8_t *cp_str)
 {
-	unsigned char cmd = 0, cmd_7bits = 0, output = PARSE_SUCCESSFUL, numb  = 0;
+	unsigned char cmd = 0, cmd_7bits = 0;
 	unsigned int id = 0;
+	uint8_t pType = RX_PTYPE_INVALID;
 
 	//Command
 	cmd = cp_str[P_CMD1];		//CMD w/ R/W bit
@@ -75,11 +76,20 @@ unsigned int payload_parse_str(uint8_t *cp_str)
 	id = get_rid(cp_str);
 	if(id == ID_MATCH)
 	{
+		pType = packetType(cp_str);
+
 		//It's addressed to me. Function pointer array will call
 		//the appropriate handler (as defined in flexsea_system):
-		(*flexsea_payload_ptr[cmd_7bits]) (cp_str);
+		if((cmd_7bits <= MAX_CMD_CODE) && (pType <= RX_PTYPE_MAX_INDEX))
+		{
+			(*flexsea_payload_ptr[cmd_7bits][pType]) (cp_str);
 
-		return PARSE_SUCCESSFUL;
+			return PARSE_SUCCESSFUL;
+		}
+		else
+		{
+			return PARSE_DEFAULT;
+		}
 	}
 	else if(id == ID_SUB1_MATCH)
 	{
@@ -100,6 +110,8 @@ unsigned int payload_parse_str(uint8_t *cp_str)
 		//For my master:
 
 		#ifdef BOARD_TYPE_FLEXSEA_MANAGE
+
+		uint8_t numb  = 0;
 
 		//Manage is the only board that can receive a package destined to his master
 
@@ -166,6 +178,43 @@ uint8_t sent_from_a_slave(uint8_t *buf)
 
 	//Should not happen
 	return 0;
+}
+
+//We received a packet. Is it a Read, a Reply or a Write?
+uint8_t packetType(uint8_t *buf)
+{
+	//Logic behind this code: slaves have higher addresses than their master.
+
+	//From a Master:
+	if(buf[P_XID] < buf[P_RID])
+	{
+		//Master is writing. Write or Read?
+		if(IS_CMD_RW(buf[P_CMD1]) == READ)
+		{
+			return RX_PTYPE_READ;
+		}
+		else
+		{
+			return RX_PTYPE_WRITE;
+		}
+	}
+
+	//From a Slave:
+	if(buf[P_XID] > buf[P_RID])
+	{
+		//The only thing we can get from a slave is a Reply
+		if(IS_CMD_RW(buf[P_CMD1]) == WRITE)
+		{
+			return RX_PTYPE_REPLY;
+		}
+		else
+		{
+			return RX_PTYPE_INVALID;
+		}
+	}
+
+	//Equal addresses, shouldn't happen
+	return RX_PTYPE_INVALID;
 }
 
 //****************************************************************************
