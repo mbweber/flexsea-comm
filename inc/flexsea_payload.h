@@ -53,11 +53,11 @@ extern uint8_t payload_str[PAYLOAD_BUF_LEN];
 // Public Function Prototype(s):
 //****************************************************************************
 
-unsigned int payload_parse_str(uint8_t *cp_str);
+uint8_t payload_parse_str(uint8_t *cp_str, uint8_t *info);
 uint8_t sent_from_a_slave(uint8_t *buf);
 uint8_t packetType(uint8_t *buf);
 void prepare_empty_payload(uint8_t from, uint8_t to, uint8_t *buf, uint32_t len);
-void flexsea_payload_catchall(uint8_t *buf);
+void flexsea_payload_catchall(uint8_t *buf, uint8_t *info);
 
 //****************************************************************************
 // Definition(s):

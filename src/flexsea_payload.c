@@ -62,7 +62,7 @@ static void route_to_slave(uint8_t port, uint8_t *buf, uint32_t len);
 
 //Decode/parse received string
 //ToDo fix: for now, supports only one command per string
-unsigned int payload_parse_str(uint8_t *cp_str)
+uint8_t payload_parse_str(uint8_t *cp_str, uint8_t *info)
 {
 	unsigned char cmd = 0, cmd_7bits = 0;
 	unsigned int id = 0;
@@ -82,7 +82,7 @@ unsigned int payload_parse_str(uint8_t *cp_str)
 		//the appropriate handler (as defined in flexsea_system):
 		if((cmd_7bits <= MAX_CMD_CODE) && (pType <= RX_PTYPE_MAX_INDEX))
 		{
-			(*flexsea_payload_ptr[cmd_7bits][pType]) (cp_str);
+			(*flexsea_payload_ptr[cmd_7bits][pType]) (cp_str, info);
 
 			return PARSE_SUCCESSFUL;
 		}
@@ -109,7 +109,7 @@ unsigned int payload_parse_str(uint8_t *cp_str)
 	{
 		//For my master:
 
-		#ifdef BOARD_TYPE_FLEXSEA_MANAGE
+		#ifdef BOARD_TYPE_FLEXSEA_MANAGE	//TODO redo this whole block of code
 
 		uint8_t numb  = 0;
 

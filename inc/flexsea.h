@@ -91,10 +91,12 @@ void test_SPLIT_REBUILD(void);
 #define ID_NO_MATCH						0
 
 //Communication ports:
-#define PORT_SUB1						0
-#define PORT_SUB2						1
+#define PORT_485_1						0
+#define PORT_485_2						1
 #define PORT_SPI						2
 #define PORT_USB						3
+#define PORT_SUB1						PORT_485_1
+#define PORT_SUB2						PORT_485_2
 
 //Communication protocol payload fields:
 #define P_XID							0		//Emitter ID
@@ -120,7 +122,8 @@ void test_SPLIT_REBUILD(void);
 //****************************************************************************
 
 //Function pointer array:
-extern void (*flexsea_payload_ptr[MAX_CMD_CODE][RX_PTYPE_MAX_INDEX+1]) (uint8_t *buf);
+extern void (*flexsea_payload_ptr[MAX_CMD_CODE][RX_PTYPE_MAX_INDEX+1]) \
+				(uint8_t *buf, uint8_t *info);
 
 //****************************************************************************
 // Macro(s):
