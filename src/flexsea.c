@@ -60,7 +60,7 @@ extern "C" {
 // Variable(s)
 //****************************************************************************
 
-unsigned char test_payload[PAYLOAD_BUF_LEN];
+uint8_t test_payload[PAYLOAD_BUF_LEN];
 
 #ifdef ENABLE_COMM_MANUAL_TEST_FCT
 int16_t test_comm_val2_1 = 0, test_comm_val2_2 = 0;
@@ -167,7 +167,7 @@ void fill_uint8_buf(uint8_t *buf, uint32_t len, uint8_t filler)
 //Empties the buffer - used by the test function
 static void clear_rx_command(uint8_t x, uint8_t y, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN])
 {
-	unsigned char i = 0, j = 0;
+	uint8_t i = 0, j = 0;
 
 	for(i = 0; i < x; i++)
 	{

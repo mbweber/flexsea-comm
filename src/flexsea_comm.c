@@ -105,7 +105,7 @@ static uint8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LE
 uint8_t comm_gen_str(uint8_t payload[], uint8_t *cstr, uint8_t bytes)
 {
 	unsigned int i = 0, escapes = 0, idx = 0, total_bytes = 0;
-	unsigned char checksum = 0;
+	uint8_t checksum = 0;
 
 	//Fill comm_str with zeros
 	for(i = 0; i < COMM_STR_BUF_LEN; i++)

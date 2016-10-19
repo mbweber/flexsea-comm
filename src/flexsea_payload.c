@@ -64,7 +64,7 @@ static void route_to_slave(uint8_t port, uint8_t *buf, uint32_t len);
 //ToDo fix: for now, supports only one command per string
 uint8_t payload_parse_str(uint8_t *cp_str, uint8_t *info)
 {
-	unsigned char cmd = 0, cmd_7bits = 0;
+	uint8_t cmd = 0, cmd_7bits = 0;
 	unsigned int id = 0;
 	uint8_t pType = RX_PTYPE_INVALID;
 
@@ -253,6 +253,12 @@ static void route_to_slave(uint8_t port, uint8_t *buf, uint32_t len)
 		comm_str_ptr[i] = comm_str_tmp[i];
 	}
 
+	#else
+		
+		(void)port;
+		(void)buf;
+		(void) len;
+		
 	#endif 	//BOARD_TYPE_FLEXSEA_MANAGE
 }
 
