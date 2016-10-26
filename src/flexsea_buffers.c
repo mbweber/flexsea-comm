@@ -72,20 +72,25 @@ uint8_t rx_buf_4[RX_BUF_LEN];
 
 //For all the buffers:
 static void update_rx_buf_byte(uint8_t *buf, uint32_t *idx, uint8_t new_byte);
-static void update_rx_buf_array(uint8_t *buf, uint32_t *idx, uint8_t *new_data, uint32_t len);
+static void update_rx_buf_array(uint8_t *buf, uint32_t *idx, \
+								uint8_t *new_data, uint32_t len);
 
 //Specific:
 #ifdef ENABLE_FLEXSEA_BUF_1
-static void update_rx_buf_1(uint8_t byte_array, uint8_t new_byte, uint8_t *new_array, uint32_t len);
+static void update_rx_buf_1(uint8_t byte_array, uint8_t new_byte, \
+							uint8_t *new_array, uint32_t len);
 #endif	//ENABLE_FLEXSEA_BUF_1
 #ifdef ENABLE_FLEXSEA_BUF_2
-static void update_rx_buf_2(uint8_t byte_array, uint8_t new_byte, uint8_t *new_array, uint32_t len);
+static void update_rx_buf_2(uint8_t byte_array, uint8_t new_byte, \
+							uint8_t *new_array, uint32_t len);
 #endif	//ENABLE_FLEXSEA_BUF_2
 #ifdef ENABLE_FLEXSEA_BUF_3
-static void update_rx_buf_3(uint8_t byte_array, uint8_t new_byte, uint8_t *new_array, uint32_t len);
+static void update_rx_buf_3(uint8_t byte_array, uint8_t new_byte, \
+							uint8_t *new_array, uint32_t len);
 #endif	//ENABLE_FLEXSEA_BUF_3
 #ifdef ENABLE_FLEXSEA_BUF_4
-static void update_rx_buf_4(uint8_t byte_array, uint8_t new_byte, uint8_t *new_array, uint32_t len);
+static void update_rx_buf_4(uint8_t byte_array, uint8_t new_byte, \
+							uint8_t *new_array, uint32_t len);
 #endif	//ENABLE_FLEXSEA_BUF_4
 
 //****************************************************************************
@@ -163,45 +168,6 @@ void update_rx_buf_array_4(uint8_t *new_array, uint32_t len)
 #ifdef __cplusplus
 }
 #endif
-
-//If the Header isn't in [0] we 'unwrap' the array and save it in 'new_array'
-uint8_t unwrap_buffer(uint8_t *array, uint8_t *new_array, uint32_t len)
-{
-	uint8_t i = 0, j = 0, retval = 0, idx = 0;
-
-	if(array[0] != HEADER)	//Quick check
-	{
-		for(i = 1; i < len; i++)
-		{
-			if(array[i] == HEADER)
-			{
-				//We found the header
-				idx = i;
-				for(j = 0; j < len; j++)
-				{
-					new_array[j] = array[idx];
-					idx++;
-					idx %= len;
-				}
-
-				retval = i;
-				break;
-			}
-		}
-	}
-	else
-	{
-		//No need to unwrap, copy & exit
-		for(i = 0; i < len; i++)
-		{
-			//new_array = array
-			new_array[i] = array[i];
-		}
-		retval = 0;
-	}
-
-	return retval;
-}
 
 //****************************************************************************
 // Private function(s)
@@ -394,23 +360,46 @@ static void update_rx_buf_4(uint8_t byte_array, uint8_t new_byte, uint8_t *new_a
 #endif	//ENABLE_FLEXSEA_BUF_4
 
 //****************************************************************************
-// Manual Test Function(s)
+// Soon to be eliminated:
 //****************************************************************************
 
-#ifdef ENABLE_COMM_MANUAL_TEST_FCT
-
-void test_upd(void)
+/*
+//If the Header isn't in [0] we 'unwrap' the array and save it in 'new_array'
+uint8_t unwrap_buffer(uint8_t *array, uint8_t *new_array, uint32_t len)
 {
-	uint8_t byte = 1;
-	uint8_t array[RX_BUF_LEN];
-	uint32_t idx = 0;
+	uint8_t i = 0, j = 0, retval = 0, idx = 0;
 
-	while(1)
+	if(array[0] != HEADER)	//Quick check
 	{
-		update_rx_buf_byte(array, &idx, byte);
-		update_rx_buf_1(UPDATE_BYTE, byte, array, 1);
-		byte++;
-	}
-}
+		for(i = 1; i < len; i++)
+		{
+			if(array[i] == HEADER)
+			{
+				//We found the header
+				idx = i;
+				for(j = 0; j < len; j++)
+				{
+					new_array[j] = array[idx];
+					idx++;
+					idx %= len;
+				}
 
-#endif //ENABLE_COMM_MANUAL_TEST_FCT
+				retval = i;
+				break;
+			}
+		}
+	}
+	else
+	{
+		//No need to unwrap, copy & exit
+		for(i = 0; i < len; i++)
+		{
+			//new_array = array
+			new_array[i] = array[i];
+		}
+		retval = 0;
+	}
+
+	return retval;
+}
+*/
