@@ -174,7 +174,8 @@ void update_rx_buf_array_4(uint8_t *new_array, uint32_t len)
 //****************************************************************************
 
 //Add one byte to the FIFO buffer
-//Do not call that function directly, call update_rx_buf_byte_n() where n is your communication port/buffer name
+//Do not call that function directly, call update_rx_buf_byte_n() where n is
+//your communication port/buffer name
 static void update_rx_buf_byte(uint8_t *buf, uint32_t *idx, uint8_t new_byte)
 {
 	uint32_t i = 0;
@@ -200,7 +201,8 @@ static void update_rx_buf_byte(uint8_t *buf, uint32_t *idx, uint8_t new_byte)
 }
 
 //Add 'len' bytes from the 'new_data' array to the FIFO buffer
-//Do not call that function directly, call update_rx_buf_array_n() where n is your communication port/buffer name
+//Do not call that function directly, call update_rx_buf_array_n() where n is \
+your communication port/buffer name
 static void update_rx_buf_array(uint8_t *buf, uint32_t *idx, uint8_t *new_data, uint32_t len)
 {
 	uint32_t i = 0, cnt = 0, remaining = 0;
@@ -211,7 +213,8 @@ static void update_rx_buf_array(uint8_t *buf, uint32_t *idx, uint8_t *new_data, 
 
 		while(((*idx) + len) < RX_BUF_LEN)
 		{
-			//As long as we did not over fill it we keep adding bytes and increasing the index
+			//As long as we did not over fill it we keep adding bytes and
+			//increasing the index
 			buf[(*idx)] = new_data[cnt];
 			(*idx)++;
 			cnt++;	//Number of bytes we could add before shifting old data
@@ -253,9 +256,11 @@ static void update_rx_buf_array(uint8_t *buf, uint32_t *idx, uint8_t *new_data, 
 
 #ifdef ENABLE_FLEXSEA_BUF_1
 
-//Wraps update_rx_buf_byte()/update_rx_buf_array() for buffer #1. Keeps track of the index.
-//Do not use directly, call update_rx_buf_byte_1() or update_rx_buf_array_1()
-static void update_rx_buf_1(uint8_t byte_array, uint8_t new_byte, uint8_t *new_array, uint32_t len)
+//Wraps update_rx_buf_byte()/update_rx_buf_array() for buffer #N. Keeps track
+//of the index. Do not use directly, call update_rx_buf_byte_N() or
+//update_rx_buf_array_N()
+static void update_rx_buf_1(uint8_t byte_array, uint8_t new_byte, \
+							uint8_t *new_array, uint32_t len)
 {
 	static uint32_t idx_1 = 0;
 
@@ -280,9 +285,9 @@ static void update_rx_buf_1(uint8_t byte_array, uint8_t new_byte, uint8_t *new_a
 
 #ifdef ENABLE_FLEXSEA_BUF_2
 
-//Wraps update_rx_buf_byte()/update_rx_buf_array() for buffer #2. Keeps track of the index.
-//Do not use directly, call update_rx_buf_byte_2() or update_rx_buf_array_2()
-static void update_rx_buf_2(uint8_t byte_array, uint8_t new_byte, uint8_t *new_array, uint32_t len)
+//See comment above update_rx_buf_1()
+static void update_rx_buf_2(uint8_t byte_array, uint8_t new_byte, \
+							uint8_t *new_array, uint32_t len)
 {
 	static uint32_t idx_2 = 0;
 
@@ -307,9 +312,9 @@ static void update_rx_buf_2(uint8_t byte_array, uint8_t new_byte, uint8_t *new_a
 
 #ifdef ENABLE_FLEXSEA_BUF_3
 
-//Wraps update_rx_buf_byte()/update_rx_buf_array() for buffer #3. Keeps track of the index.
-//Do not use directly, call update_rx_buf_byte_3() or update_rx_buf_array_3()
-static void update_rx_buf_3(uint8_t byte_array, uint8_t new_byte, uint8_t *new_array, uint32_t len)
+//See comment above update_rx_buf_1()
+static void update_rx_buf_3(uint8_t byte_array, uint8_t new_byte, \
+							uint8_t *new_array, uint32_t len)
 {
 	static uint32_t idx_3 = 0;
 
@@ -334,9 +339,9 @@ static void update_rx_buf_3(uint8_t byte_array, uint8_t new_byte, uint8_t *new_a
 
 #ifdef ENABLE_FLEXSEA_BUF_4
 
-//Wraps update_rx_buf_byte()/update_rx_buf_array() for buffer #4. Keeps track of the index.
-//Do not use directly, call update_rx_buf_byte_4() or update_rx_buf_array_4()
-static void update_rx_buf_4(uint8_t byte_array, uint8_t new_byte, uint8_t *new_array, uint32_t len)
+//See comment above update_rx_buf_1()
+static void update_rx_buf_4(uint8_t byte_array, uint8_t new_byte, \
+							uint8_t *new_array, uint32_t len)
 {
 	static uint32_t idx_4 = 0;
 

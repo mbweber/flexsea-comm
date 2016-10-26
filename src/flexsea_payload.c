@@ -61,7 +61,7 @@ static void route_to_slave(uint8_t port, uint8_t *buf, uint32_t len);
 //****************************************************************************
 
 //Decode/parse received string
-//ToDo fix: for now, supports only one command per string
+//ToDo improve: for now, supports only one command per string
 uint8_t payload_parse_str(uint8_t *cp_str, uint8_t *info)
 {
 	uint8_t cmd = 0, cmd_7bits = 0;
@@ -137,6 +137,7 @@ uint8_t payload_parse_str(uint8_t *cp_str, uint8_t *info)
 void prepare_empty_payload(uint8_t from, uint8_t to, uint8_t *buf, uint32_t len)
 {
 	//Start fresh:
+	//ToDo replace by memset
 	fill_uint8_buf(buf, len, 0);
 
 	//Addresses:
@@ -144,27 +145,11 @@ void prepare_empty_payload(uint8_t from, uint8_t to, uint8_t *buf, uint32_t len)
 	buf[P_RID] = to;
 }
 
-//Add a buffer at the end of a partially filled payload buffer
-//Payload is the partially filled buffer, idx is the next position to use, new_data is.. well, the new bytes
-//and len is the number of bytes you want to add
-uint32_t append_to_payload(uint8_t *payload, uint32_t idx, uint8_t *new_data, uint32_t len)
-{
-	uint32_t i = 0, cnt = 0;
-
-	//Append the new data:
-	for(i = idx; i < (idx+len); i++)
-	{
-		payload[i] = new_data[cnt++];
-	}
-
-	//Index for the next call:
-	return i;
-}
-
 //Returns one if it was sent from a slave, 0 otherwise
 uint8_t sent_from_a_slave(uint8_t *buf)
 {
 	//Slaves have higher addresses than their master.
+	//ToDo: add test code, then replace by conditional operator
 	if(buf[P_XID] > buf[P_RID])
 	{
 		//Slave
@@ -254,11 +239,11 @@ static void route_to_slave(uint8_t port, uint8_t *buf, uint32_t len)
 	}
 
 	#else
-		
+
 		(void)port;
 		(void)buf;
 		(void) len;
-		
+
 	#endif 	//BOARD_TYPE_FLEXSEA_MANAGE
 }
 
@@ -302,6 +287,31 @@ static uint8_t get_rid(uint8_t *pldata)
 	//If we end up here it's because we didn't get a match:
 	return ID_NO_MATCH;
 }
+
+//****************************************************************************
+// Soon to be eliminated:
+//****************************************************************************
+
+/*
+//Add a buffer at the end of a partially filled payload buffer
+//Payload is the partially filled buffer, idx is the next position to use,
+//new_data is.. well, the new bytes and len is the number of bytes you want
+//to add
+uint32_t append_to_payload(uint8_t *payload, uint32_t idx, \
+						   uint8_t *new_data, uint32_t len)
+{
+	uint32_t i = 0, cnt = 0;
+
+	//Append the new data:
+	for(i = idx; i < (idx+len); i++)
+	{
+		payload[i] = new_data[cnt++];
+	}
+
+	//Index for the next call:
+	return i;
+}
+*/
 
 #ifdef __cplusplus
 }
