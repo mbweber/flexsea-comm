@@ -161,28 +161,16 @@ uint8_t packetType(uint8_t *buf)
 	if(buf[P_XID] < buf[P_RID])
 	{
 		//Master is writing. Write or Read?
-		if(IS_CMD_RW(buf[P_CMD1]) == READ)
-		{
-			return RX_PTYPE_READ;
-		}
-		else
-		{
-			return RX_PTYPE_WRITE;
-		}
+		return ((IS_CMD_RW(buf[P_CMD1]) == READ) ? \
+					RX_PTYPE_READ : RX_PTYPE_WRITE);
 	}
 
 	//From a Slave:
 	if(buf[P_XID] > buf[P_RID])
 	{
 		//The only thing we can get from a slave is a Reply
-		if(IS_CMD_RW(buf[P_CMD1]) == WRITE)
-		{
-			return RX_PTYPE_REPLY;
-		}
-		else
-		{
-			return RX_PTYPE_INVALID;
-		}
+		return ((IS_CMD_RW(buf[P_CMD1]) == WRITE) ? \
+					RX_PTYPE_REPLY : RX_PTYPE_INVALID);
 	}
 
 	//Equal addresses, shouldn't happen
@@ -196,34 +184,34 @@ uint8_t packetType(uint8_t *buf)
 //ToDo not the greatest function...
 static void route_to_slave(uint8_t port, uint8_t *buf, uint32_t len)
 {
-	uint32_t numb = 0 , i  = 0;
-	uint8_t *comm_str_ptr = slaves_485_1.xmit.str;
-
 	#ifdef BOARD_TYPE_FLEXSEA_MANAGE
 
-	//Repackages the payload. ToDo: would be more efficient to just resend the comm_str
-	numb = comm_gen_str(buf, comm_str_tmp, len);
-	//numb = COMM_STR_BUF_LEN;    //Fixed length for now
+		uint32_t numb = 0 , i  = 0;
+		uint8_t *comm_str_ptr = slaves_485_1.xmit.str;
 
-	//Port specific flags and buffer:
-	if(port == PORT_RS485_1)
-	{
-		comm_str_ptr = slaves_485_1.xmit.str;
-		slaves_485_1.xmit.cmd = buf[P_CMD1];
-		slaves_485_1.xmit.flag = 1;
-	}
-	else if(port == PORT_RS485_2)
-	{
-		comm_str_ptr = slaves_485_2.xmit.str;
-		slaves_485_2.xmit.cmd = buf[P_CMD1];
-		slaves_485_2.xmit.flag = 1;
-	}
+		//Repackages the payload. ToDo: would be more efficient to just resend the comm_str
+		numb = comm_gen_str(buf, comm_str_tmp, len);
+		//numb = COMM_STR_BUF_LEN;    //Fixed length for now
 
-	//Copy string:
-	for(i = 0; i < numb+1; i++)
-	{
-		comm_str_ptr[i] = comm_str_tmp[i];
-	}
+		//Port specific flags and buffer:
+		if(port == PORT_RS485_1)
+		{
+			comm_str_ptr = slaves_485_1.xmit.str;
+			slaves_485_1.xmit.cmd = buf[P_CMD1];
+			slaves_485_1.xmit.flag = 1;
+		}
+		else if(port == PORT_RS485_2)
+		{
+			comm_str_ptr = slaves_485_2.xmit.str;
+			slaves_485_2.xmit.cmd = buf[P_CMD1];
+			slaves_485_2.xmit.flag = 1;
+		}
+
+		//Copy string:
+		for(i = 0; i < numb+1; i++)
+		{
+			comm_str_ptr[i] = comm_str_tmp[i];
+		}
 
 	#else
 
@@ -274,31 +262,6 @@ static uint8_t get_rid(uint8_t *pldata)
 	//If we end up here it's because we didn't get a match:
 	return ID_NO_MATCH;
 }
-
-//****************************************************************************
-// Soon to be eliminated:
-//****************************************************************************
-
-/*
-//Add a buffer at the end of a partially filled payload buffer
-//Payload is the partially filled buffer, idx is the next position to use,
-//new_data is.. well, the new bytes and len is the number of bytes you want
-//to add
-uint32_t append_to_payload(uint8_t *payload, uint32_t idx, \
-						   uint8_t *new_data, uint32_t len)
-{
-	uint32_t i = 0, cnt = 0;
-
-	//Append the new data:
-	for(i = idx; i < (idx+len); i++)
-	{
-		payload[i] = new_data[cnt++];
-	}
-
-	//Index for the next call:
-	return i;
-}
-*/
 
 #ifdef __cplusplus
 }

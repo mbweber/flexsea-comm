@@ -68,11 +68,11 @@ void fill_uint8_buf(uint8_t *buf, uint32_t len, uint8_t filler);
 //ToDo: Should be in 'system'
 
 //Packet types:
-#define RX_PTYPE_READ			0
-#define RX_PTYPE_WRITE			1
-#define RX_PTYPE_REPLY			2
-#define RX_PTYPE_INVALID		3
-#define RX_PTYPE_MAX_INDEX		2
+#define RX_PTYPE_READ					0
+#define RX_PTYPE_WRITE					1
+#define RX_PTYPE_REPLY					2
+#define RX_PTYPE_INVALID				3
+#define RX_PTYPE_MAX_INDEX				2
 
 //Board ID related defines:
 #define ID_MATCH						1		//Addressed to me

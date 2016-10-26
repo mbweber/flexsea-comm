@@ -53,7 +53,28 @@ void test_sent_from_a_slave(void)
 
 void test_packetType(void)
 {
-	//ToDo
+	uint8_t testBuffer[48];
+	uint8_t xid = 0, rid = 0;
+	
+	//Master Writing to Slave:
+	xid = FLEXSEA_PLAN_1;
+	rid = FLEXSEA_EXECUTE_1;
+	prepare_empty_payload(xid, rid, testBuffer, 48);
+	testBuffer[P_CMD1] = CMD_W(CMD_TEST);
+	TEST_ASSERT_EQUAL_MESSAGE(RX_PTYPE_WRITE, packetType(testBuffer), "Master Write");
+	//Requesting a Read instead:
+	testBuffer[P_CMD1] = CMD_R(CMD_TEST);
+	TEST_ASSERT_EQUAL_MESSAGE(RX_PTYPE_READ, packetType(testBuffer), "Master read");
+
+	//Slave Writing to Master:
+	xid = FLEXSEA_EXECUTE_1;
+	rid = FLEXSEA_PLAN_1;
+	prepare_empty_payload(xid, rid, testBuffer, 48);
+	testBuffer[P_CMD1] = CMD_W(CMD_TEST);
+	TEST_ASSERT_EQUAL_MESSAGE(RX_PTYPE_REPLY, packetType(testBuffer), "Slave Write (Reply)");
+	//Requesting a Read instead:
+	testBuffer[P_CMD1] = CMD_R(CMD_TEST);
+	TEST_ASSERT_EQUAL_MESSAGE(RX_PTYPE_INVALID, packetType(testBuffer), "Slave read (invalid)");
 }
 
 void test_flexsea_payload(void)
@@ -61,7 +82,7 @@ void test_flexsea_payload(void)
 	//RUN_TEST(test_payload_parse_str);
 	RUN_TEST(test_prepare_empty_payload);
 	RUN_TEST(test_sent_from_a_slave);
-	//RUN_TEST(test_packetType);
+	RUN_TEST(test_packetType);
 }
 
 #ifdef __cplusplus

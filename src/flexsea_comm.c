@@ -102,6 +102,7 @@ static uint8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LE
 //****************************************************************************
 
 //Takes payload, adds ESCAPES, checksum, header, ...
+//ToDo: write test code, then delete all those DEBUG_PRINTF() statements
 uint8_t comm_gen_str(uint8_t payload[], uint8_t *cstr, uint8_t bytes)
 {
 	unsigned int i = 0, escapes = 0, idx = 0, total_bytes = 0;
@@ -195,6 +196,7 @@ uint8_t unpack_payload_4(void)
 
 //New version of comm_decode_str
 //Take a buffer as an argument, returns the number of decoded payload packets
+//ToDo: write test code, then delete all those DEBUG_PRINTF() statements
 static uint8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN])
 {
 	uint32_t i = 0, j = 0, k = 0, idx = 0, h = 0;
@@ -257,7 +259,9 @@ static uint8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LE
 						skip = 0;
 						for(k = 2; k < (unsigned int)(2+bytes); k++)
 						{
-							if(((rx_buf_tmp[k] == HEADER) || (rx_buf_tmp[k] == FOOTER) || (rx_buf_tmp[k] == ESCAPE)) && skip == 0)
+							if(((rx_buf_tmp[k] == HEADER) || \
+								(rx_buf_tmp[k] == FOOTER) || \
+								(rx_buf_tmp[k] == ESCAPE)) && skip == 0)
 							{
 								DEBUG_PRINTF("Skipped 1 ESC\n");
 
