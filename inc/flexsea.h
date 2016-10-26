@@ -37,7 +37,6 @@ extern "C" {
 
 #include <stdint.h>
 
-//#define ENABLE_COMM_MANUAL_TEST_FCT	//Enable to use test code
 //#define USE_DEBUG_PRINTF			//Enable this to debug with the terminal
 
 //****************************************************************************
@@ -53,14 +52,6 @@ void SPLIT_32(uint32_t var, uint8_t *buf, uint16_t *index);
 uint32_t REBUILD_UINT32(uint8_t *buf, uint16_t *index);
 
 void fill_uint8_buf(uint8_t *buf, uint32_t len, uint8_t filler);
-
-#ifdef ENABLE_COMM_MANUAL_TEST_FCT
-void test_SPLIT_REBUILD(void);
-//uint32_t tx_cmd_test(uint8_t receiver, uint8_t cmd_type, uint8_t *buf,
-//							uint32_t len, int16_t val1, int16_t val2);
-//void rx_cmd_test(uint8_t *buf);
-//void test_flexsea_stack(void);
-#endif //ENABLE_COMM_MANUAL_TEST_FCT
 
 //****************************************************************************
 // Definition(s):
