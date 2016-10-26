@@ -148,21 +148,8 @@ void prepare_empty_payload(uint8_t from, uint8_t to, uint8_t *buf, uint32_t len)
 //Returns one if it was sent from a slave, 0 otherwise
 uint8_t sent_from_a_slave(uint8_t *buf)
 {
-	//Slaves have higher addresses than their master.
-	//ToDo: add test code, then replace by conditional operator
-	if(buf[P_XID] > buf[P_RID])
-	{
-		//Slave
-		return 1;
-	}
-	else
-	{
-		//Master
-		return 0;
-	}
-
-	//Should not happen
-	return 0;
+	//Hint: slaves have higher addresses than their master
+	return ((buf[P_XID] > buf[P_RID])? 1 : 0);
 }
 
 //We received a packet. Is it a Read, a Reply or a Write?
