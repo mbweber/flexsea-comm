@@ -14,7 +14,9 @@ void test_comm_gen_str(void)
 
 void test_flexsea_comm(void)
 {
+	//UNITY_BEGIN();
 	//RUN_TEST();
+	//UNITY_END();
 }
 
 #ifdef __cplusplus

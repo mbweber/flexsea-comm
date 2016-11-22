@@ -27,6 +27,7 @@ int flexsea_comm_test(void)
 	//One call per file here:
 	test_flexsea();
 	test_flexsea_payload();
+	test_flexsea_buffers();
 
 	return UNITY_END();
 }

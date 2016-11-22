@@ -94,6 +94,16 @@ void test_upd(void);
 #define UPDATE_BYTE				0
 #define UPDATE_ARRAY			1
 
+//****************************************************************************
+// New code - not integrated - test in progress:
+//****************************************************************************
+
+extern uint8_t rx_buf_T[];
+void update_rx_buf_byte_T(uint8_t new_byte);
+void update_rx_buf_array_T(uint8_t *new_array, int len);
+uint8_t get_rx_buf_T(int index);
+int get_size_T(void);
+
 #ifdef __cplusplus
 }
 #endif

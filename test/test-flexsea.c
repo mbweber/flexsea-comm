@@ -81,8 +81,10 @@ void test_SPLIT_REBUILD_32(void)
 
 void test_flexsea(void)
 {
+	UNITY_BEGIN();
 	RUN_TEST(test_SPLIT_REBUILD_16);
 	RUN_TEST(test_SPLIT_REBUILD_32);
+	UNITY_END();
 }
 
 #ifdef __cplusplus
