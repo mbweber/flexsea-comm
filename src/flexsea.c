@@ -128,24 +128,6 @@ uint32_t REBUILD_UINT32(uint8_t *buf, uint16_t *index)
 // Soon to be eliminated:
 //****************************************************************************
 
-//From 1 uint32 to 4 uint8
-//TODO: being replaced by SPLIT_32(), eliminate once the transition is complete
-void uint32_to_bytes(uint32_t x, uint8_t *b0, uint8_t *b1, uint8_t *b2, uint8_t *b3)
-{
-	*b0 = (uint8_t) ((x >> 24) & 0xFF);
-	*b1 = (uint8_t) ((x >> 16) & 0xFF);
-	*b2 = (uint8_t) ((x >> 8) & 0xFF);
-	*b3 = (uint8_t) (x & 0xFF);
-}
-
-//From 1 uint16 to 2 uint8
-//TODO: being replaced by SPLIT_16(), eliminate once the transition is complete
-void uint16_to_bytes(uint32_t x, uint8_t *b0, uint8_t *b1)
-{
-	*b0 = (uint8_t) ((x >> 8) & 0xFF);
-	*b1 = (uint8_t) (x & 0xFF);
-}
-
 //Can be used to fill a buffer of any length with any value
 //ToDo replace by memset
 void fill_uint8_buf(uint8_t *buf, uint32_t len, uint8_t filler)

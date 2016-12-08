@@ -44,8 +44,6 @@ extern "C" {
 //****************************************************************************
 
 unsigned int flexsea_error(unsigned int err_code);
-void uint32_to_bytes(uint32_t x, uint8_t *b0, uint8_t *b1, uint8_t *b2, uint8_t *b3);
-void uint16_to_bytes(uint32_t x, uint8_t *b0, uint8_t *b1);
 void SPLIT_16(uint16_t var, uint8_t *buf, uint16_t *index);
 uint16_t REBUILD_UINT16(uint8_t *buf, uint16_t *index);
 void SPLIT_32(uint32_t var, uint8_t *buf, uint16_t *index);
