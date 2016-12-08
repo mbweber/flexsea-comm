@@ -49,8 +49,6 @@ uint16_t REBUILD_UINT16(uint8_t *buf, uint16_t *index);
 void SPLIT_32(uint32_t var, uint8_t *buf, uint16_t *index);
 uint32_t REBUILD_UINT32(uint8_t *buf, uint16_t *index);
 
-void fill_uint8_buf(uint8_t *buf, uint32_t len, uint8_t filler);
-
 //****************************************************************************
 // Definition(s):
 //****************************************************************************

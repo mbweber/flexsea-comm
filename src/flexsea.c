@@ -124,22 +124,6 @@ uint32_t REBUILD_UINT32(uint8_t *buf, uint16_t *index)
 // Private Function(s):
 //****************************************************************************
 
-//****************************************************************************
-// Soon to be eliminated:
-//****************************************************************************
-
-//Can be used to fill a buffer of any length with any value
-//ToDo replace by memset
-void fill_uint8_buf(uint8_t *buf, uint32_t len, uint8_t filler)
-{
-	uint32_t i = 0;
-
-	for(i = 0; i < len; i++)
-	{
-		buf[i] = filler;
-	}
-}
-
 #ifdef __cplusplus
 }
 #endif

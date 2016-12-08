@@ -39,6 +39,7 @@ extern "C" {
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "../inc/flexsea.h"
 #include "../../flexsea-system/inc/flexsea_system.h"
 #include "flexsea_board.h"
@@ -137,8 +138,7 @@ uint8_t payload_parse_str(uint8_t *cp_str, uint8_t *info)
 void prepare_empty_payload(uint8_t from, uint8_t to, uint8_t *buf, uint32_t len)
 {
 	//Start fresh:
-	//ToDo replace by memset
-	fill_uint8_buf(buf, len, 0);
+	memset(buf, 0, len);
 
 	//Addresses:
 	buf[P_XID] = from;
