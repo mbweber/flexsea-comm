@@ -4,6 +4,7 @@ extern "C" {
 
 #include "main.h"
 #include "unity.h"
+#include "../inc/flexsea_comm.h"
 #include "flexsea-comm_test-all.h"
 
 //****************************************************************************
@@ -26,6 +27,7 @@ int flexsea_comm_test(void)
 
 	//One call per file here:
 	test_flexsea();
+	test_flexsea_comm();
 	test_flexsea_payload();
 	test_flexsea_buffers();
 

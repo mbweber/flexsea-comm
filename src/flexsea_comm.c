@@ -91,6 +91,8 @@ uint32_t cmd_bad_checksum = 0;
 //ToDo: this is project specific! Eliminate or use generic names!
 struct slave_comm_s slaves_485_1, slaves_485_2;
 
+struct commSpy_s commSpy1; // = {0,0,0,0,0,0};
+
 //****************************************************************************
 // Private Function Prototype(s):
 //****************************************************************************
@@ -108,12 +110,11 @@ uint8_t comm_gen_str(uint8_t payload[], uint8_t *cstr, uint8_t bytes)
 	unsigned int i = 0, escapes = 0, idx = 0, total_bytes = 0;
 	uint8_t checksum = 0;
 
-	//Fill comm_str with zeros
+	//Fill comm_str with known values ('a')
 	for(i = 0; i < COMM_STR_BUF_LEN; i++)
 	{
-		cstr[i] = 0xAA; //'0';
+		cstr[i] = 0xAA; //'a';
 	}
-	DEBUG_COMM_PRINTF("comm_str: %s\n", cstr);
 
 	//Fill comm_str with payload and add ESCAPE characters
 	escapes = 0;
@@ -133,22 +134,21 @@ uint8_t comm_gen_str(uint8_t payload[], uint8_t *cstr, uint8_t bytes)
 		}
 		idx++;
 	}
-	DEBUG_COMM_PRINTF("comm_str: %s\n", cstr);
 
 	total_bytes = bytes + escapes;
 
-	DEBUG_COMM_PRINTF("total_bytes: %i\n", total_bytes);
+	commSpy1.bytes = bytes;
+	commSpy1.escapes = (uint8_t) escapes;
+	commSpy1.total_bytes = (uint8_t) total_bytes;
 
 	//Checksum:
 	checksum = 0;
 	for (i = 0; i < total_bytes; i++)
 	{
-		//DEBUG_COMM_PRINTF("cs b[%i] = %c\n", i, cstr[2+i]);
-
 		checksum = checksum + cstr[2+i];
 	}
 
-	DEBUG_COMM_PRINTF("checksum: %i\n", checksum);
+	commSpy1.checksum = checksum;
 
 	//Build comm_str:
 	cstr[0] = HEADER;
@@ -157,6 +157,7 @@ uint8_t comm_gen_str(uint8_t payload[], uint8_t *cstr, uint8_t bytes)
 	cstr[3 + total_bytes] = FOOTER;
 
 	//Return the length of the valid data
+	commSpy1.retVal = 3 + (uint8_t)total_bytes;
 	return (3 + total_bytes);
 }
 

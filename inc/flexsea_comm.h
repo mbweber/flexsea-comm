@@ -44,32 +44,6 @@ extern "C" {
 #include "flexsea_system.h"
 
 //****************************************************************************
-// Shared variable(s)
-//****************************************************************************
-
-extern uint8_t comm_str_tmp[COMM_STR_BUF_LEN];
-
-#ifdef ENABLE_FLEXSEA_BUF_1
-extern uint8_t comm_str_1[COMM_STR_BUF_LEN];
-extern uint8_t rx_command_1[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_1
-#ifdef ENABLE_FLEXSEA_BUF_2
-extern uint8_t comm_str_2[COMM_STR_BUF_LEN];
-extern uint8_t rx_command_2[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_2
-#ifdef ENABLE_FLEXSEA_BUF_3
-extern uint8_t comm_str_3[COMM_STR_BUF_LEN];
-extern uint8_t rx_command_3[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_3
-#ifdef ENABLE_FLEXSEA_BUF_4
-extern uint8_t comm_str_4[COMM_STR_BUF_LEN];
-extern uint8_t rx_command_4[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_4
-
-//ToDo: this is project specific! Eliminate or use generic names!
-extern struct slave_comm_s slaves_485_1, slaves_485_2;
-
-//****************************************************************************
 // Public Function Prototype(s):
 //****************************************************************************
 
@@ -114,8 +88,17 @@ uint8_t unpack_payload_4(void);
 // Structure(s):
 //****************************************************************************
 
-//ToDo: should this be here? Not sure this is used anymore... FIX
+struct commSpy_s
+{
+	uint8_t counter;
+	uint8_t bytes;
+	uint8_t total_bytes;
+	uint8_t escapes;
+	uint8_t checksum;
+	uint8_t retVal;
+};
 
+//ToDo: should this be here? Not sure this is used anymore... FIX
 struct sc_data_s
 {
 	uint8_t flag;						//1 when new data ready to be transmitted
@@ -139,8 +122,36 @@ struct slave_comm_s
 	struct sc_data_s autosample;		//For the Autosampling mode
 };
 
+//****************************************************************************
+// Shared variable(s)
+//****************************************************************************
+
+extern uint8_t comm_str_tmp[COMM_STR_BUF_LEN];
+
+#ifdef ENABLE_FLEXSEA_BUF_1
+extern uint8_t comm_str_1[COMM_STR_BUF_LEN];
+extern uint8_t rx_command_1[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
+#endif	//ENABLE_FLEXSEA_BUF_1
+#ifdef ENABLE_FLEXSEA_BUF_2
+extern uint8_t comm_str_2[COMM_STR_BUF_LEN];
+extern uint8_t rx_command_2[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
+#endif	//ENABLE_FLEXSEA_BUF_2
+#ifdef ENABLE_FLEXSEA_BUF_3
+extern uint8_t comm_str_3[COMM_STR_BUF_LEN];
+extern uint8_t rx_command_3[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
+#endif	//ENABLE_FLEXSEA_BUF_3
+#ifdef ENABLE_FLEXSEA_BUF_4
+extern uint8_t comm_str_4[COMM_STR_BUF_LEN];
+extern uint8_t rx_command_4[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
+#endif	//ENABLE_FLEXSEA_BUF_4
+
+//ToDo: this is project specific! Eliminate or use generic names!
+extern struct slave_comm_s slaves_485_1, slaves_485_2;
+
+extern struct commSpy_s commSpy1;
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif	//INC_FX_COMM_H
