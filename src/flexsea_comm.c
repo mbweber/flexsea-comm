@@ -59,6 +59,7 @@ extern "C" {
 // Include(s)
 //****************************************************************************
 
+#include <string.h>
 #include "../inc/flexsea.h"
 #include "flexsea_board.h"
 #include "flexsea_system.h"
@@ -91,7 +92,7 @@ uint32_t cmd_bad_checksum = 0;
 //ToDo: this is project specific! Eliminate or use generic names!
 struct slave_comm_s slaves_485_1, slaves_485_2;
 
-struct commSpy_s commSpy1; // = {0,0,0,0,0,0};
+struct commSpy_s commSpy1 = {0,0,0,0,0,0};
 
 //****************************************************************************
 // Private Function Prototype(s):
@@ -111,10 +112,7 @@ uint8_t comm_gen_str(uint8_t payload[], uint8_t *cstr, uint8_t bytes)
 	uint8_t checksum = 0;
 
 	//Fill comm_str with known values ('a')
-	for(i = 0; i < COMM_STR_BUF_LEN; i++)
-	{
-		cstr[i] = 0xAA; //'a';
-	}
+	memset(cstr, 0xAA, COMM_STR_BUF_LEN);
 
 	//Fill comm_str with payload and add ESCAPE characters
 	escapes = 0;
