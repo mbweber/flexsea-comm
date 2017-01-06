@@ -60,6 +60,7 @@ extern "C" {
 //****************************************************************************
 
 #include <string.h>
+#include <stdlib.h>
 #include "../inc/flexsea.h"
 #include "flexsea_board.h"
 #include "flexsea_system.h"
@@ -92,7 +93,7 @@ uint32_t cmd_bad_checksum = 0;
 //ToDo: this is project specific! Eliminate or use generic names!
 struct slave_comm_s slaves_485_1, slaves_485_2;
 
-struct commSpy_s commSpy1 = {0,0,0,0,0,0};
+struct commSpy_s commSpy1 = {0,0,0,0,0,0,0};
 
 //****************************************************************************
 // Private Function Prototype(s):
@@ -105,7 +106,6 @@ static uint8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LE
 //****************************************************************************
 
 //Takes payload, adds ESCAPES, checksum, header, ...
-//ToDo: write test code, then delete all those DEBUG_PRINTF() statements
 uint8_t comm_gen_str(uint8_t payload[], uint8_t *cstr, uint8_t bytes)
 {
 	unsigned int i = 0, escapes = 0, idx = 0, total_bytes = 0;
@@ -138,6 +138,16 @@ uint8_t comm_gen_str(uint8_t payload[], uint8_t *cstr, uint8_t bytes)
 	commSpy1.bytes = bytes;
 	commSpy1.escapes = (uint8_t) escapes;
 	commSpy1.total_bytes = (uint8_t) total_bytes;
+	commSpy1.error++;
+
+	//String length?
+	if(total_bytes >= COMM_STR_BUF_LEN)
+	{
+		//Too long, abort:
+		memset(cstr, 0, COMM_STR_BUF_LEN);	//Clear string
+		commSpy1.retVal = 0;
+		return 0;
+	}
 
 	//Checksum:
 	checksum = 0;
@@ -188,6 +198,27 @@ uint8_t unpack_payload_4(void)
 	return unpack_payload(rx_buf_4, rx_command_4);
 }
 #endif	//ENABLE_FLEXSEA_BUF_4
+
+void initRandomGenerator(int seed)
+{
+	srand(seed);
+}
+
+uint8_t generateRandomUint8(void)
+{
+	int r = rand();
+	return (uint8_t)(r % 255);
+}
+
+void generateRandomUint8Array(uint8_t *arr, uint8_t size)
+{
+	int i = 0;
+
+	for(i = 0; i < size; i++)
+	{
+		arr[i] = generateRandomUint8();
+	}
+}
 
 //****************************************************************************
 // Private Function(s)

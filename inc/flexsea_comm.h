@@ -62,6 +62,11 @@ uint8_t unpack_payload_3(void);
 uint8_t unpack_payload_4(void);
 #endif	//ENABLE_FLEXSEA_BUF_4
 
+//Random numbers and arrays:
+void initRandomGenerator(int seed);
+uint8_t generateRandomUint8(void);
+void generateRandomUint8Array(uint8_t *arr, uint8_t size);
+
 //****************************************************************************
 // Definition(s):
 //****************************************************************************
@@ -96,6 +101,7 @@ struct commSpy_s
 	uint8_t escapes;
 	uint8_t checksum;
 	uint8_t retVal;
+	uint8_t error;
 };
 
 //ToDo: should this be here? Not sure this is used anymore... FIX
