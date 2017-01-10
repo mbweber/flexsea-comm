@@ -61,7 +61,6 @@ uint32_t REBUILD_UINT32(uint8_t *buf, uint16_t *index);
 #define PACKAGED_PAYLOAD_LEN			48		//Temporary
 #define PAYLOAD_BUFFERS					4		//Max # of payload strings we expect to find
 #define MAX_CMD_CODE					127
-//ToDo: Should be in 'system'
 
 //Packet types:
 #define RX_PTYPE_READ					0

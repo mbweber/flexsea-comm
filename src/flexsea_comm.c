@@ -99,7 +99,7 @@ struct commSpy_s commSpy1 = {0,0,0,0,0,0,0};
 // Private Function Prototype(s):
 //****************************************************************************
 
-static uint8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN]);
+static int8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN]);
 
 //****************************************************************************
 // Public Function(s)
@@ -172,32 +172,38 @@ uint8_t comm_gen_str(uint8_t payload[], uint8_t *cstr, uint8_t bytes)
 //To avoid sharing buffers in multiple files we use specific functions:
 
 #ifdef ENABLE_FLEXSEA_BUF_1
-uint8_t unpack_payload_1(void)
+int8_t unpack_payload_1(void)
 {
 	return unpack_payload(rx_buf_1, rx_command_1);
 }
 #endif	//ENABLE_FLEXSEA_BUF_1
 
 #ifdef ENABLE_FLEXSEA_BUF_2
-uint8_t unpack_payload_2(void)
+int8_t unpack_payload_2(void)
 {
 	return unpack_payload(rx_buf_2, rx_command_2);
 }
 #endif	//ENABLE_FLEXSEA_BUF_2
 
 #ifdef ENABLE_FLEXSEA_BUF_3
-uint8_t unpack_payload_3(void)
+int8_t unpack_payload_3(void)
 {
 	return unpack_payload(rx_buf_3, rx_command_3);
 }
 #endif	//ENABLE_FLEXSEA_BUF_3
 
 #ifdef ENABLE_FLEXSEA_BUF_4
-uint8_t unpack_payload_4(void)
+int8_t unpack_payload_4(void)
 {
 	return unpack_payload(rx_buf_4, rx_command_4);
 }
 #endif	//ENABLE_FLEXSEA_BUF_4
+
+//Special wrapper for unit test code:
+int8_t unpack_payload_test(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN])
+{
+	return unpack_payload(buf, rx_cmd);
+}
 
 void initRandomGenerator(int seed)
 {
@@ -226,38 +232,32 @@ void generateRandomUint8Array(uint8_t *arr, uint8_t size)
 
 //New version of comm_decode_str
 //Take a buffer as an argument, returns the number of decoded payload packets
-//ToDo: write test code, then delete all those DEBUG_PRINTF() statements
-static uint8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN])
+//ToDo: The error codes are not always right, but if it's < 0 you know it didn't
+//find a valid string
+static int8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN])
 {
 	uint32_t i = 0, j = 0, k = 0, idx = 0, h = 0;
 	uint32_t bytes = 0, possible_footer = 0, possible_footer_pos = 0;
 	uint8_t checksum = 0, skip = 0, payload_strings = 0;
 	uint8_t rx_buf_tmp[RX_BUF_LEN];
+	uint8_t foundHeader = 0;
+	int8_t tmpRetVal = 0;
 
 	for(i = 0; i < (RX_BUF_LEN - 2); i++)
 	{
 		if(buf[i] == HEADER)
 		{
-			//We found a header
-			DEBUG_PRINTF("===\nFound header\n");
-
+			foundHeader++;
 			bytes = buf[i+1];
-			DEBUG_PRINTF("bytes = %i\n", bytes);
-
 			possible_footer_pos = i+3+bytes;
-
-			DEBUG_PRINTF("pos foot pos: %i\n", possible_footer_pos);
 
 			if(possible_footer_pos <= RX_BUF_LEN)
 			{
 				//We have enough bytes for a full string
-				DEBUG_PRINTF("Enough data\n");
 				possible_footer = buf[possible_footer_pos];
 				if(possible_footer == FOOTER)
 				{
 					//Correctly framed string
-					DEBUG_PRINTF("Correctly framed\n");
-
 					k = 0;
 					for(j = i; j <= possible_footer_pos; j++)
 					{
@@ -265,8 +265,6 @@ static uint8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LE
 						rx_buf_tmp[k] = buf[j];
 						k++;
 					}
-
-					DEBUG_PRINTF("rx_buf_tmp: %s\n",rx_buf_tmp);
 
 					//Is the checksum OK?
 					checksum = 0;
@@ -277,13 +275,8 @@ static uint8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LE
 						checksum = checksum + rx_buf_tmp[2+k];
 					}
 
-					DEBUG_PRINTF("Computed checksum: %i\n", checksum);
-					DEBUG_PRINTF("Compared to: %i\n", rx_buf_tmp[2+bytes]);
-
 					if(checksum == rx_buf_tmp[2+bytes])
 					{
-						DEBUG_PRINTF("Checksum matches\n");
-
 						//Now we de-escap and de-frame to get the payload
 						idx = 0;
 						skip = 0;
@@ -293,8 +286,6 @@ static uint8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LE
 								(rx_buf_tmp[k] == FOOTER) || \
 								(rx_buf_tmp[k] == ESCAPE)) && skip == 0)
 							{
-								DEBUG_PRINTF("Skipped 1 ESC\n");
-
 								skip = 1;
 							}
 							else
@@ -315,12 +306,10 @@ static uint8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LE
 							buf[h] = 0;
 						}
 
-						DEBUG_PRINTF("payload: %s\n",rx_cmd[payload_strings-1]);
+						tmpRetVal = payload_strings;
 					}
 					else
 					{
-						DEBUG_PRINTF("Wrong checksum\n");
-
 						//Remove the string to avoid double detection
 						for(h = i; h <= possible_footer_pos; h++)
 						{
@@ -328,22 +317,41 @@ static uint8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LE
 						}
 
 						cmd_bad_checksum++;
+
+						tmpRetVal = UNPACK_ERR_CHECKSUM;
 					}
 				}
 				else
 				{
-					DEBUG_PRINTF("Scrap\n");
+					tmpRetVal = UNPACK_ERR_FOOTER;
 				}
 			}
 			else
 			{
-				DEBUG_PRINTF("Not enough data (too short)\n");
+				tmpRetVal = UNPACK_ERR_LEN;
 			}
 		}
 	}
 
-	//Returns the number of decoded strings
-	return payload_strings;
+	if(payload_strings > 0)
+	{
+		//Returns the number of decoded strings
+		return payload_strings;
+	}
+
+	if(tmpRetVal != 0)
+	{
+		return tmpRetVal;
+	}
+
+	if(!foundHeader)
+	{
+		//Error - return with error code:
+		return UNPACK_ERR_HEADER;
+	}
+
+	//Default
+	return 0;
 }
 
 #ifdef __cplusplus
