@@ -95,14 +95,12 @@ uint8_t payload_parse_str(uint8_t *cp_str, uint8_t *info)
 	else if(id == ID_SUB1_MATCH)
 	{
 		//For a slave on bus #1:
-
 		route_to_slave(PORT_SUB1, cp_str, PAYLOAD_BUF_LEN);
 		//ToDo compute length rather then sending the max
 	}
 	else if(id == ID_SUB2_MATCH)
 	{
 		//For a slave on bus #2:
-
 		route_to_slave(PORT_SUB2, cp_str, PAYLOAD_BUF_LEN);
 		//ToDo compute length rather then sending the max
 	}
@@ -110,13 +108,14 @@ uint8_t payload_parse_str(uint8_t *cp_str, uint8_t *info)
 	{
 		//For my master:
 
-		#ifdef BOARD_TYPE_FLEXSEA_MANAGE	//TODO redo this whole block of code
+		#ifdef BOARD_TYPE_FLEXSEA_MANAGE
 
 		uint8_t numb  = 0;
 
 		//Manage is the only board that can receive a package destined to his master
 
-		//Repackages the payload. ToDo: would be more efficient to just resend the comm_str
+		//Repackages the payload. ToDo: would be more efficient to just resend the comm_str, but it's not passed
+		//to this function (cp_str is a payload, not a comm_str)
 		numb = comm_gen_str(cp_str, comm_str_usb, PAYLOAD_BUF_LEN);		//ToDo: shouldn't be fixed at spi or usb
 		numb = COMM_STR_BUF_LEN;    //Fixed length for now
 		flexsea_send_serial_master(PORT_USB, comm_str_usb, numb);	//Same comment here - ToDo fix
@@ -132,7 +131,6 @@ uint8_t payload_parse_str(uint8_t *cp_str, uint8_t *info)
 	//Shouldn't get here...
 	return PARSE_DEFAULT;
 }
-
 
 //Start a new payload string
 void prepare_empty_payload(uint8_t from, uint8_t to, uint8_t *buf, uint32_t len)
@@ -186,10 +184,11 @@ static void route_to_slave(uint8_t port, uint8_t *buf, uint32_t len)
 {
 	#ifdef BOARD_TYPE_FLEXSEA_MANAGE
 
-		uint32_t numb = 0 , i  = 0;
+		uint32_t numb = 0;
 		uint8_t *comm_str_ptr = slaves_485_1.xmit.str;
 
-		//Repackages the payload. ToDo: would be more efficient to just resend the comm_str
+		//Repackages the payload. ToDo: would be more efficient to just resend the comm_str,
+		//but it's not passed to this function
 		numb = comm_gen_str(buf, comm_str_tmp, len);
 		//numb = COMM_STR_BUF_LEN;    //Fixed length for now
 
@@ -208,10 +207,7 @@ static void route_to_slave(uint8_t port, uint8_t *buf, uint32_t len)
 		}
 
 		//Copy string:
-		for(i = 0; i < numb+1; i++)
-		{
-			comm_str_ptr[i] = comm_str_tmp[i];
-		}
+		memcpy(comm_str_ptr, comm_str_tmp, numb+1);
 
 	#else
 
