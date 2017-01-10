@@ -12,7 +12,8 @@ uint8_t fakeCommStrArray0[COMM_STR_BUF_LEN];
 uint8_t fakeCommStrArray1[COMM_STR_BUF_LEN];
 uint8_t fakeCommStrArray2[COMM_STR_BUF_LEN];
 uint8_t rx_cmd_test[4][PACKAGED_PAYLOAD_LEN];
-uint8_t retVal = 0, retVal2 = 0;
+uint8_t retVal = 0;
+int8_t retVal2 = 0;
 
 void resetCommStats(void)
 {
@@ -204,19 +205,19 @@ void test_unpack_payload_2(void)
 
 	//We keed 0 intact, but we modify the others:
 	fakeCommStrArray1[0] = 0;		//No header
-	fakeCommStrArray2[0] = 123;		//Invalid # of bytes
+	fakeCommStrArray2[1] = 123;		//Invalid # of bytes
 
 	//Tests:
 	//======
 
 	retVal2 = unpack_payload_test(fakeCommStrArray0, rx_cmd_test);
-	TEST_ASSERT_EQUAL_MESSAGE(1, retVal2, "Unpack payload: payloads found?");
+	TEST_ASSERT_EQUAL_INT8_MESSAGE(1, retVal2, "Unpack payload: payloads found?");
 
 	retVal2 = unpack_payload_test(fakeCommStrArray1, rx_cmd_test);
-	TEST_ASSERT_EQUAL_MESSAGE(0, retVal2, "Missing header");
+	TEST_ASSERT_EQUAL_INT8_MESSAGE(UNPACK_ERR_HEADER, retVal2, "Missing header");
 
 	retVal2 = unpack_payload_test(fakeCommStrArray2, rx_cmd_test);
-	TEST_ASSERT_EQUAL_MESSAGE(0, retVal2, "Wrong length / too long");
+	TEST_ASSERT_EQUAL_INT8_MESSAGE(UNPACK_ERR_LEN, retVal2, "Wrong length / too long");
 }
 
 void test_flexsea_comm(void)

@@ -50,17 +50,18 @@ extern "C" {
 uint8_t comm_gen_str(uint8_t payload[], uint8_t *cstr, uint8_t bytes);
 
 #ifdef ENABLE_FLEXSEA_BUF_1
-uint8_t unpack_payload_1(void);
+int8_t unpack_payload_1(void);
 #endif	//ENABLE_FLEXSEA_BUF_1
 #ifdef ENABLE_FLEXSEA_BUF_2
-uint8_t unpack_payload_2(void);
+int8_t unpack_payload_2(void);
 #endif	//ENABLE_FLEXSEA_BUF_2
 #ifdef ENABLE_FLEXSEA_BUF_3
-uint8_t unpack_payload_3(void);
+int8_t unpack_payload_3(void);
 #endif	//ENABLE_FLEXSEA_BUF_3
 #ifdef ENABLE_FLEXSEA_BUF_4
-uint8_t unpack_payload_4(void);
+int8_t unpack_payload_4(void);
 #endif	//ENABLE_FLEXSEA_BUF_4
+int8_t unpack_payload_test(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN]);
 
 //Random numbers and arrays:
 void initRandomGenerator(int seed);
@@ -75,6 +76,12 @@ void generateRandomUint8Array(uint8_t *arr, uint8_t size);
 #define HEADER  				0xED	//237d
 #define FOOTER  				0xEE	//238d
 #define ESCAPE  				0xE9	//233d
+
+//Return codes:
+#define UNPACK_ERR_HEADER		-1
+#define UNPACK_ERR_FOOTER		-2
+#define UNPACK_ERR_LEN			-3
+#define UNPACK_ERR_CHECKSUM		-4
 
 #define SC_TRANSPARENT			0
 #define SC_AUTOSAMPLING			1
@@ -150,7 +157,6 @@ extern uint8_t rx_command_3[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
 extern uint8_t comm_str_4[COMM_STR_BUF_LEN];
 extern uint8_t rx_command_4[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_4
-uint8_t unpack_payload_test(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN]);
 
 //ToDo: this is project specific! Eliminate or use generic names!
 extern struct slave_comm_s slaves_485_1, slaves_485_2;
