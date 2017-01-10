@@ -232,6 +232,8 @@ void generateRandomUint8Array(uint8_t *arr, uint8_t size)
 
 //New version of comm_decode_str
 //Take a buffer as an argument, returns the number of decoded payload packets
+//ToDo: The error codes are not always right, but if it's < 0 you know it didn't
+//find a valid string
 static int8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN])
 {
 	uint32_t i = 0, j = 0, k = 0, idx = 0, h = 0;
