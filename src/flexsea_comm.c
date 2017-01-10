@@ -270,8 +270,6 @@ static int8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN
 					checksum = 0;
 					for (k = 0; k < bytes; k++)
 					{
-						//DEBUG_PRINTF("cs b[%i] = %c\n", k, rx_buf_tmp[2+k]);
-
 						checksum = checksum + rx_buf_tmp[2+k];
 					}
 
