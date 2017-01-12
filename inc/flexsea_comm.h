@@ -111,13 +111,14 @@ struct commSpy_s
 	uint8_t error;
 };
 
-//ToDo: should this be here? Not sure this is used anymore... FIX
+//ToDo: should this be here?
 struct sc_data_s
 {
 	uint8_t flag;						//1 when new data ready to be transmitted
 	uint8_t str[COMM_STR_BUF_LEN];		//Data to be transmitted
 	uint8_t length;						//Number of bytes to be sent
 	uint8_t cmd;						//What's the command? (used to know if we will get an answer)
+	uint8_t willListenSoon;				//Lift this first, then ISR will lift "listen"
 	uint8_t listen;						//1 when we expect an answer
 };
 
