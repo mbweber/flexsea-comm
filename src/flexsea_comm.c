@@ -243,6 +243,8 @@ static int8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN
 	uint8_t foundHeader = 0;
 	int8_t tmpRetVal = 0;
 
+	memset(rx_buf_tmp, 0, RX_BUF_LEN);
+
 	for(i = 0; i < (RX_BUF_LEN - 2); i++)
 	{
 		if(buf[i] == HEADER)

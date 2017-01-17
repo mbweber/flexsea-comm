@@ -48,16 +48,16 @@ extern "C" {
 //****************************************************************************
 
 #ifdef ENABLE_FLEXSEA_BUF_1
-extern uint8_t rx_buf_1[];
+extern uint8_t rx_buf_1[RX_BUF_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_1
 #ifdef ENABLE_FLEXSEA_BUF_2
-extern uint8_t rx_buf_2[];
+extern uint8_t rx_buf_2[RX_BUF_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_2
 #ifdef ENABLE_FLEXSEA_BUF_3
-extern uint8_t rx_buf_3[];
+extern uint8_t rx_buf_3[RX_BUF_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_3
 #ifdef ENABLE_FLEXSEA_BUF_4
-extern uint8_t rx_buf_4[];
+extern uint8_t rx_buf_4[RX_BUF_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_4
 
 //****************************************************************************

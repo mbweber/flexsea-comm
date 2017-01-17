@@ -127,7 +127,7 @@ struct slave_comm_s
 	uint8_t mode;						//SC_TRANSPARENT or SC_AUTOSAMPLING
 	uint8_t port;						//PORT_RS485_1 or PORT_RS485_2
 	uint8_t bytes_ready;
-	uint8_t cmd_ready;
+	int8_t cmd_ready;
 
 	//We use 2 structures to avoid confusion in the data if the master was to request
 	//a Read while we are auto-sampling:
