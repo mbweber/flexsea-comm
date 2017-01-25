@@ -130,9 +130,14 @@ struct comm_rx_s
 
 struct comm_tx_s
 {
-	//ToDo: this replaces uint8_t str[COMM_STR_BUF_LEN]; from sc_data_s.
-	//Should that be a pointer instead?
+	//ToDo: this is a copy of what I had before. I'm expecting that it will
+	//be reworked soon
+
 	uint8_t txBuf[COMM_STR_BUF_LEN];
+	uint8_t cmd;
+	uint8_t len;
+	uint8_t inject;
+
 };
 
 struct comm_s

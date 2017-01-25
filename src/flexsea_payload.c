@@ -191,24 +191,26 @@ static void route_to_slave(uint8_t port, uint8_t *buf, uint32_t len)
 		//Repackages the payload. ToDo: would be more efficient to just resend the comm_str,
 		//but it's not passed to this function
 		numb = comm_gen_str(buf, comm_str_tmp, len);
-		//numb = COMM_STR_BUF_LEN;    //Fixed length for now
+		numb = COMM_STR_BUF_LEN;    //Fixed length for now
 
 		//Port specific flags and buffer:
 		if(port == PORT_RS485_1)
 		{
 			comm_str_ptr = slaveComm[0].tx.txBuf;
-			//slaves_485_1.xmit.cmd = buf[P_CMD1];	//ToDo rework/delete/replace
-			//slaves_485_1.xmit.flag = 1;
+			slaveComm[0].tx.cmd = buf[P_CMD1];
+			slaveComm[0].tx.inject = 1;
+			slaveComm[0].tx.len = numb;
 		}
 		else if(port == PORT_RS485_2)
 		{
 			comm_str_ptr = slaveComm[1].tx.txBuf;
-			//slaves_485_2.xmit.cmd = buf[P_CMD1];	//ToDo rework/delete/replace
-			//slaves_485_2.xmit.flag = 1;
+			slaveComm[1].tx.cmd = buf[P_CMD1];
+			slaveComm[1].tx.inject = 1;
+			slaveComm[1].tx.len = numb;
 		}
 
 		//Copy string:
-		memcpy(comm_str_ptr, comm_str_tmp, numb+1);
+		memcpy(comm_str_ptr, comm_str_tmp, numb);
 
 	#else
 
