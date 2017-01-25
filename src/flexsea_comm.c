@@ -90,8 +90,7 @@ uint8_t rx_command_4[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
 uint32_t cmd_valid = 0;
 uint32_t cmd_bad_checksum = 0;
 
-//ToDo: this is project specific! Eliminate or use generic names!
-struct slave_comm_s slaves_485_1, slaves_485_2;
+struct comm_s slaveComm[COMM_SLAVE_BUS];
 
 struct commSpy_s commSpy1 = {0,0,0,0,0,0,0};
 

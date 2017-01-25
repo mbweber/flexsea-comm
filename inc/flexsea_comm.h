@@ -83,8 +83,14 @@ void generateRandomUint8Array(uint8_t *arr, uint8_t size);
 #define UNPACK_ERR_LEN			-3
 #define UNPACK_ERR_CHECKSUM		-4
 
-#define SC_TRANSPARENT			0
-#define SC_AUTOSAMPLING			1
+//Generic transceiver state:
+#define TRANS_STATE_UNKNOWN		0
+#define TRANS_STATE_TX			1
+#define TRANS_STATE_TX_THEN_RX	2
+#define TRANS_STATE_PREP_RX		3
+#define TRANS_STATE_RX			4
+//Pure write: stays TRANS_STATE_TX
+//Read: TRANS_STATE_TX_THEN_RX => TRANS_STATE_PREP_RX => TRANS_STATE_RX
 
 //Enable this to debug with the terminal:
 //#define DEBUG_COMM_PRINTF_
@@ -111,30 +117,36 @@ struct commSpy_s
 	uint8_t error;
 };
 
-//ToDo: should this be here?
-struct sc_data_s
+struct comm_rx_s
 {
-	uint8_t flag;						//1 when new data ready to be transmitted
-	uint8_t str[COMM_STR_BUF_LEN];		//Data to be transmitted
-	uint8_t length;						//Number of bytes to be sent
-	uint8_t cmd;						//What's the command? (used to know if we will get an answer)
-	uint8_t willListenSoon;				//Lift this first, then ISR will lift "listen"
-	uint8_t listen;						//1 when we expect an answer
+	int8_t cmdReady;
+	uint16_t bytesReady;
+
+	//Pointers to buffers:
+	uint8_t *rxBuf;
+	uint8_t *commStr;
+	uint8_t (*rxCmd)[PACKAGED_PAYLOAD_LEN];
 };
 
-struct slave_comm_s
+struct comm_tx_s
 {
-	uint8_t mode;						//SC_TRANSPARENT or SC_AUTOSAMPLING
-	uint8_t port;						//PORT_RS485_1 or PORT_RS485_2
-	uint8_t bytes_ready;
-	int8_t cmd_ready;
-
-	//We use 2 structures to avoid confusion in the data if the master was to request
-	//a Read while we are auto-sampling:
-
-	struct sc_data_s xmit;				//For the Transparent mode
-	struct sc_data_s autosample;		//For the Autosampling mode
+	//ToDo: this replaces uint8_t str[COMM_STR_BUF_LEN]; from sc_data_s.
+	//Should that be a pointer instead?
+	uint8_t txBuf[COMM_STR_BUF_LEN];
 };
+
+struct comm_s
+{
+	uint8_t port;
+	int8_t transceiverState;
+
+	//Reception:
+	struct comm_rx_s rx;
+
+	//Transmission:
+	struct comm_tx_s tx;
+};
+
 
 //****************************************************************************
 // Shared variable(s)
@@ -159,8 +171,7 @@ extern uint8_t comm_str_4[COMM_STR_BUF_LEN];
 extern uint8_t rx_command_4[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_4
 
-//ToDo: this is project specific! Eliminate or use generic names!
-extern struct slave_comm_s slaves_485_1, slaves_485_2;
+extern struct comm_s slaveComm[COMM_SLAVE_BUS];
 
 extern struct commSpy_s commSpy1;
 

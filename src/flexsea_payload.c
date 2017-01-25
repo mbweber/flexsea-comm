@@ -41,6 +41,7 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 #include "../inc/flexsea.h"
+#include "../../flexsea-comm/inc/flexsea_comm.h"
 #include "../../flexsea-system/inc/flexsea_system.h"
 #include "flexsea_board.h"
 
@@ -185,7 +186,7 @@ static void route_to_slave(uint8_t port, uint8_t *buf, uint32_t len)
 	#ifdef BOARD_TYPE_FLEXSEA_MANAGE
 
 		uint32_t numb = 0;
-		uint8_t *comm_str_ptr = slaves_485_1.xmit.str;
+		uint8_t *comm_str_ptr = slaveComm[0].tx.txBuf;
 
 		//Repackages the payload. ToDo: would be more efficient to just resend the comm_str,
 		//but it's not passed to this function
@@ -195,15 +196,15 @@ static void route_to_slave(uint8_t port, uint8_t *buf, uint32_t len)
 		//Port specific flags and buffer:
 		if(port == PORT_RS485_1)
 		{
-			comm_str_ptr = slaves_485_1.xmit.str;
-			slaves_485_1.xmit.cmd = buf[P_CMD1];
-			slaves_485_1.xmit.flag = 1;
+			comm_str_ptr = slaveComm[0].tx.txBuf;
+			//slaves_485_1.xmit.cmd = buf[P_CMD1];	//ToDo rework/delete/replace
+			//slaves_485_1.xmit.flag = 1;
 		}
 		else if(port == PORT_RS485_2)
 		{
-			comm_str_ptr = slaves_485_2.xmit.str;
-			slaves_485_2.xmit.cmd = buf[P_CMD1];
-			slaves_485_2.xmit.flag = 1;
+			comm_str_ptr = slaveComm[1].tx.txBuf;
+			//slaves_485_2.xmit.cmd = buf[P_CMD1];	//ToDo rework/delete/replace
+			//slaves_485_2.xmit.flag = 1;
 		}
 
 		//Copy string:
