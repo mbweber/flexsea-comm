@@ -70,27 +70,37 @@ extern "C" {
 //****************************************************************************
 
 uint8_t comm_str_tmp[COMM_STR_BUF_LEN];
+
 #ifdef ENABLE_FLEXSEA_BUF_1
 uint8_t comm_str_1[COMM_STR_BUF_LEN];
 uint8_t rx_command_1[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_1
+
 #ifdef ENABLE_FLEXSEA_BUF_2
 uint8_t comm_str_2[COMM_STR_BUF_LEN];
 uint8_t rx_command_2[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_2
+
 #ifdef ENABLE_FLEXSEA_BUF_3
 uint8_t comm_str_3[COMM_STR_BUF_LEN];
 uint8_t rx_command_3[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_3
+
 #ifdef ENABLE_FLEXSEA_BUF_4
 uint8_t comm_str_4[COMM_STR_BUF_LEN];
 uint8_t rx_command_4[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_4
 
+#ifdef ENABLE_FLEXSEA_BUF_5
+uint8_t comm_str_5[COMM_STR_BUF_LEN];
+uint8_t rx_command_5[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
+#endif	//ENABLE_FLEXSEA_BUF_5
+
 uint32_t cmd_valid = 0;
 uint32_t cmd_bad_checksum = 0;
 
 struct comm_s slaveComm[COMM_SLAVE_BUS];
+struct comm_s masterComm[COMM_MASTERS];
 
 struct commSpy_s commSpy1 = {0,0,0,0,0,0,0};
 
@@ -197,6 +207,13 @@ int8_t unpack_payload_4(void)
 	return unpack_payload(rx_buf_4, rx_command_4);
 }
 #endif	//ENABLE_FLEXSEA_BUF_4
+
+#ifdef ENABLE_FLEXSEA_BUF_5
+int8_t unpack_payload_5(void)
+{
+	return unpack_payload(rx_buf_5, rx_command_5);
+}
+#endif	//ENABLE_FLEXSEA_BUF_5
 
 //Special wrapper for unit test code:
 int8_t unpack_payload_test(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN])

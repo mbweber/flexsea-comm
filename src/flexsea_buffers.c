@@ -56,15 +56,22 @@ extern "C" {
 #ifdef ENABLE_FLEXSEA_BUF_1
 uint8_t rx_buf_1[RX_BUF_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_1
+
 #ifdef ENABLE_FLEXSEA_BUF_2
 uint8_t rx_buf_2[RX_BUF_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_2
+
 #ifdef ENABLE_FLEXSEA_BUF_3
 uint8_t rx_buf_3[RX_BUF_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_3
+
 #ifdef ENABLE_FLEXSEA_BUF_4
 uint8_t rx_buf_4[RX_BUF_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_4
+
+#ifdef ENABLE_FLEXSEA_BUF_5
+uint8_t rx_buf_5[RX_BUF_LEN];
+#endif	//ENABLE_FLEXSEA_BUF_5
 
 //****************************************************************************
 // Private Function Prototype(s):
@@ -92,6 +99,10 @@ static void update_rx_buf_3(uint8_t byte_array, uint8_t new_byte, \
 static void update_rx_buf_4(uint8_t byte_array, uint8_t new_byte, \
 							uint8_t *new_array, uint32_t len);
 #endif	//ENABLE_FLEXSEA_BUF_4
+#ifdef ENABLE_FLEXSEA_BUF_5
+static void update_rx_buf_5(uint8_t byte_array, uint8_t new_byte, \
+							uint8_t *new_array, uint32_t len);
+#endif	//ENABLE_FLEXSEA_BUF_5
 
 //****************************************************************************
 // Public Function(s)
@@ -164,6 +175,23 @@ void update_rx_buf_array_4(uint8_t *new_array, uint32_t len)
 }
 
 #endif	//ENABLE_FLEXSEA_BUF_4
+
+#ifdef ENABLE_FLEXSEA_BUF_5
+
+//Add one byte to buffer #5
+void update_rx_buf_byte_5(uint8_t new_byte)
+{
+	uint8_t empty_array[1] = {0};
+	update_rx_buf_5(UPDATE_BYTE, new_byte, empty_array, 0);
+}
+
+//Add an array of bytes to buffer #5
+void update_rx_buf_array_5(uint8_t *new_array, uint32_t len)
+{
+	update_rx_buf_5(UPDATE_ARRAY, 0, new_array, len);
+}
+
+#endif	//ENABLE_FLEXSEA_BUF_5
 
 #ifdef __cplusplus
 }
@@ -364,6 +392,33 @@ static void update_rx_buf_4(uint8_t byte_array, uint8_t new_byte, \
 }
 
 #endif	//ENABLE_FLEXSEA_BUF_4
+
+#ifdef ENABLE_FLEXSEA_BUF_5
+
+//See comment above update_rx_buf_1()
+static void update_rx_buf_5(uint8_t byte_array, uint8_t new_byte, \
+							uint8_t *new_array, uint32_t len)
+{
+	static uint32_t idx_5 = 0;
+
+	if(byte_array == UPDATE_BYTE)
+	{
+		//Updating buffer with one byte
+		update_rx_buf_byte(rx_buf_5, &idx_5, new_byte);
+	}
+	else if(byte_array == UPDATE_ARRAY)
+	{
+		//Updating buffer with an array
+		update_rx_buf_array(rx_buf_5, &idx_5, new_array, len);
+	}
+	else
+	{
+		//Error
+		//flexsea_error(0);	ToDo
+	}
+}
+
+#endif	//ENABLE_FLEXSEA_BUF_5
 
 //****************************************************************************
 // New code - not integrated - test in progress:
