@@ -152,8 +152,6 @@ void test_unpack_payload_1(void)
 	//First, we generate a comm_str:
 	//==============================
 
-	int i = 0;
-
 	//Empty strings:
 	memset(fakePayload, 0, PAYLOAD_BUF_LEN);
 	memset(fakeCommStr, 0, COMM_STR_BUF_LEN);
@@ -182,8 +180,6 @@ void test_unpack_payload_2(void)
 {
 	//First, we generate a comm_str:
 	//==============================
-
-	int i = 0;
 
 	//Empty strings:
 	memset(fakePayload, 0, PAYLOAD_BUF_LEN);
