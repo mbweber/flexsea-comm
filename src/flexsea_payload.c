@@ -44,19 +44,22 @@ extern "C" {
 #include "../../flexsea-comm/inc/flexsea_comm.h"
 #include "../../flexsea-system/inc/flexsea_system.h"
 #include "flexsea_board.h"
+#include <flexsea_payload.h>
+
 
 //****************************************************************************
 // Variable(s)
 //****************************************************************************
 
 uint8_t payload_str[PAYLOAD_BUF_LEN];
+extern MsgQueue slave_queue;
 
 //****************************************************************************
 // Private Function Prototype(s):
 //****************************************************************************
 
 static uint8_t get_rid(uint8_t *pldata);
-static void route_to_slave(uint8_t port, uint8_t *buf, uint32_t len);
+static void route_to_slave(PacketWrapper* p);
 
 //****************************************************************************
 // Public Function(s):
@@ -64,8 +67,11 @@ static void route_to_slave(uint8_t port, uint8_t *buf, uint32_t len);
 
 //Decode/parse received string
 //ToDo improve: for now, supports only one command per string
-uint8_t payload_parse_str(uint8_t *cp_str, uint8_t *info)
+uint8_t payload_parse_str(PacketWrapper* p)
 {
+
+	uint8_t *cp_str = p->unpaked;
+	uint8_t *info   = &p->port;
 	uint8_t cmd = 0, cmd_7bits = 0;
 	unsigned int id = 0;
 	uint8_t pType = RX_PTYPE_INVALID;
@@ -85,24 +91,25 @@ uint8_t payload_parse_str(uint8_t *cp_str, uint8_t *info)
 		if((cmd_7bits <= MAX_CMD_CODE) && (pType <= RX_PTYPE_MAX_INDEX))
 		{
 			(*flexsea_payload_ptr[cmd_7bits][pType]) (cp_str, info);
-
+			fm_pool_free_block(p);
 			return PARSE_SUCCESSFUL;
 		}
 		else
 		{
+			fm_pool_free_block(p);
 			return PARSE_DEFAULT;
 		}
 	}
 	else if(id == ID_SUB1_MATCH)
 	{
 		//For a slave on bus #1:
-		route_to_slave(PORT_SUB1, cp_str, PAYLOAD_BUF_LEN);
+		route_to_slave(p);
 		//ToDo compute length rather then sending the max
 	}
 	else if(id == ID_SUB2_MATCH)
 	{
 		//For a slave on bus #2:
-		route_to_slave(PORT_SUB2, cp_str, PAYLOAD_BUF_LEN);
+		route_to_slave(p);
 		//ToDo compute length rather then sending the max
 	}
 	else if(id == ID_UP_MATCH)
@@ -115,20 +122,27 @@ uint8_t payload_parse_str(uint8_t *cp_str, uint8_t *info)
 
 		//Manage is the only board that can receive a package destined to his master
 
+		/*
 		//Repackages the payload. ToDo: would be more efficient to just resend the comm_str, but it's not passed
 		//to this function (cp_str is a payload, not a comm_str)
 		numb = comm_gen_str(cp_str, comm_str_usb, PAYLOAD_BUF_LEN);		//ToDo: shouldn't be fixed at spi or usb
 		numb = COMM_STR_BUF_LEN;    //Fixed length for now
-		flexsea_send_serial_master(PORT_USB, comm_str_usb, numb);	//Same comment here - ToDo fix
+		*/
+
+		flexsea_send_serial_master(p);	//Same comment here - ToDo fix
+
 		//(the SPI driver will grab comm_str_spi directly)
 
 		#endif	//BOARD_TYPE_FLEXSEA_MANAGE
 	}
 	else
 	{
+		fm_pool_free_block(p);
+		p = NULL;
 		return PARSE_ID_NO_MATCH;
 	}
-
+	fm_pool_free_block(p);
+	p = NULL;
 	//Shouldn't get here...
 	return PARSE_DEFAULT;
 }
@@ -181,43 +195,10 @@ uint8_t packetType(uint8_t *buf)
 //****************************************************************************
 
 //ToDo not the greatest function...
-static void route_to_slave(uint8_t port, uint8_t *buf, uint32_t len)
+static void route_to_slave(PacketWrapper * p)
 {
 	#ifdef BOARD_TYPE_FLEXSEA_MANAGE
-
-		uint32_t numb = 0;
-		uint8_t *comm_str_ptr = slaveComm[0].tx.txBuf;
-
-		//Repackages the payload. ToDo: would be more efficient to just resend the comm_str,
-		//but it's not passed to this function
-		numb = comm_gen_str(buf, comm_str_tmp, len);
-		numb = COMM_STR_BUF_LEN;    //Fixed length for now
-
-		//Port specific flags and buffer:
-		if(port == PORT_RS485_1)
-		{
-			comm_str_ptr = slaveComm[0].tx.txBuf;
-			slaveComm[0].tx.cmd = buf[P_CMD1];
-			slaveComm[0].tx.inject = 1;
-			slaveComm[0].tx.len = numb;
-		}
-		else if(port == PORT_RS485_2)
-		{
-			comm_str_ptr = slaveComm[1].tx.txBuf;
-			slaveComm[1].tx.cmd = buf[P_CMD1];
-			slaveComm[1].tx.inject = 1;
-			slaveComm[1].tx.len = numb;
-		}
-
-		//Copy string:
-		memcpy(comm_str_ptr, comm_str_tmp, numb);
-
-	#else
-
-		(void)port;
-		(void)buf;
-		(void) len;
-
+	fm_queue_put(&slave_queue, p);
 	#endif 	//BOARD_TYPE_FLEXSEA_MANAGE
 }
 

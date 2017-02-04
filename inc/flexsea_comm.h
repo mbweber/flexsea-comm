@@ -42,6 +42,8 @@ extern "C" {
 #include "flexsea.h"
 #include "flexsea_board.h"
 #include "flexsea_system.h"
+#include <flexsea_board.h>
+#include  <fm_block_allocator.h>
 
 //****************************************************************************
 // Public Function Prototype(s):
@@ -153,6 +155,9 @@ struct comm_s
 };
 
 
+
+
+
 //****************************************************************************
 // Shared variable(s)
 //****************************************************************************
@@ -188,6 +193,13 @@ extern struct comm_s slaveComm[COMM_SLAVE_BUS];
 extern struct comm_s masterComm[COMM_MASTERS];
 
 extern struct commSpy_s commSpy1;
+
+extern MsgQueue unpacked_packet_queue;
+
+#if defined(OMG)
+#error OMGOMGOMG
+#endif
+
 
 #ifdef __cplusplus
 }
