@@ -81,6 +81,7 @@ uint32_t REBUILD_UINT32(uint8_t *buf, uint16_t *index);
 #define PORT_485_2						1
 #define PORT_SPI						2
 #define PORT_USB						3
+#define PORT_WIRELESS					4
 #define PORT_SUB1						PORT_485_1
 #define PORT_SUB2						PORT_485_2
 
