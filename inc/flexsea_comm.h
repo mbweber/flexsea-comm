@@ -155,9 +155,6 @@ struct comm_s
 };
 
 
-
-
-
 //****************************************************************************
 // Shared variable(s)
 //****************************************************************************
@@ -195,12 +192,6 @@ extern struct comm_s masterComm[COMM_MASTERS];
 extern struct commSpy_s commSpy1;
 
 extern MsgQueue unpacked_packet_queue;
-
-#if defined(OMG)
-#error OMGOMGOMG
-#endif
-
-
 #ifdef __cplusplus
 }
 #endif

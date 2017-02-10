@@ -76,8 +76,6 @@ uint32_t REBUILD_UINT32(uint8_t *buf, uint16_t *index);
 #define ID_UP_MATCH						4		//Addressed to my master
 #define ID_NO_MATCH						0
 
-
-
 typedef enum {
 	PORT_RS485_1 = 0,
 	PORT_SUB1  = PORT_RS485_1,
@@ -160,7 +158,6 @@ extern void (*flexsea_payload_ptr[MAX_CMD_CODE][RX_PTYPE_MAX_INDEX+1]) \
 #else
 	#define _USE_PRINTF(...) do {} while (0)
 #endif	//USE__PRINTF
-
 
 /**
  *

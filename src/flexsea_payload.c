@@ -122,15 +122,7 @@ uint8_t payload_parse_str(PacketWrapper* p)
 
 		//Manage is the only board that can receive a package destined to his master
 
-		/*
-		//Repackages the payload. ToDo: would be more efficient to just resend the comm_str, but it's not passed
-		//to this function (cp_str is a payload, not a comm_str)
-		numb = comm_gen_str(cp_str, comm_str_usb, PAYLOAD_BUF_LEN);		//ToDo: shouldn't be fixed at spi or usb
-		numb = COMM_STR_BUF_LEN;    //Fixed length for now
-		*/
-
-		flexsea_send_serial_master(p);	//Same comment here - ToDo fix
-
+		flexsea_send_serial_master(p);	
 		//(the SPI driver will grab comm_str_spi directly)
 
 		#endif	//BOARD_TYPE_FLEXSEA_MANAGE
