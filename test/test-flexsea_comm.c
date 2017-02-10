@@ -4,6 +4,7 @@ extern "C" {
 
 #include "../inc/flexsea.h"
 #include "flexsea-comm_test-all.h"
+#include <flexsea_comm.h>
 
 //Definitions and variables used by some/all tests:
 uint8_t fakePayload[PAYLOAD_BUF_LEN];
