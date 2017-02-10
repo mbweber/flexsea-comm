@@ -58,14 +58,13 @@ extern "C" {
 //****************************************************************************
 // Include(s)
 //****************************************************************************
-
+#include "flexsea_buffers.h"
 #include <string.h>
 #include <stdlib.h>
 #include "../inc/flexsea.h"
 #include "flexsea_board.h"
 #include "flexsea_system.h"
 #include <flexsea_comm.h>
-#include <flexsea_buffers.h>
 
 //****************************************************************************
 // Variable(s)
