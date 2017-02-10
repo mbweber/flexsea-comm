@@ -64,6 +64,8 @@ extern "C" {
 #include "../inc/flexsea.h"
 #include "flexsea_board.h"
 #include "flexsea_system.h"
+#include <flexsea_comm.h>
+#include <flexsea_buffers.h>
 
 //****************************************************************************
 // Variable(s)
@@ -104,11 +106,14 @@ struct comm_s masterComm[COMM_MASTERS];
 
 struct commSpy_s commSpy1 = {0,0,0,0,0,0,0};
 
+MsgQueue unpacked_packet_queue;
+MsgQueue usb_reply_queue;
+
 //****************************************************************************
 // Private Function Prototype(s):
 //****************************************************************************
 
-static int8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN]);
+int8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN]);
 
 //****************************************************************************
 // Public Function(s)
@@ -250,7 +255,7 @@ void generateRandomUint8Array(uint8_t *arr, uint8_t size)
 //Take a buffer as an argument, returns the number of decoded payload packets
 //ToDo: The error codes are not always right, but if it's < 0 you know it didn't
 //find a valid string
-static int8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN])
+int8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN])
 {
 	uint32_t i = 0, j = 0, k = 0, idx = 0, h = 0;
 	uint32_t bytes = 0, possible_footer = 0, possible_footer_pos = 0;
@@ -307,7 +312,7 @@ static int8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN
 							else
 							{
 								skip = 0;
-								rx_cmd[payload_strings][idx] = rx_buf_tmp[k];
+								rx_cmd[idx] = rx_buf_tmp[k];
 								idx++;
 							}
 						}
@@ -315,6 +320,7 @@ static int8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN
 						//At this point we have extracted a valid string
 						payload_strings++;
 						cmd_valid++;
+						return 1;
 
 						//Remove the string to avoid double detection
 						for(h = i; h <= possible_footer_pos; h++)

@@ -46,6 +46,7 @@ extern "C" {
 #include "../inc/flexsea.h"
 #include "flexsea_system.h"
 #include "flexsea_board.h"
+#include <flexsea_buffers.h>
 
 //****************************************************************************
 // Variable(s)

@@ -39,9 +39,10 @@ extern "C" {
 //****************************************************************************
 // Include(s)
 //****************************************************************************
-
+#include <flexsea_comm.h>
 #include <stdint.h>
-#include "flexsea.h"
+#include <flexsea.h>
+
 
 //****************************************************************************
 // Shared variable(s)
@@ -52,8 +53,7 @@ extern uint8_t payload_str[PAYLOAD_BUF_LEN];
 //****************************************************************************
 // Public Function Prototype(s):
 //****************************************************************************
-
-uint8_t payload_parse_str(uint8_t *cp_str, uint8_t *info);
+uint8_t payload_parse_str(PacketWrapper* foo);
 uint8_t sent_from_a_slave(uint8_t *buf);
 uint8_t packetType(uint8_t *buf);
 void prepare_empty_payload(uint8_t from, uint8_t to, uint8_t *buf, uint32_t len);

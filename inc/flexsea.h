@@ -76,13 +76,15 @@ uint32_t REBUILD_UINT32(uint8_t *buf, uint16_t *index);
 #define ID_UP_MATCH						4		//Addressed to my master
 #define ID_NO_MATCH						0
 
-//Communication ports:
-#define PORT_485_1						0
-#define PORT_485_2						1
-#define PORT_SPI						2
-#define PORT_USB						3
-#define PORT_SUB1						PORT_485_1
-#define PORT_SUB2						PORT_485_2
+typedef enum {
+	PORT_RS485_1 = 0,
+	PORT_SUB1  = PORT_RS485_1,
+	PORT_RS485_2,
+	PORT_SUB2 = PORT_RS485_2,
+	PORT_SPI,
+	PORT_USB,
+	PORT_WIRELESS
+} Port;
 
 //Communication protocol payload fields:
 #define P_XID							0		//Emitter ID
@@ -157,6 +159,29 @@ extern void (*flexsea_payload_ptr[MAX_CMD_CODE][RX_PTYPE_MAX_INDEX+1]) \
 	#define _USE_PRINTF(...) do {} while (0)
 #endif	//USE__PRINTF
 
+/**
+ *
+ * Struct to store a packet, in both packed and unpacked
+ */
+typedef struct
+{
+	/**
+	 * Source port of the packet
+	 */
+
+	Port port;
+	/**
+	 * Raw bytes as received on the wire
+	 */
+	uint8_t packed[100];
+
+	/**
+	 * Unpacked packet ready to be parsed.
+	 */
+	uint8_t unpaked[100];
+} PacketWrapper;
+
+
 //****************************************************************************
 // Include(s) - at the end to make sure that the included files can access
 // all the project wide #define.
@@ -164,9 +189,6 @@ extern void (*flexsea_payload_ptr[MAX_CMD_CODE][RX_PTYPE_MAX_INDEX+1]) \
 
 //All the FlexSEA stack includes:
 
-#include "flexsea_buffers.h"
-#include "flexsea_comm.h"
-#include "flexsea_payload.h"
 
 #ifdef __cplusplus
 }
