@@ -163,27 +163,27 @@ extern uint8_t comm_str_tmp[COMM_STR_BUF_LEN];
 
 #ifdef ENABLE_FLEXSEA_BUF_1
 extern uint8_t comm_str_1[COMM_STR_BUF_LEN];
-extern uint8_t rx_command_1[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
+extern uint8_t rx_command_1[PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_1
 
 #ifdef ENABLE_FLEXSEA_BUF_2
 extern uint8_t comm_str_2[COMM_STR_BUF_LEN];
-extern uint8_t rx_command_2[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
+extern uint8_t rx_command_2[PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_2
 
 #ifdef ENABLE_FLEXSEA_BUF_3
 extern uint8_t comm_str_3[COMM_STR_BUF_LEN];
-extern uint8_t rx_command_3[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
+extern uint8_t rx_command_3[PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_3
 
 #ifdef ENABLE_FLEXSEA_BUF_4
 extern uint8_t comm_str_4[COMM_STR_BUF_LEN];
-extern uint8_t rx_command_4[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
+extern uint8_t rx_command_4[PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_4
 
 #ifdef ENABLE_FLEXSEA_BUF_5
 extern uint8_t comm_str_5[COMM_STR_BUF_LEN];
-extern uint8_t rx_command_5[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
+extern uint8_t rx_command_5[PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_5
 
 extern struct comm_s slaveComm[COMM_SLAVE_BUS];
