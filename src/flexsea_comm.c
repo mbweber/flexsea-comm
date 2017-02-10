@@ -220,7 +220,7 @@ int8_t unpack_payload_5(void)
 #endif	//ENABLE_FLEXSEA_BUF_5
 
 //Special wrapper for unit test code:
-int8_t unpack_payload_test(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN])
+int8_t unpack_payload_test(uint8_t *buf, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN])
 {
 	return unpack_payload(buf, rx_cmd);
 }

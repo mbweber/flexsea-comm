@@ -63,7 +63,7 @@ int8_t unpack_payload_3(void);
 #ifdef ENABLE_FLEXSEA_BUF_4
 int8_t unpack_payload_4(void);
 #endif	//ENABLE_FLEXSEA_BUF_4
-int8_t unpack_payload_test(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN]);
+int8_t unpack_payload_test(uint8_t *buf, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN]);
 
 //Random numbers and arrays:
 void initRandomGenerator(int seed);
