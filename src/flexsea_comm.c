@@ -58,14 +58,13 @@ extern "C" {
 //****************************************************************************
 // Include(s)
 //****************************************************************************
-
+#include "flexsea_buffers.h"
 #include <string.h>
 #include <stdlib.h>
 #include "../inc/flexsea.h"
 #include "flexsea_board.h"
 #include "flexsea_system.h"
 #include <flexsea_comm.h>
-#include <flexsea_buffers.h>
 
 //****************************************************************************
 // Variable(s)
@@ -75,12 +74,12 @@ uint8_t comm_str_tmp[COMM_STR_BUF_LEN];
 
 #ifdef ENABLE_FLEXSEA_BUF_1
 uint8_t comm_str_1[COMM_STR_BUF_LEN];
-uint8_t rx_command_1[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
+uint8_t rx_command_1[PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_1
 
 #ifdef ENABLE_FLEXSEA_BUF_2
 uint8_t comm_str_2[COMM_STR_BUF_LEN];
-uint8_t rx_command_2[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
+uint8_t rx_command_2[PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_2
 
 #ifdef ENABLE_FLEXSEA_BUF_3
@@ -221,7 +220,7 @@ int8_t unpack_payload_5(void)
 #endif	//ENABLE_FLEXSEA_BUF_5
 
 //Special wrapper for unit test code:
-int8_t unpack_payload_test(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN])
+int8_t unpack_payload_test(uint8_t *buf, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN])
 {
 	return unpack_payload(buf, rx_cmd);
 }
