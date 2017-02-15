@@ -170,6 +170,7 @@ typedef struct
 	 */
 
 	Port port;
+	Port reply_port;
 	/**
 	 * Raw bytes as received on the wire
 	 */

@@ -127,7 +127,7 @@ struct comm_rx_s
 	//Pointers to buffers:
 	uint8_t *rxBuf;
 	uint8_t *commStr;
-	uint8_t (*rxCmd)[PACKAGED_PAYLOAD_LEN];
+	uint8_t *rxCmd;
 };
 
 struct comm_tx_s
@@ -145,6 +145,7 @@ struct comm_tx_s
 struct comm_s
 {
 	uint8_t port;
+	uint8_t reply_port;
 	int8_t transceiverState;
 
 	//Reception:

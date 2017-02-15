@@ -84,17 +84,17 @@ uint8_t rx_command_2[PACKAGED_PAYLOAD_LEN];
 
 #ifdef ENABLE_FLEXSEA_BUF_3
 uint8_t comm_str_3[COMM_STR_BUF_LEN];
-uint8_t rx_command_3[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
+uint8_t rx_command_3[PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_3
 
 #ifdef ENABLE_FLEXSEA_BUF_4
 uint8_t comm_str_4[COMM_STR_BUF_LEN];
-uint8_t rx_command_4[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
+uint8_t rx_command_4[PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_4
 
 #ifdef ENABLE_FLEXSEA_BUF_5
 uint8_t comm_str_5[COMM_STR_BUF_LEN];
-uint8_t rx_command_5[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
+uint8_t rx_command_5[PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_5
 
 uint32_t cmd_valid = 0;
