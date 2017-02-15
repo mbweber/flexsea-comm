@@ -111,7 +111,7 @@ uint8_t payload_parse_str(PacketWrapper* p)
 	{
 		//For a slave on bus #2:
 		p->reply_port = p->port;
-		p->port = PORT_RS485_1;
+		p->port = PORT_RS485_2;
 		route_to_slave(p);
 	}
 	else if(id == ID_UP_MATCH)
