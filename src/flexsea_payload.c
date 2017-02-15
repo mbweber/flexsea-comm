@@ -103,14 +103,16 @@ uint8_t payload_parse_str(PacketWrapper* p)
 	else if(id == ID_SUB1_MATCH)
 	{
 		//For a slave on bus #1:
+		p->reply_port = p->port;
+		p->port = PORT_RS485_1;
 		route_to_slave(p);
-		//ToDo compute length rather then sending the max
 	}
 	else if(id == ID_SUB2_MATCH)
 	{
 		//For a slave on bus #2:
+		p->reply_port = p->port;
+		p->port = PORT_RS485_1;
 		route_to_slave(p);
-		//ToDo compute length rather then sending the max
 	}
 	else if(id == ID_UP_MATCH)
 	{
@@ -118,12 +120,8 @@ uint8_t payload_parse_str(PacketWrapper* p)
 
 		#ifdef BOARD_TYPE_FLEXSEA_MANAGE
 
-		uint8_t numb  = 0;
-
 		//Manage is the only board that can receive a package destined to his master
-
-		flexsea_send_serial_master(p);	
-		//(the SPI driver will grab comm_str_spi directly)
+		flexsea_send_serial_master(p);
 
 		#endif	//BOARD_TYPE_FLEXSEA_MANAGE
 	}
