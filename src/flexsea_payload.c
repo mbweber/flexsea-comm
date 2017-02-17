@@ -40,12 +40,12 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fm_block_allocator.h>
 #include "../inc/flexsea.h"
 #include "../../flexsea-comm/inc/flexsea_comm.h"
 #include "../../flexsea-system/inc/flexsea_system.h"
 #include "flexsea_board.h"
 #include <flexsea_payload.h>
-
 
 //****************************************************************************
 // Variable(s)

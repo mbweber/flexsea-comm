@@ -40,7 +40,7 @@ extern "C" {
 //****************************************************************************
 
 #include "flexsea.h"
-#include "flexsea_board.h"
+#include "flexsea_buffers.h"
 #include "flexsea_system.h"
 #include <flexsea_board.h>
 #include  <fm_block_allocator.h>
@@ -193,6 +193,31 @@ extern struct comm_s masterComm[COMM_MASTERS];
 extern struct commSpy_s commSpy1;
 
 extern MsgQueue unpacked_packet_queue;
+
+//Overload buffer & function names (for user convenience):
+
+#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
+
+#define comm_str_485_1 					comm_str_1
+#define unpack_payload_485 				unpack_payload_1
+#define rx_command_485 					rx_command_1
+#define update_rx_buf_byte_485 			update_rx_buf_byte_1
+#define update_rx_buf_array_485 		update_rx_buf_array_1
+
+#define comm_str_usb 					comm_str_2
+#define unpack_payload_usb			 	unpack_payload_2
+#define rx_command_usb 					rx_command_2
+#define update_rx_buf_byte_usb 			update_rx_buf_byte_2
+#define update_rx_buf_array_usb 		update_rx_buf_array_2
+
+#define comm_str_wireless				comm_str_3
+#define unpack_payload_wireless			unpack_payload_3
+#define rx_command_wireless				rx_command_3
+#define update_rx_buf_byte_wireless		update_rx_buf_byte_3
+#define update_rx_buf_array_wireless	update_rx_buf_array_3
+
+#endif
+	
 #ifdef __cplusplus
 }
 #endif
