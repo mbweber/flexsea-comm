@@ -12,7 +12,7 @@ uint8_t fakeCommStr[COMM_STR_BUF_LEN];
 uint8_t fakeCommStrArray0[COMM_STR_BUF_LEN];
 uint8_t fakeCommStrArray1[COMM_STR_BUF_LEN];
 uint8_t fakeCommStrArray2[COMM_STR_BUF_LEN];
-uint8_t rx_cmd_test[4][PACKAGED_PAYLOAD_LEN];
+uint8_t rx_cmd_test[PACKAGED_PAYLOAD_LEN];
 uint8_t retVal = 0;
 int8_t retVal2 = 0;
 

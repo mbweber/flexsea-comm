@@ -2,6 +2,7 @@
 extern "C" {
 #endif
 
+#include <flexsea_payload.h>
 #include "flexsea-comm_test-all.h"
 
 //Definitions and variables used by some/all tests:
@@ -55,7 +56,7 @@ void test_packetType(void)
 {
 	uint8_t testBuffer[48];
 	uint8_t xid = 0, rid = 0;
-	
+
 	//Master Writing to Slave:
 	xid = FLEXSEA_PLAN_1;
 	rid = FLEXSEA_EXECUTE_1;
