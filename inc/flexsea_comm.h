@@ -43,7 +43,10 @@ extern "C" {
 #include "flexsea_buffers.h"
 #include "flexsea_system.h"
 #include <flexsea_board.h>
-#include  <fm_block_allocator.h>
+
+#if (defined BOARD_TYPE_FLEXSEA_MANAGE || defined BOARD_TYPE_FLEXSEA_EXECUTE)
+#include <fm_block_allocator.h>
+#endif
 
 //****************************************************************************
 // Public Function Prototype(s):
@@ -192,7 +195,9 @@ extern struct comm_s masterComm[COMM_MASTERS];
 
 extern struct commSpy_s commSpy1;
 
+#if (defined BOARD_TYPE_FLEXSEA_MANAGE || defined BOARD_TYPE_FLEXSEA_EXECUTE)
 extern MsgQueue unpacked_packet_queue;
+#endif
 
 //Overload buffer & function names (for user convenience):
 
