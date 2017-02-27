@@ -55,7 +55,7 @@ extern "C" {
 
 uint8_t payload_str[PAYLOAD_BUF_LEN];
 #if (defined BOARD_TYPE_FLEXSEA_MANAGE || defined BOARD_TYPE_FLEXSEA_EXECUTE)
-extern MsgQueue slave_queue;
+MsgQueue slave_queue;
 #endif
 
 #if (defined BOARD_TYPE_FLEXSEA_MANAGE || defined BOARD_TYPE_FLEXSEA_EXECUTE)

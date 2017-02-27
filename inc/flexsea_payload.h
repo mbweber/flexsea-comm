@@ -49,6 +49,7 @@ extern "C" {
 //****************************************************************************
 
 extern uint8_t payload_str[PAYLOAD_BUF_LEN];
+extern MsgQueue slave_queue;
 
 //****************************************************************************
 // Public Function Prototype(s):
