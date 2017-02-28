@@ -49,10 +49,7 @@ extern "C" {
 //****************************************************************************
 
 extern uint8_t payload_str[PAYLOAD_BUF_LEN];
-
-#if (defined BOARD_TYPE_FLEXSEA_MANAGE || defined BOARD_TYPE_FLEXSEA_EXECUTE)
 extern MsgQueue slave_queue;
-#endif
 
 //****************************************************************************
 // Public Function Prototype(s):
