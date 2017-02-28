@@ -40,9 +40,7 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if (defined BOARD_TYPE_FLEXSEA_MANAGE || defined BOARD_TYPE_FLEXSEA_EXECUTE)
 #include <fm_block_allocator.h>
-#endif
 #include "../inc/flexsea.h"
 #include "../../flexsea-comm/inc/flexsea_comm.h"
 #include "../../flexsea-system/inc/flexsea_system.h"
@@ -54,15 +52,7 @@ extern "C" {
 //****************************************************************************
 
 uint8_t payload_str[PAYLOAD_BUF_LEN];
-#if (defined BOARD_TYPE_FLEXSEA_MANAGE || defined BOARD_TYPE_FLEXSEA_EXECUTE)
 MsgQueue slave_queue;
-#endif
-
-#if (defined BOARD_TYPE_FLEXSEA_MANAGE || defined BOARD_TYPE_FLEXSEA_EXECUTE)
-#define FM_FREE_BLOCK(p) fm_pool_free_block((p))
-#else
-#define FM_FREE_BLOCK(p) free((p))
-#endif
 
 //****************************************************************************
 // Private Function Prototype(s):
@@ -101,12 +91,12 @@ uint8_t payload_parse_str(PacketWrapper* p)
 		if((cmd_7bits <= MAX_CMD_CODE) && (pType <= RX_PTYPE_MAX_INDEX))
 		{
 			(*flexsea_payload_ptr[cmd_7bits][pType]) (cp_str, info);
-			FM_FREE_BLOCK(p);
+			fm_pool_free_block(p);
 			return PARSE_SUCCESSFUL;
 		}
 		else
 		{
-			FM_FREE_BLOCK(p);
+			fm_pool_free_block(p);
 			return PARSE_DEFAULT;
 		}
 	}
@@ -137,11 +127,11 @@ uint8_t payload_parse_str(PacketWrapper* p)
 	}
 	else
 	{
-		FM_FREE_BLOCK(p);
+		fm_pool_free_block(p);
 		p = NULL;
 		return PARSE_ID_NO_MATCH;
 	}
-	FM_FREE_BLOCK(p);
+	fm_pool_free_block(p);
 	p = NULL;
 	//Shouldn't get here...
 	return PARSE_DEFAULT;

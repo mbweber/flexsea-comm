@@ -105,10 +105,8 @@ struct comm_s masterComm[COMM_MASTERS];
 
 struct commSpy_s commSpy1 = {0,0,0,0,0,0,0};
 
-#if (defined BOARD_TYPE_FLEXSEA_MANAGE || defined BOARD_TYPE_FLEXSEA_EXECUTE)
 MsgQueue unpacked_packet_queue;
 MsgQueue usb_reply_queue;
-#endif
 
 //****************************************************************************
 // Private Function Prototype(s):
