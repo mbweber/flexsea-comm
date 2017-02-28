@@ -105,8 +105,8 @@ struct comm_s masterComm[COMM_MASTERS];
 
 struct commSpy_s commSpy1 = {0,0,0,0,0,0,0};
 
-MsgQueue unpacked_packet_queue;
-MsgQueue usb_reply_queue;
+//MsgQueue unpacked_packet_queue;
+//MsgQueue usb_reply_queue;
 
 //****************************************************************************
 // Private Function Prototype(s):

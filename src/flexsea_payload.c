@@ -40,7 +40,7 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <fm_block_allocator.h>
+//#include <fm_block_allocator.h>
 #include "../inc/flexsea.h"
 #include "../../flexsea-comm/inc/flexsea_comm.h"
 #include "../../flexsea-system/inc/flexsea_system.h"
@@ -91,12 +91,12 @@ uint8_t payload_parse_str(PacketWrapper* p)
 		if((cmd_7bits <= MAX_CMD_CODE) && (pType <= RX_PTYPE_MAX_INDEX))
 		{
 			(*flexsea_payload_ptr[cmd_7bits][pType]) (cp_str, info);
-			fm_pool_free_block(p);
+			//fm_pool_free_block(p);
 			return PARSE_SUCCESSFUL;
 		}
 		else
 		{
-			fm_pool_free_block(p);
+			//fm_pool_free_block(p);
 			return PARSE_DEFAULT;
 		}
 	}
@@ -121,18 +121,19 @@ uint8_t payload_parse_str(PacketWrapper* p)
 		#ifdef BOARD_TYPE_FLEXSEA_MANAGE
 
 		//Manage is the only board that can receive a package destined to his master
+		p->port = PORT_USB;	//ToDo fix, ugly hack!
 		flexsea_send_serial_master(p);
 
 		#endif	//BOARD_TYPE_FLEXSEA_MANAGE
 	}
 	else
 	{
-		fm_pool_free_block(p);
-		p = NULL;
+		//fm_pool_free_block(p);
+		//p = NULL;
 		return PARSE_ID_NO_MATCH;
 	}
-	fm_pool_free_block(p);
-	p = NULL;
+	//fm_pool_free_block(p);
+	//p = NULL;
 	//Shouldn't get here...
 	return PARSE_DEFAULT;
 }
@@ -184,11 +185,53 @@ uint8_t packetType(uint8_t *buf)
 // Private Function(s):
 //****************************************************************************
 
-//ToDo not the greatest function...
 static void route_to_slave(PacketWrapper * p)
 {
+	/*
 	#ifdef BOARD_TYPE_FLEXSEA_MANAGE
 	fm_queue_put(&slave_queue, p);
+	#endif 	//BOARD_TYPE_FLEXSEA_MANAGE
+	*/
+
+	#ifdef BOARD_TYPE_FLEXSEA_MANAGE
+
+		uint8_t port = p->port;
+		uint8_t *buf = p->unpaked;
+		uint32_t len = PAYLOAD_BUF_LEN;	//??
+
+		uint32_t numb = 0;
+		uint8_t *comm_str_ptr = slaveComm[0].tx.txBuf;
+
+		//Repackages the payload. ToDo: would be more efficient to just resend the comm_str,
+		//but it's not passed to this function
+		numb = comm_gen_str(buf, comm_str_tmp, len);
+		numb = COMM_STR_BUF_LEN;    //Fixed length for now
+
+		//Port specific flags and buffer:
+		if(port == PORT_RS485_1)
+		{
+			comm_str_ptr = slaveComm[0].tx.txBuf;
+			slaveComm[0].tx.cmd = buf[P_CMD1];
+			slaveComm[0].tx.inject = 1;
+			slaveComm[0].tx.len = numb;
+		}
+		else if(port == PORT_RS485_2)
+		{
+			comm_str_ptr = slaveComm[1].tx.txBuf;
+			slaveComm[1].tx.cmd = buf[P_CMD1];
+			slaveComm[1].tx.inject = 1;
+			slaveComm[1].tx.len = numb;
+		}
+
+		//Copy string:
+		memcpy(comm_str_ptr, comm_str_tmp, numb);
+
+	#else
+
+		(void)port;
+		(void)buf;
+		(void) len;
+
 	#endif 	//BOARD_TYPE_FLEXSEA_MANAGE
 }
 
