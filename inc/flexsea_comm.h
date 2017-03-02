@@ -86,7 +86,7 @@ void generateRandomUint8Array(uint8_t *arr, uint8_t size);
 #define UNPACK_ERR_LEN			-3
 #define UNPACK_ERR_CHECKSUM		-4
 
-//Generic transceiver state:
+//Generic transceiver state:	//ToDo being replaced by TransceiverSate
 #define TRANS_STATE_UNKNOWN		0
 #define TRANS_STATE_TX			1
 #define TRANS_STATE_TX_THEN_RX	2
@@ -109,6 +109,7 @@ void generateRandomUint8Array(uint8_t *arr, uint8_t size);
 // Structure(s):
 //****************************************************************************
 
+//Communication test tools:
 struct commSpy_s
 {
 	uint8_t counter;
@@ -156,7 +157,6 @@ struct comm_s
 	struct comm_tx_s tx;
 };
 
-
 //****************************************************************************
 // Shared variable(s)
 //****************************************************************************
@@ -188,12 +188,19 @@ extern uint8_t comm_str_5[COMM_STR_BUF_LEN];
 extern uint8_t rx_command_5[PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_5
 
+//ToDo: being replaced...
 extern struct comm_s slaveComm[COMM_SLAVE_BUS];
 extern struct comm_s masterComm[COMM_MASTERS];
+//... by this:
+CommPeriph slaveCommPeriph[COMM_SLAVE_BUS];
+CommPeriph masterCommPeriph[COMM_MASTERS];
 
 extern struct commSpy_s commSpy1;
 
 extern MsgQueue unpacked_packet_queue;
+
+void fillPacketFromCommPeriph(CommPeriph *cp, PacketWrapper *pw);
+void copyPacket(PacketWrapper *from, PacketWrapper *to, TravelDirection td);
 
 //Overload buffer & function names (for user convenience):
 

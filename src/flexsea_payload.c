@@ -71,7 +71,8 @@ uint8_t payload_parse_str(PacketWrapper* p)
 {
 
 	uint8_t *cp_str = p->unpaked;
-	uint8_t *info   = &p->port;
+	//uint8_t *info   = &p->port;
+	uint8_t *info = &p->sourcePort;
 	uint8_t cmd = 0, cmd_7bits = 0;
 	unsigned int id = 0;
 	uint8_t pType = RX_PTYPE_INVALID;
@@ -84,6 +85,7 @@ uint8_t payload_parse_str(PacketWrapper* p)
 	id = get_rid(cp_str);
 	if(id == ID_MATCH)
 	{
+		p->destinationPort = PORT_NONE;	//We are home
 		pType = packetType(cp_str);
 
 		//It's addressed to me. Function pointer array will call
@@ -103,15 +105,19 @@ uint8_t payload_parse_str(PacketWrapper* p)
 	else if(id == ID_SUB1_MATCH)
 	{
 		//For a slave on bus #1:
-		p->reply_port = p->port;
-		p->port = PORT_RS485_1;
+		p->destinationPort = PORT_RS485_1;
+
+		//p->reply_port = p->port;
+		//p->port = PORT_RS485_1;
 		route_to_slave(p);
 	}
 	else if(id == ID_SUB2_MATCH)
 	{
 		//For a slave on bus #2:
-		p->reply_port = p->port;
-		p->port = PORT_RS485_2;
+		p->destinationPort = PORT_RS485_2;
+
+		//p->reply_port = p->port;
+		//p->port = PORT_RS485_2;
 		route_to_slave(p);
 	}
 	else if(id == ID_UP_MATCH)
@@ -187,44 +193,13 @@ uint8_t packetType(uint8_t *buf)
 
 static void route_to_slave(PacketWrapper * p)
 {
-	/*
-	#ifdef BOARD_TYPE_FLEXSEA_MANAGE
-	fm_queue_put(&slave_queue, p);
-	#endif 	//BOARD_TYPE_FLEXSEA_MANAGE
-	*/
-
 	#ifdef BOARD_TYPE_FLEXSEA_MANAGE
 
-		uint8_t port = p->port;
-		uint8_t *buf = p->unpaked;
-		uint32_t len = PAYLOAD_BUF_LEN;	//??
+		uint8_t idx = p->destinationPort;
 
-		uint32_t numb = 0;
-		uint8_t *comm_str_ptr = slaveComm[0].tx.txBuf;
-
-		//Repackages the payload. ToDo: would be more efficient to just resend the comm_str,
-		//but it's not passed to this function
-		numb = comm_gen_str(buf, comm_str_tmp, len);
-		numb = COMM_STR_BUF_LEN;    //Fixed length for now
-
-		//Port specific flags and buffer:
-		if(port == PORT_RS485_1)
-		{
-			comm_str_ptr = slaveComm[0].tx.txBuf;
-			slaveComm[0].tx.cmd = buf[P_CMD1];
-			slaveComm[0].tx.inject = 1;
-			slaveComm[0].tx.len = numb;
-		}
-		else if(port == PORT_RS485_2)
-		{
-			comm_str_ptr = slaveComm[1].tx.txBuf;
-			slaveComm[1].tx.cmd = buf[P_CMD1];
-			slaveComm[1].tx.inject = 1;
-			slaveComm[1].tx.len = numb;
-		}
-
-		//Copy string:
-		memcpy(comm_str_ptr, comm_str_tmp, numb);
+		copyPacket(p, &slaveOutbound[idx], DOWNSTREAM);
+		slaveOutbound[0].cmd = slaveOutbound[idx].unpaked[P_CMD1];
+		slaveCommPeriph[idx].tx.packetReady = 1;
 
 	#else
 

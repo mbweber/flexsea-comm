@@ -61,6 +61,7 @@ uint32_t REBUILD_UINT32(uint8_t *buf, uint16_t *index);
 #define PACKAGED_PAYLOAD_LEN			48		//Temporary
 #define PAYLOAD_BUFFERS					4		//Max # of payload strings we expect to find
 #define MAX_CMD_CODE					127
+#define PACKET_WRAPPER_LEN				RX_BUF_LEN
 
 //Packet types:
 #define RX_PTYPE_READ					0
@@ -76,6 +77,7 @@ uint32_t REBUILD_UINT32(uint8_t *buf, uint16_t *index);
 #define ID_UP_MATCH						4		//Addressed to my master
 #define ID_NO_MATCH						0
 
+//Communication port/interface:
 typedef enum {
 	PORT_RS485_1 = 0,
 	PORT_SUB1  = PORT_RS485_1,
@@ -83,8 +85,9 @@ typedef enum {
 	PORT_SUB2 = PORT_RS485_2,
 	PORT_SPI,
 	PORT_USB,
-	PORT_WIRELESS
-} Port;
+	PORT_WIRELESS,
+	PORT_NONE
+}Port;
 
 //Communication protocol payload fields:
 #define P_XID							0		//Emitter ID
@@ -159,6 +162,59 @@ extern void (*flexsea_payload_ptr[MAX_CMD_CODE][RX_PTYPE_MAX_INDEX+1]) \
 	#define _USE_PRINTF(...) do {} while (0)
 #endif	//USE__PRINTF
 
+#define COMM_PERIPH_ARR_LEN		RX_BUF_LEN
+
+typedef enum {
+	TS_UNKNOWN = 0,
+	TS_TRANSMIT,
+	TS_TRANSMIT_THEN_RECEIVE,
+	TS_PREP_TO_RECEIVE,
+	TS_RECEIVE
+}TransceiverSate;
+
+typedef enum {
+	UNKNOWN_TRAVEL_DIR = 0,
+	DOWNSTREAM,
+	UPSTREAM
+}TravelDirection;
+
+typedef enum {
+	MASTER = 0,
+	SLAVE
+}PortType;
+
+//New approach - 03/2017. This will replace comm_s.
+//================================================
+
+typedef struct
+{
+	//State:
+	uint8_t bytesReadyFlag;
+	uint8_t unpackedPacketsAvailable;
+	uint8_t packetReady;
+
+	//Data:
+	uint8_t *unpackedPtr;
+	uint8_t *packedPtr;
+	uint8_t unpacked[COMM_PERIPH_ARR_LEN];
+	uint8_t packed[COMM_PERIPH_ARR_LEN];
+
+	//Note: using both pointers and arrays to ease the refactoring
+}CommPeriphSub;
+
+typedef struct
+{
+	//Peripheral state and info:
+	Port port;
+	PortType portType;
+	TransceiverSate transState;
+
+	//Specific for RX or TX:
+	CommPeriphSub rx;
+	CommPeriphSub tx;
+}CommPeriph;
+
+
 /**
  *
  * Struct to store a packet, in both packed and unpacked
@@ -171,24 +227,24 @@ typedef struct
 
 	Port port;
 	Port reply_port;
+
+	Port sourcePort;
+	Port destinationPort;
+	TravelDirection travelDir;
+
+	uint8_t cmd;
+	uint8_t numb;
 	/**
 	 * Raw bytes as received on the wire
 	 */
-	uint8_t packed[100];
+	uint8_t packed[PACKET_WRAPPER_LEN];
 
 	/**
 	 * Unpacked packet ready to be parsed.
 	 */
-	uint8_t unpaked[100];
+	uint8_t unpaked[PACKET_WRAPPER_LEN];	//ToDo fix typo
 } PacketWrapper;
 
-
-//****************************************************************************
-// Include(s) - at the end to make sure that the included files can access
-// all the project wide #define.
-//****************************************************************************
-
-//All the FlexSEA stack includes:
 
 
 #ifdef __cplusplus

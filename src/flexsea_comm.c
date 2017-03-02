@@ -100,8 +100,12 @@ uint8_t rx_command_5[PACKAGED_PAYLOAD_LEN];
 uint32_t cmd_valid = 0;
 uint32_t cmd_bad_checksum = 0;
 
+//ToDo: being replaced...
 struct comm_s slaveComm[COMM_SLAVE_BUS];
 struct comm_s masterComm[COMM_MASTERS];
+//... by this:
+CommPeriph slaveCommPeriph[COMM_SLAVE_BUS];
+CommPeriph masterCommPeriph[COMM_MASTERS];
 
 struct commSpy_s commSpy1 = {0,0,0,0,0,0,0};
 
@@ -367,6 +371,35 @@ int8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN])
 
 	//Default
 	return 0;
+}
+
+//From CommPeriph to PacketWrapper:
+void fillPacketFromCommPeriph(CommPeriph *cp, PacketWrapper *pw)
+{
+	pw->sourcePort = cp->port;
+	if(cp->portType == MASTER)
+	{
+		pw->travelDir = DOWNSTREAM;
+	}
+	else
+	{
+		pw->travelDir = UPSTREAM;
+	}
+
+	//Copy data. As the source is the peripheral, we always use rx.
+	uint16_t len = COMM_STR_BUF_LEN;	//ToDo something smarter!
+	memcpy(pw->packed, cp->rx.packed, len);
+}
+
+//Functions that can copy packets between PacketWrapper objects:
+
+void copyPacket(PacketWrapper *from, PacketWrapper *to, TravelDirection td)
+{
+	to->sourcePort = from->sourcePort;
+	to->destinationPort = from->destinationPort;
+	to->travelDir = from->travelDir;
+	memcpy(to->packed, from->packed, PACKET_WRAPPER_LEN);
+	memcpy(to->unpaked, from->unpaked, PACKET_WRAPPER_LEN);
 }
 
 #ifdef __cplusplus
