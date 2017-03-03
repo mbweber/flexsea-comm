@@ -234,9 +234,8 @@ static void route(PacketWrapper * p, PortType to)
 
 	#else
 
-		(void)port;
-		(void)buf;
-		(void) len;
+		(void)p;
+		(void)to;
 
 	#endif 	//BOARD_TYPE_FLEXSEA_MANAGE
 }

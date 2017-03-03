@@ -43,7 +43,6 @@ extern "C" {
 #include "flexsea_buffers.h"
 #include "flexsea_system.h"
 #include <flexsea_board.h>
-#include  <fm_block_allocator.h>
 
 //****************************************************************************
 // Public Function Prototype(s):
@@ -196,8 +195,6 @@ CommPeriph slaveCommPeriph[COMM_SLAVE_BUS];
 CommPeriph masterCommPeriph[COMM_MASTERS];
 
 extern struct commSpy_s commSpy1;
-
-extern MsgQueue unpacked_packet_queue;
 
 void fillPacketFromCommPeriph(CommPeriph *cp, PacketWrapper *pw);
 void copyPacket(PacketWrapper *from, PacketWrapper *to, TravelDirection td);
