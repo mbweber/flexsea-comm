@@ -79,13 +79,16 @@ uint32_t REBUILD_UINT32(uint8_t *buf, uint16_t *index);
 
 //Communication port/interface:
 typedef enum {
+	//Slave:
 	PORT_RS485_1 = 0,
 	PORT_SUB1  = PORT_RS485_1,
 	PORT_RS485_2,
 	PORT_SUB2 = PORT_RS485_2,
-	PORT_SPI,
+	//Master:
 	PORT_USB,
+	PORT_SPI,
 	PORT_WIRELESS,
+	//None
 	PORT_NONE
 }Port;
 
