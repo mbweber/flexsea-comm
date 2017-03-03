@@ -74,26 +74,31 @@ uint8_t comm_str_tmp[COMM_STR_BUF_LEN];
 
 #ifdef ENABLE_FLEXSEA_BUF_1
 uint8_t comm_str_1[COMM_STR_BUF_LEN];
+uint8_t packed_1[COMM_STR_BUF_LEN];
 uint8_t rx_command_1[PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_1
 
 #ifdef ENABLE_FLEXSEA_BUF_2
 uint8_t comm_str_2[COMM_STR_BUF_LEN];
+uint8_t packed_2[COMM_STR_BUF_LEN];
 uint8_t rx_command_2[PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_2
 
 #ifdef ENABLE_FLEXSEA_BUF_3
 uint8_t comm_str_3[COMM_STR_BUF_LEN];
+uint8_t packed_3[COMM_STR_BUF_LEN];
 uint8_t rx_command_3[PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_3
 
 #ifdef ENABLE_FLEXSEA_BUF_4
 uint8_t comm_str_4[COMM_STR_BUF_LEN];
+uint8_t packed_4[COMM_STR_BUF_LEN];
 uint8_t rx_command_4[PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_4
 
 #ifdef ENABLE_FLEXSEA_BUF_5
 uint8_t comm_str_5[COMM_STR_BUF_LEN];
+uint8_t packed_5[COMM_STR_BUF_LEN];
 uint8_t rx_command_5[PACKAGED_PAYLOAD_LEN];
 #endif	//ENABLE_FLEXSEA_BUF_5
 
@@ -190,42 +195,42 @@ uint8_t comm_gen_str(uint8_t payload[], uint8_t *cstr, uint8_t bytes)
 #ifdef ENABLE_FLEXSEA_BUF_1
 int8_t unpack_payload_1(void)
 {
-	return unpack_payload(rx_buf_1, rx_command_1);
+	return unpack_payload(rx_buf_1, packed_1, rx_command_1);
 }
 #endif	//ENABLE_FLEXSEA_BUF_1
 
 #ifdef ENABLE_FLEXSEA_BUF_2
 int8_t unpack_payload_2(void)
 {
-	return unpack_payload(rx_buf_2, rx_command_2);
+	return unpack_payload(rx_buf_2, packed_2, rx_command_2);
 }
 #endif	//ENABLE_FLEXSEA_BUF_2
 
 #ifdef ENABLE_FLEXSEA_BUF_3
 int8_t unpack_payload_3(void)
 {
-	return unpack_payload(rx_buf_3, rx_command_3);
+	return unpack_payload(rx_buf_3, packed_3, rx_command_3);
 }
 #endif	//ENABLE_FLEXSEA_BUF_3
 
 #ifdef ENABLE_FLEXSEA_BUF_4
 int8_t unpack_payload_4(void)
 {
-	return unpack_payload(rx_buf_4, rx_command_4);
+	return unpack_payload(rx_buf_4, packed_4, rx_command_4);
 }
 #endif	//ENABLE_FLEXSEA_BUF_4
 
 #ifdef ENABLE_FLEXSEA_BUF_5
 int8_t unpack_payload_5(void)
 {
-	return unpack_payload(rx_buf_5, rx_command_5);
+	return unpack_payload(rx_buf_5, packed_5, rx_command_5);
 }
 #endif	//ENABLE_FLEXSEA_BUF_5
 
 //Special wrapper for unit test code:
-int8_t unpack_payload_test(uint8_t *buf, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN])
+int8_t unpack_payload_test(uint8_t *buf, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN])
 {
-	return unpack_payload(buf, rx_cmd);
+	return unpack_payload(buf, packed, rx_cmd);
 }
 
 void initRandomGenerator(int seed)
@@ -252,7 +257,7 @@ void generateRandomUint8Array(uint8_t *arr, uint8_t size)
 //Take a buffer as an argument, returns the number of decoded payload packets
 //ToDo: The error codes are not always right, but if it's < 0 you know it didn't
 //find a valid string
-int8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN])
+int8_t unpack_payload(uint8_t *buf, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN])
 {
 	uint32_t i = 0, j = 0, k = 0, idx = 0, h = 0;
 	uint32_t bytes = 0, possible_footer = 0, possible_footer_pos = 0;
@@ -317,11 +322,13 @@ int8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN])
 						//At this point we have extracted a valid string
 						payload_strings++;
 						cmd_valid++;
-						return 1;
 
-						//Remove the string to avoid double detection
+						//Remove the string to avoid double detection, and
+						//save a copy of it
+						int cnt = 0;
 						for(h = i; h <= possible_footer_pos; h++)
 						{
+							packed[cnt++] = buf[h];
 							buf[h] = 0;
 						}
 
@@ -388,7 +395,8 @@ void fillPacketFromCommPeriph(CommPeriph *cp, PacketWrapper *pw)
 
 	//Copy data. As the source is the peripheral, we always use rx.
 	uint16_t len = COMM_STR_BUF_LEN;	//ToDo something smarter!
-	memcpy(pw->packed, cp->rx.packed, len);
+	memcpy(pw->packed, cp->rx.packedPtr, len);
+	memcpy(pw->unpaked, cp->rx.unpackedPtr, len);
 }
 
 //Functions that can copy packets between PacketWrapper objects:

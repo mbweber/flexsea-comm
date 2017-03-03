@@ -186,6 +186,29 @@ typedef enum {
 //New approach - 03/2017. This will replace comm_s.
 //================================================
 
+//Struct to store a packet, in both packed and unpacked
+typedef struct
+{
+	Port port;
+	Port reply_port;
+
+	Port sourcePort;
+	Port destinationPort;
+	TravelDirection travelDir;
+
+	uint8_t cmd;
+	uint8_t numb;
+
+	// bytes as received on the wire
+	uint8_t packed[PACKET_WRAPPER_LEN];
+
+	//Unpacked packet ready to be parsed.
+	uint8_t unpaked[PACKET_WRAPPER_LEN];	//ToDo fix typo
+
+	//Hold info about parent (if applicable):
+	void *parent;
+} PacketWrapper;
+
 typedef struct
 {
 	//State:
@@ -194,13 +217,16 @@ typedef struct
 	uint8_t packetReady;
 
 	//Data:
-	uint8_t *unpackedPtr;
-	uint8_t *packedPtr;
+	uint8_t *inputBufferPtr;	//Points to rx_buf_
+	uint8_t *unpackedPtr;		//Points to comm_str_
+	uint8_t *packedPtr;			//Points to rx_cmd_
 	uint8_t unpacked[COMM_PERIPH_ARR_LEN];
 	uint8_t packed[COMM_PERIPH_ARR_LEN];
 
 	//Note: using both pointers and arrays to ease the refactoring
 }CommPeriphSub;
+
+//Forward declaration:
 
 typedef struct
 {
@@ -212,40 +238,11 @@ typedef struct
 	//Specific for RX or TX:
 	CommPeriphSub rx;
 	CommPeriphSub tx;
+
+	//Attach PacketWrappers:
+	PacketWrapper *in;
+	PacketWrapper *out;
 }CommPeriph;
-
-
-/**
- *
- * Struct to store a packet, in both packed and unpacked
- */
-typedef struct
-{
-	/**
-	 * Source port of the packet
-	 */
-
-	Port port;
-	Port reply_port;
-
-	Port sourcePort;
-	Port destinationPort;
-	TravelDirection travelDir;
-
-	uint8_t cmd;
-	uint8_t numb;
-	/**
-	 * Raw bytes as received on the wire
-	 */
-	uint8_t packed[PACKET_WRAPPER_LEN];
-
-	/**
-	 * Unpacked packet ready to be parsed.
-	 */
-	uint8_t unpaked[PACKET_WRAPPER_LEN];	//ToDo fix typo
-} PacketWrapper;
-
-
 
 #ifdef __cplusplus
 }

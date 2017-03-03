@@ -50,7 +50,7 @@ extern "C" {
 //****************************************************************************
 
 uint8_t comm_gen_str(uint8_t payload[], uint8_t *cstr, uint8_t bytes);
-int8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN]);
+int8_t unpack_payload(uint8_t *buf, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN]);
 
 #ifdef ENABLE_FLEXSEA_BUF_1
 int8_t unpack_payload_1(void);
@@ -64,7 +64,7 @@ int8_t unpack_payload_3(void);
 #ifdef ENABLE_FLEXSEA_BUF_4
 int8_t unpack_payload_4(void);
 #endif	//ENABLE_FLEXSEA_BUF_4
-int8_t unpack_payload_test(uint8_t *buf, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN]);
+int8_t unpack_payload_test(uint8_t *buf, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN]);
 
 //Random numbers and arrays:
 void initRandomGenerator(int seed);

@@ -59,7 +59,7 @@ MsgQueue slave_queue;
 //****************************************************************************
 
 static uint8_t get_rid(uint8_t *pldata);
-static void route_to_slave(PacketWrapper* p);
+static void route(PacketWrapper * p, PortType to);
 
 //****************************************************************************
 // Public Function(s):
@@ -93,12 +93,10 @@ uint8_t payload_parse_str(PacketWrapper* p)
 		if((cmd_7bits <= MAX_CMD_CODE) && (pType <= RX_PTYPE_MAX_INDEX))
 		{
 			(*flexsea_payload_ptr[cmd_7bits][pType]) (cp_str, info);
-			//fm_pool_free_block(p);
 			return PARSE_SUCCESSFUL;
 		}
 		else
 		{
-			//fm_pool_free_block(p);
 			return PARSE_DEFAULT;
 		}
 	}
@@ -106,19 +104,13 @@ uint8_t payload_parse_str(PacketWrapper* p)
 	{
 		//For a slave on bus #1:
 		p->destinationPort = PORT_RS485_1;
-
-		//p->reply_port = p->port;
-		//p->port = PORT_RS485_1;
-		route_to_slave(p);
+		route(p, SLAVE);
 	}
 	else if(id == ID_SUB2_MATCH)
 	{
 		//For a slave on bus #2:
 		p->destinationPort = PORT_RS485_2;
-
-		//p->reply_port = p->port;
-		//p->port = PORT_RS485_2;
-		route_to_slave(p);
+		route(p, SLAVE);
 	}
 	else if(id == ID_UP_MATCH)
 	{
@@ -127,19 +119,17 @@ uint8_t payload_parse_str(PacketWrapper* p)
 		#ifdef BOARD_TYPE_FLEXSEA_MANAGE
 
 		//Manage is the only board that can receive a package destined to his master
-		p->port = PORT_USB;	//ToDo fix, ugly hack!
-		flexsea_send_serial_master(p);
+		//p->port = PORT_USB;	//ToDo fix, ugly hack! *****************
+		//flexsea_send_serial_master(p);
+		route(p, MASTER);
 
 		#endif	//BOARD_TYPE_FLEXSEA_MANAGE
 	}
 	else
 	{
-		//fm_pool_free_block(p);
-		//p = NULL;
 		return PARSE_ID_NO_MATCH;
 	}
-	//fm_pool_free_block(p);
-	//p = NULL;
+
 	//Shouldn't get here...
 	return PARSE_DEFAULT;
 }
@@ -191,15 +181,28 @@ uint8_t packetType(uint8_t *buf)
 // Private Function(s):
 //****************************************************************************
 
-static void route_to_slave(PacketWrapper * p)
+static void route(PacketWrapper * p, PortType to)
 {
 	#ifdef BOARD_TYPE_FLEXSEA_MANAGE
 
-		uint8_t idx = p->destinationPort;
+		uint8_t idx = 0;
 
-		copyPacket(p, &slaveOutbound[idx], DOWNSTREAM);
-		slaveOutbound[0].cmd = slaveOutbound[idx].unpaked[P_CMD1];
-		slaveCommPeriph[idx].tx.packetReady = 1;
+		if(to == SLAVE)
+		{
+			idx = p->destinationPort;
+			copyPacket(p, &slaveOutbound[idx], DOWNSTREAM);
+			slaveOutbound[idx].cmd = slaveOutbound[idx].unpaked[P_CMD1];
+			slaveCommPeriph[idx].tx.packetReady = 1;
+		}
+		else
+		{
+			idx = 0;	//Hack, forcing USB ToDo fix *************
+			p->destinationPort = PORT_USB;
+			copyPacket(p, &masterOutbound[idx], UPSTREAM);
+			//slaveOutbound[idx].cmd = slaveOutbound[idx].unpaked[P_CMD1];
+			//slaveCommPeriph[idx].tx.packetReady = 1;
+			flexsea_send_serial_master(p);
+		}
 
 	#else
 

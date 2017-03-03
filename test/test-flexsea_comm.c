@@ -12,6 +12,7 @@ uint8_t fakeCommStr[COMM_STR_BUF_LEN];
 uint8_t fakeCommStrArray0[COMM_STR_BUF_LEN];
 uint8_t fakeCommStrArray1[COMM_STR_BUF_LEN];
 uint8_t fakeCommStrArray2[COMM_STR_BUF_LEN];
+uint8_t packed[COMM_STR_BUF_LEN];
 uint8_t rx_cmd_test[PACKAGED_PAYLOAD_LEN];
 uint8_t retVal = 0;
 int8_t retVal2 = 0;
@@ -169,7 +170,7 @@ void test_unpack_payload_1(void)
 	//Second, we parse it:
 	//====================
 
-	retVal2 = unpack_payload_test(fakeCommStr, rx_cmd_test);
+	retVal2 = unpack_payload_test(fakeCommStr, packed, rx_cmd_test);
 
 	//Tests:
 	//======
@@ -207,13 +208,13 @@ void test_unpack_payload_2(void)
 	//Tests:
 	//======
 
-	retVal2 = unpack_payload_test(fakeCommStrArray0, rx_cmd_test);
+	retVal2 = unpack_payload_test(fakeCommStrArray0, packed, rx_cmd_test);
 	TEST_ASSERT_EQUAL_INT8_MESSAGE(1, retVal2, "Unpack payload: payloads found?");
 
-	retVal2 = unpack_payload_test(fakeCommStrArray1, rx_cmd_test);
+	retVal2 = unpack_payload_test(fakeCommStrArray1, packed, rx_cmd_test);
 	TEST_ASSERT_EQUAL_INT8_MESSAGE(UNPACK_ERR_HEADER, retVal2, "Missing header");
 
-	retVal2 = unpack_payload_test(fakeCommStrArray2, rx_cmd_test);
+	retVal2 = unpack_payload_test(fakeCommStrArray2, packed, rx_cmd_test);
 	TEST_ASSERT_EQUAL_INT8_MESSAGE(UNPACK_ERR_LEN, retVal2, "Wrong length / too long");
 }
 
