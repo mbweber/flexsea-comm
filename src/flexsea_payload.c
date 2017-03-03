@@ -177,6 +177,34 @@ uint8_t packetType(uint8_t *buf)
 	return RX_PTYPE_INVALID;
 }
 
+//Do you have bytes ready? Can they be unpacked? Let's give it a shot.
+uint8_t tryUnpacking(CommPeriph *cp, PacketWrapper *pw)
+{
+	uint8_t retVal = 0;
+
+	if(cp->rx.bytesReadyFlag > 0)
+	{
+		//Try unpacking. This is the only way to know if we have a packet and
+		//not just random bytes, or an incomplete packet.
+		cp->rx.unpackedPacketsAvailable = unpack_payload( \
+				cp->rx.inputBufferPtr, \
+				cp->rx.packedPtr, \
+				cp->rx.unpackedPtr);
+
+		if(cp->rx.unpackedPacketsAvailable > 0)
+		{
+			//Transition from CommInterface to PacketWrapper:
+			fillPacketFromCommPeriph(cp, pw);
+			retVal = 1;
+		}
+
+		//Drop flag
+		cp->rx.bytesReadyFlag = 0;
+	}
+
+	return retVal;
+}
+
 //****************************************************************************
 // Private Function(s):
 //****************************************************************************
