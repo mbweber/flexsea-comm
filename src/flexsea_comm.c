@@ -112,10 +112,9 @@ struct comm_s masterComm[COMM_MASTERS];
 CommPeriph slaveCommPeriph[COMM_SLAVE_BUS];
 CommPeriph masterCommPeriph[COMM_MASTERS];
 
-struct commSpy_s commSpy1 = {0,0,0,0,0,0,0};
+PacketWrapper packet[NUMBER_OF_PORTS][2];
 
-//MsgQueue unpacked_packet_queue;
-//MsgQueue usb_reply_queue;
+struct commSpy_s commSpy1 = {0,0,0,0,0,0,0};
 
 //****************************************************************************
 // Private Function Prototype(s):

@@ -194,6 +194,8 @@ extern struct comm_s masterComm[COMM_MASTERS];
 CommPeriph slaveCommPeriph[COMM_SLAVE_BUS];
 CommPeriph masterCommPeriph[COMM_MASTERS];
 
+extern PacketWrapper packet[NUMBER_OF_PORTS][2];
+
 extern struct commSpy_s commSpy1;
 
 void fillPacketFromCommPeriph(CommPeriph *cp, PacketWrapper *pw);

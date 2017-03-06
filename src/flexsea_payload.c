@@ -217,16 +217,16 @@ static void route(PacketWrapper * p, PortType to)
 		if(to == SLAVE)
 		{
 			idx = p->destinationPort;
-			copyPacket(p, &slaveOutbound[idx], DOWNSTREAM);
-			slaveOutbound[idx].cmd = slaveOutbound[idx].unpaked[P_CMD1];
+			copyPacket(p, &packet[idx][OUTBOUND], DOWNSTREAM);
+			packet[idx][OUTBOUND].cmd = packet[idx][OUTBOUND].unpaked[P_CMD1];
 			slaveCommPeriph[idx].tx.packetReady = 1;
 		}
 		else
 		{
 			idx = 0;	//Hack, forcing USB ToDo fix *************
 			p->destinationPort = PORT_USB;
-			copyPacket(p, &masterOutbound[idx], UPSTREAM);
-			//slaveOutbound[idx].cmd = slaveOutbound[idx].unpaked[P_CMD1];
+			copyPacket(p, &packet[idx][OUTBOUND], UPSTREAM);
+			//packet[idx][OUTBOUND].cmd = packet[idx][OUTBOUND].unpaked[P_CMD1];
 			//slaveCommPeriph[idx].tx.packetReady = 1;
 			flexsea_send_serial_master(p);
 		}

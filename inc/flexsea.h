@@ -82,15 +82,16 @@ typedef enum {
 	//Slave:
 	PORT_RS485_1 = 0,
 	PORT_SUB1  = PORT_RS485_1,
-	PORT_RS485_2,
+	PORT_RS485_2 = 1,
 	PORT_SUB2 = PORT_RS485_2,
 	//Master:
-	PORT_USB,
-	PORT_SPI,
-	PORT_WIRELESS,
+	PORT_USB = 2,
+	PORT_SPI = 3,
+	PORT_WIRELESS = 4,
 	//None
-	PORT_NONE
+	PORT_NONE	//PORT_NONE always has to be the last item
 }Port;
+#define NUMBER_OF_PORTS		5	//Has to match enum!
 
 //Communication protocol payload fields:
 #define P_XID							0		//Emitter ID
@@ -185,6 +186,11 @@ typedef enum {
 	MASTER = 0,
 	SLAVE
 }PortType;
+
+typedef enum {
+	INBOUND = 0,
+	OUTBOUND = 1
+}Dir;
 
 //New approach - 03/2017. This will replace comm_s.
 //================================================
