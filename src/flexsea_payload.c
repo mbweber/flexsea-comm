@@ -212,18 +212,18 @@ static void route(PacketWrapper * p, PortType to)
 {
 	#ifdef BOARD_TYPE_FLEXSEA_MANAGE
 
-		uint8_t idx = 0;
+		Port idx = PORT_NONE;
 
 		if(to == SLAVE)
 		{
 			idx = p->destinationPort;
 			copyPacket(p, &packet[idx][OUTBOUND], DOWNSTREAM);
 			packet[idx][OUTBOUND].cmd = packet[idx][OUTBOUND].unpaked[P_CMD1];
-			slaveCommPeriph[idx].tx.packetReady = 1;
+			commPeriph[idx].tx.packetReady = 1;
 		}
 		else
 		{
-			idx = 0;	//Hack, forcing USB ToDo fix *************
+			idx = PORT_USB;	//Hack, forcing USB ToDo fix *************
 			p->destinationPort = PORT_USB;
 			copyPacket(p, &packet[idx][OUTBOUND], UPSTREAM);
 			//packet[idx][OUTBOUND].cmd = packet[idx][OUTBOUND].unpaked[P_CMD1];

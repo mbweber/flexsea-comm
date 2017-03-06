@@ -106,13 +106,11 @@ uint32_t cmd_valid = 0;
 uint32_t cmd_bad_checksum = 0;
 
 //ToDo: being replaced...
-struct comm_s slaveComm[COMM_SLAVE_BUS];
-struct comm_s masterComm[COMM_MASTERS];
-//... by this:
-CommPeriph slaveCommPeriph[COMM_SLAVE_BUS];
-CommPeriph masterCommPeriph[COMM_MASTERS];
+struct comm_s slaveComm[COMM_SLAVE_BUS];	//ToDo remove
+struct comm_s masterComm[COMM_MASTERS];		//ToDo remove
 
 PacketWrapper packet[NUMBER_OF_PORTS][2];
+CommPeriph commPeriph[NUMBER_OF_PORTS];
 
 struct commSpy_s commSpy1 = {0,0,0,0,0,0,0};
 

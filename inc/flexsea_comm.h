@@ -190,11 +190,9 @@ extern uint8_t rx_command_5[PACKAGED_PAYLOAD_LEN];
 //ToDo: being replaced...
 extern struct comm_s slaveComm[COMM_SLAVE_BUS];
 extern struct comm_s masterComm[COMM_MASTERS];
-//... by this:
-CommPeriph slaveCommPeriph[COMM_SLAVE_BUS];
-CommPeriph masterCommPeriph[COMM_MASTERS];
 
 extern PacketWrapper packet[NUMBER_OF_PORTS][2];
+extern CommPeriph commPeriph[NUMBER_OF_PORTS];
 
 extern struct commSpy_s commSpy1;
 
