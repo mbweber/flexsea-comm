@@ -224,6 +224,7 @@ typedef struct
 	uint8_t bytesReadyFlag;
 	uint8_t unpackedPacketsAvailable;
 	uint8_t packetReady;
+	uint8_t timeStamp;
 
 	//Data:
 	uint8_t *inputBufferPtr;	//Points to rx_buf_
