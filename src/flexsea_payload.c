@@ -68,13 +68,12 @@ static void route(PacketWrapper * p, PortType to);
 //ToDo improve: for now, supports only one command per string
 uint8_t payload_parse_str(PacketWrapper* p)
 {
-
 	uint8_t *cp_str = p->unpaked;
-	//uint8_t *info   = &p->port;
-	uint8_t *info = &p->sourcePort;
+	uint8_t info[2] = {0,0}; 
 	uint8_t cmd = 0, cmd_7bits = 0;
 	unsigned int id = 0;
 	uint8_t pType = RX_PTYPE_INVALID;
+	info[0] = (uint8_t)p->sourcePort;
 
 	//Command
 	cmd = cp_str[P_CMD1];		//CMD w/ R/W bit
