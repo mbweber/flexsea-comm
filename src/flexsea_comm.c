@@ -66,6 +66,8 @@ extern "C" {
 #include "flexsea_system.h"
 #include <flexsea_comm.h>
 
+#include <stdio.h>
+
 //****************************************************************************
 // Variable(s)
 //****************************************************************************
@@ -392,9 +394,13 @@ uint16_t unpack_payload_cb(circularBuffer_t *cb, uint8_t *packed, uint8_t unpack
 		while(buf[i] != HEADER && i < lastPossibleHeaderIndex)
 			i++;
 
-		bytes = buf[i+1];
-		possibleFooterPos = i + 3 + bytes;
-		foundFrame = (possibleFooterPos < bufSize && buf[possibleFooterPos] == FOOTER);
+        foundFrame = 0;
+        if(buf[i] == HEADER)
+        {
+            bytes = buf[i+1];
+            possibleFooterPos = i + 3 + bytes;
+            foundFrame = (possibleFooterPos < bufSize && buf[possibleFooterPos] == FOOTER);
+        }
 
 		if(foundFrame)
 		{
@@ -405,7 +411,6 @@ uint16_t unpack_payload_cb(circularBuffer_t *cb, uint8_t *packed, uint8_t unpack
 
 			//if checksum is valid than we found a valid string
 			foundString = (checksum == buf[i+2+bytes]);
-			foundFrame = 0; //reset the flag
 		}
 
 		//either we found a frame and it had a valid checksum, or we want to try the next value of i
@@ -416,6 +421,13 @@ uint16_t unpack_payload_cb(circularBuffer_t *cb, uint8_t *packed, uint8_t unpack
 	int numBytesInPackedString = 0;
 	if(foundString)
 	{
+        static int iLast = -1;
+        if(iLast != -1 && iLast == 0 && i != 0)
+        {
+            printf("DunGoofed\n");
+        }
+        iLast = i;
+
 		// hopefully i is 0, if not we consider previous bytes as part of this string
 		// + 4 accounts for header, 'bytes', checksum, and footer
 		numBytesInPackedString = i + bytes + 4;

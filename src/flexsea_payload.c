@@ -226,7 +226,7 @@ uint8_t tryUnpacking1(CommPeriph *cp, PacketWrapper *pw)
 				fillPacketFromCommPeriph(cp, pw);
 				retVal = 1;
 			}
-		} while(numBytesConverted);
+        } while(0);
 
 		//Drop flag
 		cp->rx.bytesReadyFlag = 0;

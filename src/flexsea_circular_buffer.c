@@ -73,7 +73,7 @@ int circ_buff_write(circularBuffer_t* cb, uint8_t *new_array, int len)
     cb->size += i;
     if(cb->size > CB_BUF_LEN)
     {   // In this case we have overwritten data
-		cb->head = (cb->tail + 1) % CB_BUF_LEN;
+        cb->head = (cb->tail) % CB_BUF_LEN;
         cb->size = CB_BUF_LEN;
         return OVERWROTE;
     }
@@ -139,7 +139,6 @@ int circ_buff_move_head(circularBuffer_t* cb, uint16_t numBytes)
 
     return (numBytes == originalNumBytes ? SUCCESS : MOVED_MORE_THAN_BUFFERED);
 }
-
 
 int circ_buff_get_size(circularBuffer_t* cb)  { return cb->size; }
 

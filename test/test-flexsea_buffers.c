@@ -136,11 +136,22 @@ void test_buffer_circular(void)
 
 	circularBuffer_t cb;
 	circ_buff_init(&cb);
+    uint8_t buf[RX_BUF_LEN];
 
 	for(i = 0; i < RX_BUF_LEN; i++)
 	{
 		circ_buff_write(&cb, &i, 1);
 	}
+
+    circ_buff_read(&cb, buf, RX_BUF_LEN);
+
+    int fail = 0;
+    for(i = 0; i < RX_BUF_LEN; i++)
+    {
+        fail = i != buf[i];
+        if(fail) break;
+    }
+    TEST_ASSERT_FALSE_MESSAGE(fail, "READ/WRITE fail");
 
 	for(i = 0; i < RX_BUF_LEN/2; i++)
 	{
@@ -151,11 +162,12 @@ void test_buffer_circular(void)
 	int actualSize = circ_buff_get_size(&cb);
 	TEST_ASSERT_EQUAL(expectedSize, actualSize);
 
-	uint8_t buf[RX_BUF_LEN];
 
 	TEST_ASSERT_EQUAL(0, circ_buff_read(&cb, buf, RX_BUF_LEN));
-	TEST_ASSERT_EQUAL(50, buf[0]);
-	TEST_ASSERT_EQUAL(49, buf[RX_BUF_LEN-1]);
+    int firstVal = RX_BUF_LEN/2;
+    int lastVal = i-1;
+    TEST_ASSERT_EQUAL(firstVal, buf[0]);
+    TEST_ASSERT_EQUAL(lastVal, buf[RX_BUF_LEN-1]);
 }
 
 void test_flexsea_buffers(void)
