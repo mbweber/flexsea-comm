@@ -78,8 +78,8 @@ void test_update_rx_buf_array_1(void)
 
 	//Fill buffer:
 	update_rx_buf_array_1(inputStr, TEST_LEN);
-	printf("rx_buf_1: %s.\n", rx_buf_1);
-	fflush(stdout);
+	//printf("rx_buf_1: %s.\n", rx_buf_1);
+	//fflush(stdout);
 
 	TEST_ASSERT_EQUAL_STRING_LEN_MESSAGE(inputStr, rx_buf_1, TEST_LEN, "First update");
 
@@ -88,16 +88,16 @@ void test_update_rx_buf_array_1(void)
 
 	//Fill buffer:
 	update_rx_buf_array_1(inputStr, TEST_LEN);
-	printf("rx_buf_1: %s.\n", rx_buf_1);
-	fflush(stdout);
+	//printf("rx_buf_1: %s.\n", rx_buf_1);
+	//fflush(stdout);
 
 	update_rx_buf_array_1(inputStr, TEST_LEN);
-	printf("rx_buf_1: %s.\n", rx_buf_1);
-	fflush(stdout);
+	//printf("rx_buf_1: %s.\n", rx_buf_1);
+	//fflush(stdout);
 
 	update_rx_buf_array_1(inputStr, TEST_LEN);
-	printf("rx_buf_1: %s.\n", rx_buf_1);
-	fflush(stdout);
+	//printf("rx_buf_1: %s.\n", rx_buf_1);
+	//fflush(stdout);
 
 	//Final test:
 	for(i = 0; i < RX_BUF_LEN - 1; i++)
