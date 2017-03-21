@@ -422,36 +422,7 @@ static void update_rx_buf_5(uint8_t byte_array, uint8_t new_byte, \
 #endif	//ENABLE_FLEXSEA_BUF_5
 
 //****************************************************************************
-// New code - not integrated - test in progress:
+// New circular buffers - not integrated - test in progress:
 //****************************************************************************
 
-uint8_t rx_buf_T[RX_BUF_LEN];
-static int pos = 0;
-static int size = 0;
-
-//Add one byte to buffer #1
-void update_rx_buf_byte_T(uint8_t new_byte)
-{
-	rx_buf_T[pos] = new_byte;
-	pos = (pos + 1) % RX_BUF_LEN;
-	if(size < RX_BUF_LEN)
-		size++;
-}
-
-//Add an array of bytes to buffer #1
-void update_rx_buf_array_T(uint8_t *new_array, int len)
-{
-	int i;
-	for(i = 0; i < len; i++)
-		update_rx_buf_byte_T(new_array[i]);
-}
-
-uint8_t get_rx_buf_T(int index)
-{
-	return rx_buf_T[(pos + index) % RX_BUF_LEN];
-}
-
-int get_size_T(void)
-{
-	return size;
-}
+circularBuffer_t rx_buf_circ_1;

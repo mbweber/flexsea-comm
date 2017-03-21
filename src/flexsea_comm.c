@@ -377,6 +377,66 @@ int8_t unpack_payload(uint8_t *buf, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAY
 	return 0;
 }
 
+uint16_t unpack_payload_cb(circularBuffer_t* *cb, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN])
+{
+	uint8_t buf[RX_BUF_LEN];
+	int bufSize = circ_buff_get_size(cb);
+	circ_buff_read(cb, buf, bufSize);
+
+	int i = 0, foundString = 0, foundFrame = 0, bytes, possibleFooterPos;
+	uint8_t checksum = 0;
+
+	while(!foundString && i < (RX_BUF_LEN-2))
+	{
+		while(!foundFrame && i < (RX_BUF_LEN-2))
+		{
+			while(buf[i] != HEADER && i < (RX_BUF_LEN-2))
+				i++;
+
+			bytes = buf[i+1];
+			possibleFooterPos = i + 3 + bytes;
+			foundFrame = (possibleFooterPos < buffSize && buf[possibleFooterPos] == FOOTER);
+		}
+
+		if(foundFrame)
+		{
+			int k;
+			for(k = 0; k < bytes; k++)
+				checksum += rx_buf_tmp[2+k];
+
+			//if checksum is valid than we found a valid string
+			foundString = (checksum == rx_buf_tmp[2+bytes]);
+		}
+
+		//either we found a frame and it had a valid checksum, or we want to try the next value of i
+		if(!foundString)
+			i++;
+	}
+
+	int numBytesInPackedString = 0;
+	if(foundString)
+	{
+		// hopefully i is 0, if not we consider previous bytes as part of this string
+		// + 4 accounts for header, 'bytes', checksum, and footer
+		numBytesInPackedString = i + bytes + 4;
+		int k, skip = 0, rx_cmd_idx = 0;
+		for(k = 0; k < bytes; k++)
+		{
+			int index = i+k+2; //i points to header, next value is bytes, next value is first data
+			if(buf[index] == ESCAPE && skip == 0)
+			{
+				skip = 1;
+			}
+			else
+			{
+				skip = 0;
+				rx_cmd[rx_cmd_idx++] = buf[index];
+			}
+		}
+	}
+	return numBytesInPackedString;
+}
+
 //From CommPeriph to PacketWrapper:
 void fillPacketFromCommPeriph(CommPeriph *cp, PacketWrapper *pw)
 {

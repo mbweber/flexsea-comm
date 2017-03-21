@@ -21,52 +21,30 @@
 	Biomechatronics research group <http://biomech.media.mit.edu/>
 	[Contributors]
 *****************************************************************************
-	[This file] flexsea_payload: deals with the "intelligent" data packaged
-	in a comm_str
+	[This file] flexsea_circular_buffer.c: simple circular buffer implementation
 *****************************************************************************
 	[Change log] (Convention: YYYY-MM-DD | author | comment)
-	* 2016-09-09 | jfduval | Initial GPL-3.0 release
-	*
+	* 2017-03-21 | dudds4 | Initial GPL-3.0 release
 ****************************************************************************/
-
-#ifndef INC_FX_PAYLOAD_H
-#define INC_FX_PAYLOAD_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-//****************************************************************************
-// Include(s)
-//****************************************************************************
-#include <flexsea_comm.h>
-#include <stdint.h>
 #include <flexsea.h>
 
+#define CB_BUF_LEN RX_BUF_LEN
 
-//****************************************************************************
-// Shared variable(s)
-//****************************************************************************
+struct circularBuffer;
+typedef struct circularBuffer circularBuffer_t;
 
-extern uint8_t payload_str[PAYLOAD_BUF_LEN];
-
-//****************************************************************************
-// Public Function Prototype(s):
-//****************************************************************************
-uint8_t payload_parse_str(PacketWrapper* foo);
-uint8_t sent_from_a_slave(uint8_t *buf);
-uint8_t packetType(uint8_t *buf);
-void prepare_empty_payload(uint8_t from, uint8_t to, uint8_t *buf, uint32_t len);
-void flexsea_payload_catchall(uint8_t *buf, uint8_t *info);
-uint8_t tryUnpacking(CommPeriph *cp, PacketWrapper *pw);
-uint8_t tryUnpacking1(CommPeriph *cp, PacketWrapper *pw);
-
-//****************************************************************************
-// Definition(s):
-//****************************************************************************
+void circ_buff_init(circularBuffer_t* cb);
+int circ_buff_write(circularBuffer_t* cb, uint8_t *new_array, int len);
+int circ_buff_read(circularBuffer_t* cb, uint8_t* readInto, uint16_t numBytes);
+int circ_buff_move_head(circularBuffer_t* cb, uint16_t numBytes);
+int circ_buff_get_size(circularBuffer_t* cb);
+int circ_buff_get_space(circularBuffer_t* cb);
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

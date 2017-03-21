@@ -203,6 +203,38 @@ uint8_t tryUnpacking(CommPeriph *cp, PacketWrapper *pw)
 	return retVal;
 }
 
+uint8_t tryUnpacking1(CommPeriph *cp, PacketWrapper *pw)
+{
+	uint8_t retVal = 0;
+
+	if(cp->rx.bytesReadyFlag > 0)
+	{
+		//Try unpacking. This is the only way to know if we have a packet and
+		//not just random bytes, or an incomplete packet.
+
+		int numBytesConverted;
+		do {
+			numBytesConverted = unpack_payload_cb(\
+					(circularBuffer_t*)cp->rx.inputBufferPtr, \
+					cp->rx.packedPtr, \
+					cp->rx.unpackedPtr);
+
+			if(numBytesConverted > 0)
+			{
+				circ_buff_move_head((circularBuffer_t*)cp->rx.inputBufferPtr, numBytesConverted);
+				cp->rx.unpackedPacketsAvailable = 1;
+				fillPacketFromCommPeriph(cp, pw);
+				retVal = 1;
+			}
+		} while(numBytesConverted);
+
+		//Drop flag
+		cp->rx.bytesReadyFlag = 0;
+	}
+
+	return retVal;
+}
+
 //****************************************************************************
 // Private Function(s):
 //****************************************************************************

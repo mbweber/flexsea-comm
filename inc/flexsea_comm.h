@@ -50,6 +50,7 @@ extern "C" {
 
 uint8_t comm_gen_str(uint8_t payload[], uint8_t *cstr, uint8_t bytes);
 int8_t unpack_payload(uint8_t *buf, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN]);
+uint16_t unpack_payload_cb(circularBuffer_t *cb, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN]);
 
 #ifdef ENABLE_FLEXSEA_BUF_1
 int8_t unpack_payload_1(void);
@@ -235,8 +236,11 @@ extern struct commSpy_s commSpy1;
 #define comm_str_usb				comm_str_1
 #define unpack_payload_usb			unpack_payload_1
 #define rx_command_usb				rx_command_1
+
 #define update_rx_buf_byte_usb		update_rx_buf_byte_1
 #define update_rx_buf_array_usb		update_rx_buf_array_1
+
+#define update_rx_buf_usb(x, y)		circ_buff_write(rx_buf_circ_1, (x), (y))
 
 #define comm_str_spi				comm_str_2
 #define unpack_payload_spi			unpack_payload_2
