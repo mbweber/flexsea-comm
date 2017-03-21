@@ -35,8 +35,15 @@ extern "C" {
 
 #define CB_BUF_LEN RX_BUF_LEN
 
-struct circularBuffer;
-typedef struct circularBuffer circularBuffer_t;
+typedef struct circularBuffer {
+	uint8_t bytes[CB_BUF_LEN];
+	int head;
+	int tail;
+	int size;
+} circularBuffer_t;
+
+//struct circularBuffer;
+//typedef struct circularBuffer circularBuffer_t;
 
 void circ_buff_init(circularBuffer_t* cb);
 int circ_buff_write(circularBuffer_t* cb, uint8_t *new_array, int len);

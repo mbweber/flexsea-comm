@@ -33,19 +33,23 @@ extern "C" {
 
 #include <flexsea_circular_buffer.h>
 
-struct circularBuffer {
-	uint8_t bytes[CB_BUF_LEN];
-	int head;
-	int tail;
-	int size;
-};
+//struct circularBuffer {
+//	uint8_t bytes[CB_BUF_LEN];
+//	int head;
+//	int tail;
+//	int size;
+//};
 
 void circ_buff_init(circularBuffer_t* cb)
 {
 	cb->head = -1;
 	cb->tail = 0;
 	cb->size= 0;
-	memset(cb->bytes, 0, CB_BUF_LEN);
+
+	int i = 0;
+	uint8_t* b = cb->bytes;
+	for(i=0; i<CB_BUF_LEN;i++)
+		b[i]=0;
 }
 
 int circ_buff_write(circularBuffer_t* cb, uint8_t *new_array, int len)
@@ -69,7 +73,7 @@ int circ_buff_write(circularBuffer_t* cb, uint8_t *new_array, int len)
     cb->size += i;
     if(cb->size > CB_BUF_LEN)
     {   // In this case we have overwritten data
-        cb->head = (tail + 1) % CB_BUF_LEN;
+		cb->head = (cb->tail + 1) % CB_BUF_LEN;
         cb->size = CB_BUF_LEN;
         return OVERWROTE;
     }
@@ -87,12 +91,12 @@ int circ_buff_read(circularBuffer_t* cb, uint8_t* readInto, uint16_t numBytes)
     int i = 0;
     int h = cb->head;
 
-    while(i < len && h < CB_BUF_LEN)
+	while(i < numBytes && h < CB_BUF_LEN)
         readInto[i++] = (cb->bytes)[h++];
 
     h %= CB_BUF_LEN;
 
-    while(i < len)
+	while(i < numBytes)
     	readInto[i++] = (cb->bytes)[h++];
 
     return SUCCESS;
@@ -107,7 +111,7 @@ int circ_buff_move_head(circularBuffer_t* cb, uint16_t numBytes)
     numBytes = numBytes < CB_BUF_LEN ? numBytes : CB_BUF_LEN;
 
     //write zeros
-    int h = head;
+	int h = cb->head;
     int i = 0;
     
     while(h < CB_BUF_LEN && i < numBytes)
@@ -137,7 +141,7 @@ int circ_buff_move_head(circularBuffer_t* cb, uint16_t numBytes)
 }
 
 
-int circ_buff_get_size(circularBuffer_t* cb)  { cb->size; }
+int circ_buff_get_size(circularBuffer_t* cb)  { return cb->size; }
 
 #ifdef __cplusplus
 }

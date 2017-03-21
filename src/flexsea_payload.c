@@ -215,13 +215,13 @@ uint8_t tryUnpacking1(CommPeriph *cp, PacketWrapper *pw)
 		int numBytesConverted;
 		do {
 			numBytesConverted = unpack_payload_cb(\
-					(circularBuffer_t*)cp->rx.inputBufferPtr, \
+					&rx_buf_circ_1, \
 					cp->rx.packedPtr, \
 					cp->rx.unpackedPtr);
 
 			if(numBytesConverted > 0)
 			{
-				circ_buff_move_head((circularBuffer_t*)cp->rx.inputBufferPtr, numBytesConverted);
+				circ_buff_move_head(&rx_buf_circ_1, numBytesConverted);
 				cp->rx.unpackedPacketsAvailable = 1;
 				fillPacketFromCommPeriph(cp, pw);
 				retVal = 1;

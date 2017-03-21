@@ -377,7 +377,7 @@ int8_t unpack_payload(uint8_t *buf, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAY
 	return 0;
 }
 
-uint16_t unpack_payload_cb(circularBuffer_t* *cb, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN])
+uint16_t unpack_payload_cb(circularBuffer_t *cb, uint8_t *packed, uint8_t unpacked[PACKAGED_PAYLOAD_LEN])
 {
 	uint8_t buf[RX_BUF_LEN];
 	int bufSize = circ_buff_get_size(cb);
@@ -385,27 +385,27 @@ uint16_t unpack_payload_cb(circularBuffer_t* *cb, uint8_t *packed, uint8_t rx_cm
 
 	int i = 0, foundString = 0, foundFrame = 0, bytes, possibleFooterPos;
 	uint8_t checksum = 0;
+	int lastPossibleHeaderIndex = bufSize - 4;
 
-	while(!foundString && i < (RX_BUF_LEN-2))
+	while(!foundString && i < lastPossibleHeaderIndex)
 	{
-		while(!foundFrame && i < (RX_BUF_LEN-2))
-		{
-			while(buf[i] != HEADER && i < (RX_BUF_LEN-2))
-				i++;
+		while(buf[i] != HEADER && i < lastPossibleHeaderIndex)
+			i++;
 
-			bytes = buf[i+1];
-			possibleFooterPos = i + 3 + bytes;
-			foundFrame = (possibleFooterPos < buffSize && buf[possibleFooterPos] == FOOTER);
-		}
+		bytes = buf[i+1];
+		possibleFooterPos = i + 3 + bytes;
+		foundFrame = (possibleFooterPos < bufSize && buf[possibleFooterPos] == FOOTER);
 
 		if(foundFrame)
 		{
+			checksum = 0;
 			int k;
 			for(k = 0; k < bytes; k++)
-				checksum += rx_buf_tmp[2+k];
+				checksum += buf[i+2+k];
 
 			//if checksum is valid than we found a valid string
-			foundString = (checksum == rx_buf_tmp[2+bytes]);
+			foundString = (checksum == buf[i+2+bytes]);
+			foundFrame = 0; //reset the flag
 		}
 
 		//either we found a frame and it had a valid checksum, or we want to try the next value of i
@@ -419,7 +419,7 @@ uint16_t unpack_payload_cb(circularBuffer_t* *cb, uint8_t *packed, uint8_t rx_cm
 		// hopefully i is 0, if not we consider previous bytes as part of this string
 		// + 4 accounts for header, 'bytes', checksum, and footer
 		numBytesInPackedString = i + bytes + 4;
-		int k, skip = 0, rx_cmd_idx = 0;
+		int k, skip = 0, unpacked_idx = 0;
 		for(k = 0; k < bytes; k++)
 		{
 			int index = i+k+2; //i points to header, next value is bytes, next value is first data
@@ -430,9 +430,11 @@ uint16_t unpack_payload_cb(circularBuffer_t* *cb, uint8_t *packed, uint8_t rx_cm
 			else
 			{
 				skip = 0;
-				rx_cmd[rx_cmd_idx++] = buf[index];
+				unpacked[unpacked_idx++] = buf[index];
 			}
 		}
+		for(k = 0; k < bytes+4; k++)
+			packed[k] = buf[i+k];
 	}
 	return numBytesInPackedString;
 }

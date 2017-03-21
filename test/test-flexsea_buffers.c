@@ -134,21 +134,28 @@ void test_buffer_circular(void)
 {
 	int i;
 
-	//Start will all 0
-	memset(rx_buf_T, 0, RX_BUF_LEN);
+	circularBuffer_t cb;
+	circ_buff_init(&cb);
 
-	for(i = 0; i < 100; i++)
+	for(i = 0; i < RX_BUF_LEN; i++)
 	{
-		update_rx_buf_byte_T(i);
+		circ_buff_write(&cb, &i, 1);
 	}
 
-	for(i = 0; i < 50; i++)
+	for(i = 0; i < RX_BUF_LEN/2; i++)
 	{
-		update_rx_buf_byte_T(i);
+		circ_buff_write(&cb, &i, 1);
 	}
 
-	TEST_ASSERT_EQUAL(50, get_rx_buf_T(0));
-	TEST_ASSERT_EQUAL(49, get_rx_buf_T(99));
+	int expectedSize = RX_BUF_LEN;
+	int actualSize = circ_buff_get_size(&cb);
+	TEST_ASSERT_EQUAL(expectedSize, actualSize);
+
+	uint8_t buf[RX_BUF_LEN];
+
+	TEST_ASSERT_EQUAL(0, circ_buff_read(&cb, buf, RX_BUF_LEN));
+	TEST_ASSERT_EQUAL(50, buf[0]);
+	TEST_ASSERT_EQUAL(49, buf[RX_BUF_LEN-1]);
 }
 
 void test_flexsea_buffers(void)
