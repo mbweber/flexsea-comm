@@ -113,16 +113,19 @@ int32_t circ_buff_search(circularBuffer_t* cb, uint8_t value, uint16_t start)
 uint8_t circ_buff_checksum(circularBuffer_t* cb, uint16_t start, uint16_t end)
 {
     if(start >= cb->size || end > cb->size) return 0;
+	if(end - start < 1) return 0;
 
     uint8_t checksum = 0;
 
     int i = (cb->head + start); //no modulo on purpose. (it would have no ultimate effect)
-    int j = (cb->head + end) % CB_BUF_LEN;
+	int j = (cb->head + end);
 
-    while(i < j && i < CB_BUF_LEN)
-        checksum += cb->bytes[i++];
+//	checksum += cb->bytes[i++];
+	while(i < j && i < CB_BUF_LEN)
+		checksum += cb->bytes[i++];
 
     i %= CB_BUF_LEN;
+	j %= CB_BUF_LEN;
 
     while(i < j)
         checksum += cb->bytes[i++];

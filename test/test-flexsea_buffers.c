@@ -317,10 +317,12 @@ void test_buffer_circular_write_erase(void)
 	}
 
 	int shouldWrite, lengthToErase;
-	for(i = 0; i < 5000; i++)
+	int bufSize = circ_buff_get_size(cb);
+	for(i = 0; i < 5000 || bufSize < (CB_BUF_LEN / 2); i++)
 	{
+		bufSize = circ_buff_get_size(cb);
 		shouldWrite = rand() % 2;
-		if(shouldWrite)
+		if(shouldWrite || bufSize < 2)
 		{
 			circ_buff_write(cb, alphabet, ALPHABET_LEN);
 		}
@@ -331,7 +333,7 @@ void test_buffer_circular_write_erase(void)
 		}
 	}
 
-	int bufSize = circ_buff_get_size(cb);
+	bufSize = circ_buff_get_size(cb);
 	uint8_t outputBuf[CB_BUF_LEN];
 	circ_buff_read(cb, outputBuf, bufSize);
 	int j = ALPHABET_LEN-1;
@@ -344,6 +346,94 @@ void test_buffer_circular_write_erase(void)
 	}
 }
 
+int getIndexOf(uint8_t value, uint8_t* buf, uint16_t start, uint16_t length)
+{
+	int i;
+	for(i = start; i < length; i++)
+	{
+		if(buf[i] == value) return i;
+	}
+	return -1;
+}
+
+void test_buffer_circular_search(void)
+{
+	circularBuffer_t circBuf;
+	circularBuffer_t* cb = &circBuf;
+	circ_buff_init(cb);
+	srand(time(NULL));
+
+	uint8_t buf[CB_BUF_LEN];
+	int i;
+	for(i = 0; i < CB_BUF_LEN; i++)
+		buf[i] = rand();
+
+	//Perform a bunch of random writes to mess up the tail/head positions
+	int length;
+	for(i = 0; i < 100; i++)
+	{
+		length = rand() % CB_BUF_LEN;
+		circ_buff_write(cb, buf, length);
+	}
+
+	//Write the actual values we will compare to
+	circ_buff_write(cb, buf, CB_BUF_LEN);
+
+	int expectedIndex, actualIndex, lastIndex;
+	uint8_t value = 0, lastValue = 0;
+	do {
+		expectedIndex = 1;
+		actualIndex = 1;
+		lastIndex = -1;
+		while(expectedIndex > 0)
+		{
+			expectedIndex = getIndexOf(value, buf, lastIndex+1, CB_BUF_LEN);
+			actualIndex = circ_buff_search(cb, value, lastIndex+1);
+			TEST_ASSERT_EQUAL(expectedIndex, actualIndex);
+			lastIndex = expectedIndex;
+		}
+
+		lastValue = value;
+		value++;
+	} while(value > lastValue);
+}
+
+void test_buffer_circular_checksum(void)
+{
+	circularBuffer_t circBuf;
+	circularBuffer_t* cb = &circBuf;
+	circ_buff_init(cb);
+	srand(time(NULL));
+
+	uint8_t buf[CB_BUF_LEN];
+	int i;
+	for(i = 0; i < CB_BUF_LEN; i++)
+		buf[i] = rand();
+
+
+	int testI;
+	for(testI = 0; testI < 100; testI++)
+	{
+		//Perform a bunch of random writes to mess up the tail/head positions
+		int start, length;
+		for(i = 0; i < 100; i++)
+		{
+			start = rand() % CB_BUF_LEN;
+			length = rand() % (CB_BUF_LEN - start);
+			circ_buff_write(cb, buf, length);
+		}
+
+		uint8_t *d = cb->bytes;
+		uint8_t expectedSum = 0;
+		for(i = 0; i < CB_BUF_LEN; i++)
+		{
+			expectedSum += d[i];
+		}
+		uint8_t actualSum = circ_buff_checksum(cb, 0, CB_BUF_LEN);
+		TEST_ASSERT_EQUAL(expectedSum, actualSum);
+	}
+}
+
 void test_flexsea_buffers(void)
 {
 	UNITY_BEGIN();
@@ -353,6 +443,8 @@ void test_flexsea_buffers(void)
 	RUN_TEST(test_buffer_circular);
 	RUN_TEST(test_buffer_circular_alphabet);
 	RUN_TEST(test_buffer_circular_write_erase);
+	RUN_TEST(test_buffer_circular_search);
+	RUN_TEST(test_buffer_circular_checksum);
 	UNITY_END();
 }
 
