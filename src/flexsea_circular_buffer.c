@@ -32,6 +32,7 @@ extern "C" {
 #endif
 
 #include <flexsea_circular_buffer.h>
+#include <string.h>
 
 //struct circularBuffer {
 //	uint8_t bytes[CB_BUF_LEN];
@@ -84,6 +85,57 @@ int circ_buff_write(circularBuffer_t* cb, uint8_t *new_array, int len)
     return SUCCESS;	
 }
 
+uint8_t circ_buff_peak(circularBuffer_t* cb, uint16_t offset)
+{
+    if(offset >= cb->size) return 0;
+    return cb->bytes[((cb->head + offset) % CB_BUF_LEN)];
+}
+
+int32_t circ_buff_search(circularBuffer_t* cb, uint8_t value, uint16_t start)
+{
+    if(start > cb->size) return -1;
+    int i = start;
+    int index = cb->head + start;
+
+    while(i < cb->size && index < CB_BUF_LEN)
+    {
+        if(cb->bytes[index] == value) return i;
+        i++;
+        index++;
+    }
+
+    index %= CB_BUF_LEN;
+
+    while(i < cb->size)
+    {
+        if(cb->bytes[index] == value) return i;
+        i++;
+        index++;
+    }
+
+    return -1;
+}
+
+uint8_t circ_buff_checksum(circularBuffer_t* cb, uint16_t start, uint16_t end)
+{
+    if(start >= cb->size || end > cb->size) return 0;
+
+    uint8_t checksum = 0;
+
+    int i = (cb->head + start); //no modulo on purpose. (it would have no ultimate effect)
+    int j = (cb->head + end) % CB_BUF_LEN;
+
+    while(i < j && i < CB_BUF_LEN)
+        checksum += cb->bytes[i++];
+
+    i %= CB_BUF_LEN;
+
+    while(i < j)
+        checksum += cb->bytes[i++];
+
+    return checksum;
+}
+
 int circ_buff_read(circularBuffer_t* cb, uint8_t* readInto, uint16_t numBytes)
 {
     const int SUCCESS = 0;
@@ -91,19 +143,57 @@ int circ_buff_read(circularBuffer_t* cb, uint8_t* readInto, uint16_t numBytes)
 
     if(numBytes > cb->size) { return NOT_ENOUGH_BUFFERED; }
 
-    int i = 0;
-    int h = cb->head;
+    if(cb->head + numBytes < CB_BUF_LEN)
+    {
+        memcpy(readInto, cb->bytes + cb->head, numBytes);
+    }
+    else
+    {
+        int bytesUntilEnd = CB_BUF_LEN - 1 - cb->head;
+        memcpy(readInto, cb->bytes + cb->head, bytesUntilEnd);
+        memcpy(readInto + bytesUntilEnd, cb->bytes, numBytes - bytesUntilEnd);
+    }
 
-	while(i < numBytes && h < CB_BUF_LEN)
+    return SUCCESS;
+}
+
+int circ_buff_read_section(circularBuffer_t* cb, uint8_t* readInto, uint16_t start, uint16_t end)
+{
+    const int SUCCESS = 0;
+    const int INVALID_ARGS = 1;
+
+    if(end > cb->size || start >= cb->size || start > end) { return INVALID_ARGS; }
+
+    uint16_t numBytes = end - start;
+    uint16_t startOffset = cb->head + start;
+    if(cb->head + end < CB_BUF_LEN || startOffset >= CB_BUF_LEN)
+    {
+        memcpy(readInto, cb->bytes + (startOffset % CB_BUF_LEN), numBytes);
+    }
+    else
+    {
+        int bytesUntilEnd = CB_BUF_LEN - 1 - startOffset;
+        memcpy(readInto, cb->bytes + cb->head, bytesUntilEnd);
+        memcpy(readInto + bytesUntilEnd, cb->bytes, numBytes - bytesUntilEnd);
+    }
+
+    return SUCCESS;
+
+    int i = 0;
+    int h = cb->head + start; // no modulo on purpose, it would have same affect
+
+    while(i < numBytes && h < CB_BUF_LEN)
         readInto[i++] = (cb->bytes)[h++];
 
     h %= CB_BUF_LEN;
 
-	while(i < numBytes)
-    	readInto[i++] = (cb->bytes)[h++];
+    while(i < numBytes)
+        readInto[i++] = (cb->bytes)[h++];
 
     return SUCCESS;
 }
+
+
 
 int circ_buff_move_head(circularBuffer_t* cb, uint16_t numBytes)
 {
