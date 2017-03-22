@@ -298,6 +298,50 @@ void test_buffer_circular_alphabet(void)
 	}
 }
 
+void test_buffer_circular_write_erase(void)
+{
+	circularBuffer_t buf;
+	circularBuffer_t* cb = &buf;
+	circ_buff_init(cb);
+
+	srand(time(NULL));
+	const int ALPHABET_LEN = 31;
+
+	int i;
+	uint8_t alphabet[ALPHABET_LEN];
+	for(i = 0; i < ALPHABET_LEN; i++)
+	{
+		alphabet[i] = rand() % 256;
+	}
+
+	int shouldWrite, lengthToErase;
+	for(i = 0; i < 5000; i++)
+	{
+		shouldWrite = rand() % 2;
+		if(shouldWrite)
+		{
+			circ_buff_write(cb, alphabet, ALPHABET_LEN);
+		}
+		else
+		{
+			lengthToErase = rand() % (circ_buff_get_size(cb)/2);
+			circ_buff_move_head(cb, lengthToErase);
+		}
+	}
+
+	int bufSize = circ_buff_get_size(cb);
+	uint8_t outputBuf[CB_BUF_LEN];
+	circ_buff_read(cb, outputBuf, bufSize);
+	int j = ALPHABET_LEN-1;
+	for(i = bufSize - 1; i >= 0; i--)
+	{
+		TEST_ASSERT_EQUAL(alphabet[j], outputBuf[i]);
+		j--;
+		if(j < 0)
+			j+=ALPHABET_LEN;
+	}
+}
+
 void test_flexsea_buffers(void)
 {
 	UNITY_BEGIN();
@@ -306,6 +350,7 @@ void test_flexsea_buffers(void)
 	RUN_TEST(test_buffer_stack);
 	RUN_TEST(test_buffer_circular);
 	RUN_TEST(test_buffer_circular_alphabet);
+	RUN_TEST(test_buffer_circular_write_erase);
 	UNITY_END();
 }
 
