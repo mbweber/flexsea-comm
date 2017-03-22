@@ -36,6 +36,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include "flexsea_comm_def.h"
 
 //#define USE_DEBUG_PRINTF			//Enable this to debug with the terminal
 
@@ -53,30 +54,6 @@ uint32_t REBUILD_UINT32(uint8_t *buf, uint16_t *index);
 // Definition(s):
 //****************************************************************************
 
-//Buffers and packets:
-#define RX_BUF_LEN						100		//Reception buffer (flexsea_comm)
-#define PAYLOAD_BUF_LEN					36		//Number of bytes in a payload string
-#define PAYLOAD_BYTES					(PAYLOAD_BUF_LEN - 4)
-#define COMM_STR_BUF_LEN				48		//Number of bytes in a comm. string
-#define PACKAGED_PAYLOAD_LEN			48		//Temporary
-#define PAYLOAD_BUFFERS					4		//Max # of payload strings we expect to find
-#define MAX_CMD_CODE					127
-#define PACKET_WRAPPER_LEN				RX_BUF_LEN
-
-//Packet types:
-#define RX_PTYPE_READ					0
-#define RX_PTYPE_WRITE					1
-#define RX_PTYPE_REPLY					2
-#define RX_PTYPE_INVALID				3
-#define RX_PTYPE_MAX_INDEX				2
-
-//Board ID related defines:
-#define ID_MATCH						1		//Addressed to me
-#define ID_SUB1_MATCH					2		//Addressed to a board on slave bus #1
-#define ID_SUB2_MATCH					3		//Addressed to a board on slave bus #2
-#define ID_UP_MATCH						4		//Addressed to my master
-#define ID_NO_MATCH						0
-
 //Communication port/interface:
 typedef enum {
 	//Slave:
@@ -91,26 +68,6 @@ typedef enum {
 	//None
 	PORT_NONE	//PORT_NONE always has to be the last item
 }Port;
-#define NUMBER_OF_PORTS		5	//Has to match enum!
-
-//Communication protocol payload fields:
-#define P_XID							0		//Emitter ID
-#define P_RID							1		//Receiver ID
-#define P_CMDS							2		//Number of Commands sent
-#define P_CMD1							3		//First command
-#define P_DATA1							4		//First data
-
-//Parser definitions:
-#define PARSE_DEFAULT					0
-#define PARSE_ID_NO_MATCH				1
-#define PARSE_SUCCESSFUL				2
-#define PARSE_UNKNOWN_CMD				3
-
-#define CMD_READ						1
-#define CMD_WRITE						2
-
-#define KEEP							0
-#define CHANGE							1
 
 //****************************************************************************
 // Shared variable(s)
@@ -148,10 +105,6 @@ extern void (*flexsea_payload_ptr[MAX_CMD_CODE][RX_PTYPE_MAX_INDEX+1]) \
 #define CMD_7BITS(x)	((x & 0xFF)>>1)
 #define IS_CMD_RW(x)	(x & 0x01)
 
-//Read, Write, or Read&Write?
-#define WRITE			0
-#define READ			1
-
 //Conditional printf() statement - debugging only
 #ifdef USE_DEBUG_PRINTF
 	#define DEBUG_PRINTF(...) printf(__VA_ARGS__)
@@ -165,8 +118,6 @@ extern void (*flexsea_payload_ptr[MAX_CMD_CODE][RX_PTYPE_MAX_INDEX+1]) \
 #else
 	#define _USE_PRINTF(...) do {} while (0)
 #endif	//USE__PRINTF
-
-#define COMM_PERIPH_ARR_LEN		RX_BUF_LEN
 
 typedef enum {
 	TS_UNKNOWN = 0,

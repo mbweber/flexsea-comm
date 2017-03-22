@@ -37,14 +37,7 @@ extern "C" {
 // Include(s)
 //****************************************************************************
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-//#include <fm_block_allocator.h>
-#include "../inc/flexsea.h"
-#include "../../flexsea-comm/inc/flexsea_comm.h"
-#include "../../flexsea-system/inc/flexsea_system.h"
-#include "flexsea_board.h"
 #include <flexsea_payload.h>
 
 //****************************************************************************
@@ -69,7 +62,7 @@ static void route(PacketWrapper * p, PortType to);
 uint8_t payload_parse_str(PacketWrapper* p)
 {
 	uint8_t *cp_str = p->unpaked;
-	uint8_t info[2] = {0,0}; 
+	uint8_t info[2] = {0,0};
 	uint8_t cmd = 0, cmd_7bits = 0;
 	unsigned int id = 0;
 	uint8_t pType = RX_PTYPE_INVALID;
@@ -276,11 +269,13 @@ static uint8_t get_rid(uint8_t *pldata)
 	uint8_t cp_rid = pldata[P_RID];
 	uint8_t i = 0;
 
-	if(cp_rid == board_id)				//This board?
+	//if(cp_rid == board_id)				//This board?
+	if(cp_rid == getBoardID()) //This board?
 	{
 		return ID_MATCH;
 	}
-	else if(cp_rid == board_up_id)		//Master?
+	//else if(cp_rid == board_up_id)		//Master?
+	else if(cp_rid == getBoardUpID())		//Master?
 	{
 		return ID_UP_MATCH;
 	}
@@ -289,18 +284,20 @@ static uint8_t get_rid(uint8_t *pldata)
 		//Can be on a slave bus, or can be invalid.
 
 		//Search on slave bus #1:
-		for(i = 0; i < SLAVE_BUS_1_CNT; i++)
+		for(i = 0; i < getSlaveCnt(0); i++)
 		{
-			if(cp_rid == board_sub1_id[i])
+			//if(cp_rid == board_sub1_id[i])
+			if(cp_rid == getBoardSubID(0,i))
 			{
 				return ID_SUB1_MATCH;
 			}
 		}
 
 		//Then on bus #2:
-		for(i = 0; i < SLAVE_BUS_1_CNT; i++)
+		for(i = 0; i < getSlaveCnt(1); i++)
 		{
-			if(cp_rid == board_sub2_id[i])
+			//if(cp_rid == board_sub2_id[i])
+			if(cp_rid == getBoardSubID(1,i))
 			{
 				return ID_SUB2_MATCH;
 			}

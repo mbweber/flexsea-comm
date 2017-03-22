@@ -21,78 +21,80 @@
 	Biomechatronics research group <http://biomech.media.mit.edu/>
 	[Contributors]
 *****************************************************************************
-	[This file] flexsea_buffers: everything related to the reception buffers
+	[This file] flexsea: Master file for the FlexSEA stack.
 *****************************************************************************
 	[Change log] (Convention: YYYY-MM-DD | author | comment)
 	* 2016-09-09 | jfduval | Initial GPL-3.0 release
 	*
 ****************************************************************************/
 
-#ifndef INC_FX_BUF_H
-#define INC_FX_BUF_H
+#ifndef INC_FLEXSEA_COMM_DEF_H_
+#define INC_FLEXSEA_COMM_DEF_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 //****************************************************************************
-// Include(s)
+// Core features:
 //****************************************************************************
 
-#include "flexsea.h"
-#include <flexsea_circular_buffer.h>
+//Buffers and packets:
+#define RX_BUF_LEN						100		//Reception buffer (flexsea_comm)
+#define PAYLOAD_BUF_LEN					36		//Number of bytes in a payload string
+#define PAYLOAD_BYTES					(PAYLOAD_BUF_LEN - 4)
+#define COMM_STR_BUF_LEN				48		//Number of bytes in a comm. string
+#define PACKAGED_PAYLOAD_LEN			48		//Temporary
+#define PAYLOAD_BUFFERS					4		//Max # of payload strings we expect to find
+#define MAX_CMD_CODE					127
+#define PACKET_WRAPPER_LEN				RX_BUF_LEN
+#define COMM_PERIPH_ARR_LEN				RX_BUF_LEN
+
+//Packet types:
+#define RX_PTYPE_READ					0
+#define RX_PTYPE_WRITE					1
+#define RX_PTYPE_REPLY					2
+#define RX_PTYPE_INVALID				3
+#define RX_PTYPE_MAX_INDEX				2
+
+//Board ID related defines:
+#define ID_MATCH						1		//Addressed to me
+#define ID_SUB1_MATCH					2		//Addressed to a board on slave bus #1
+#define ID_SUB2_MATCH					3		//Addressed to a board on slave bus #2
+#define ID_UP_MATCH						4		//Addressed to my master
+#define ID_NO_MATCH						0
+
+#define NUMBER_OF_PORTS		5	//Has to match enum!
+
+//Communication protocol payload fields:
+#define P_XID							0		//Emitter ID
+#define P_RID							1		//Receiver ID
+#define P_CMDS							2		//Number of Commands sent
+#define P_CMD1							3		//First command
+#define P_DATA1							4		//First data
+
+//Parser definitions:
+#define PARSE_DEFAULT					0
+#define PARSE_ID_NO_MATCH				1
+#define PARSE_SUCCESSFUL				2
+#define PARSE_UNKNOWN_CMD				3
+
+#define CMD_READ						1
+#define CMD_WRITE						2
+
+#define KEEP							0
+#define CHANGE							1
+
+//Read, Write, or Read&Write?
+#define WRITE							0
+#define READ							1
 
 //****************************************************************************
-// Shared variable(s)
+// User implementation:
 //****************************************************************************
-
-extern uint8_t rx_buf_1[RX_BUF_LEN];
-extern uint8_t rx_buf_2[RX_BUF_LEN];
-extern uint8_t rx_buf_3[RX_BUF_LEN];
-extern uint8_t rx_buf_4[RX_BUF_LEN];
-extern uint8_t rx_buf_5[RX_BUF_LEN];
-
-//****************************************************************************
-// Public Function Prototype(s):
-//****************************************************************************
-
-void update_rx_buf_byte_1(uint8_t new_byte);
-void update_rx_buf_array_1(uint8_t *new_array, uint32_t len);
-
-void update_rx_buf_byte_2(uint8_t new_byte);
-void update_rx_buf_array_2(uint8_t *new_array, uint32_t len);
-
-void update_rx_buf_byte_3(uint8_t new_byte);
-void update_rx_buf_array_3(uint8_t *new_array, uint32_t len);
-
-void update_rx_buf_byte_4(uint8_t new_byte);
-void update_rx_buf_array_4(uint8_t *new_array, uint32_t len);
-
-void update_rx_buf_byte_5(uint8_t new_byte);
-void update_rx_buf_array_5(uint8_t *new_array, uint32_t len);
-
-uint8_t unwrap_buffer(uint8_t *array, uint8_t *new_array, uint32_t len);
-void resetInputBuffer(uint8_t idx);
-
-#ifdef ENABLE_COMM_MANUAL_TEST_FCT
-void test_upd(void);
-#endif //ENABLE_COMM_MANUAL_TEST_FCT
-
-//****************************************************************************
-// Definition(s):
-//****************************************************************************
-
-#define UPDATE_BYTE				0
-#define UPDATE_ARRAY			1
-
-//****************************************************************************
-// New code - not integrated - test in progress:
-//****************************************************************************
-
-extern circularBuffer_t rx_buf_circ_1;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif	//INC_FLEXSEA_COMM_DEF_H_

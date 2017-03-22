@@ -4,6 +4,7 @@ extern "C" {
 
 #include <flexsea_payload.h>
 #include "flexsea-comm_test-all.h"
+#include <flexsea_sys_def.h>
 
 //Definitions and variables used by some/all tests:
 //...

@@ -4,6 +4,7 @@ extern "C" {
 #include <flexsea_buffers.h>
 #include "flexsea-comm_test-all.h"
 #include <stdio.h>
+#include <string.h>
 
 //Definitions and variables used by some/all tests:
 //...
