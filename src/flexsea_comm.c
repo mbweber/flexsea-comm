@@ -388,12 +388,14 @@ uint16_t unpack_payload_cb(circularBuffer_t *cb, uint8_t *packed, uint8_t unpack
     int headerPos = -1, lastHeaderPos = -1;
     uint8_t checksum = 0;
 
+    int headers = 0, footers = 0;
     while(!foundString && lastHeaderPos < lastPossibleHeaderIndex)
 	{
         headerPos = circ_buff_search(cb, HEADER, lastHeaderPos+1);
         //if we can't find a header, we quit searching for strings
         if(headerPos == -1) break;
 
+        headers++;
         foundFrame = 0;
         if(headerPos <= lastPossibleHeaderIndex)
         {
@@ -404,6 +406,7 @@ uint16_t unpack_payload_cb(circularBuffer_t *cb, uint8_t *packed, uint8_t unpack
 
         if(foundFrame)
 		{
+            footers++;
             checksum = circ_buff_checksum(cb, headerPos+2, possibleFooterPos-1);
 
 			//if checksum is valid than we found a valid string
@@ -438,6 +441,7 @@ uint16_t unpack_payload_cb(circularBuffer_t *cb, uint8_t *packed, uint8_t unpack
 	}
 
 //    printf("hdrs: %d, ftrs: %d, strings: %d \n", headers, footers, numBytesInPackedString > 0);
+//    fflush(stdout);
 	return numBytesInPackedString;
 }
 
@@ -473,7 +477,7 @@ void copyPacket(PacketWrapper *from, PacketWrapper *to, TravelDirection td)
 
 //Initialize CommPeriph to defaults:
 void initCommPeriph(CommPeriph *cp, Port port, PortType pt, uint8_t *input, \
-					uint8_t *unpacked, uint8_t *packed, \
+                    uint8_t *packed, uint8_t *unpacked, \
 					PacketWrapper *inbound, PacketWrapper *outbound)
 {
 	cp->port = port;

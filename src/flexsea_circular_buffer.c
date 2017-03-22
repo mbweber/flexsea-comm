@@ -153,40 +153,64 @@ int circ_buff_read(circularBuffer_t* cb, uint8_t* readInto, uint16_t numBytes)
     return SUCCESS;
 }
 
-int circ_buff_read_section(circularBuffer_t* cb, uint8_t* readInto, uint16_t start, uint16_t end)
+int circ_buff_read_section(circularBuffer_t* cb, uint8_t* readInto, uint16_t start, uint16_t numBytes)
 {
     const int SUCCESS = 0;
     const int INVALID_ARGS = 1;
 
-    if(end > cb->size || start >= cb->size || start > end) { return INVALID_ARGS; }
+    if(!cb || !readInto || start + numBytes > cb->size) { return INVALID_ARGS; }
 
-    uint16_t numBytes = end - start;
-    uint16_t startOffset = cb->head + start;
-    if(cb->head + end < CB_BUF_LEN || startOffset >= CB_BUF_LEN)
+    uint16_t s = (cb->head + start) % CB_BUF_LEN;
+    if(s + numBytes > CB_BUF_LEN)
     {
-        memcpy(readInto, cb->bytes + (startOffset % CB_BUF_LEN), numBytes);
+        uint16_t bytesUntilEnd = CB_BUF_LEN - s;
+        memcpy(readInto, cb->bytes + s, bytesUntilEnd);
+        memcpy(readInto + bytesUntilEnd, cb->bytes, numBytes - bytesUntilEnd);
     }
     else
     {
-		uint16_t bytesUntilEnd = CB_BUF_LEN - startOffset;
-        memcpy(readInto, cb->bytes + cb->head, bytesUntilEnd);
-        memcpy(readInto + bytesUntilEnd, cb->bytes, numBytes - bytesUntilEnd);
+        memcpy(readInto, cb->bytes + s, numBytes);
     }
-
     return SUCCESS;
 
-    int i = 0;
-    int h = cb->head + start; // no modulo on purpose, it would have same affect
+//    if(cb->head + start > CB_BUF_LEN)
+//    {
 
-    while(i < numBytes && h < CB_BUF_LEN)
-        readInto[i++] = (cb->bytes)[h++];
+//    }
+//    else
+//    {
+//        if(cb->head + start + numBytes > CB_BUF_LEN)
+//        {
 
-    h %= CB_BUF_LEN;
+//        }
+//    }
 
-    while(i < numBytes)
-        readInto[i++] = (cb->bytes)[h++];
 
-    return SUCCESS;
+//    if(cb->head + end < CB_BUF_LEN || startOffset >= CB_BUF_LEN)
+//    {
+//        memcpy(readInto, cb->bytes + (startOffset % CB_BUF_LEN), numBytes);
+//    }
+//    else
+//    {
+//		uint16_t bytesUntilEnd = CB_BUF_LEN - startOffset;
+//        memcpy(readInto, cb->bytes + cb->head, bytesUntilEnd);
+//        memcpy(readInto + bytesUntilEnd, cb->bytes, numBytes - bytesUntilEnd);
+//    }
+
+//    return SUCCESS;
+
+//    int i = 0;
+//    int h = cb->head + start; // no modulo on purpose, it would have same affect
+
+//    while(i < numBytes && h < CB_BUF_LEN)
+//        readInto[i++] = (cb->bytes)[h++];
+
+//    h %= CB_BUF_LEN;
+
+//    while(i < numBytes)
+//        readInto[i++] = (cb->bytes)[h++];
+
+//    return SUCCESS;
 }
 
 
