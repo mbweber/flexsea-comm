@@ -39,6 +39,7 @@ extern "C" {
 
 #include <string.h>
 #include <flexsea_payload.h>
+#include <flexsea_board.h>
 
 //****************************************************************************
 // Variable(s)

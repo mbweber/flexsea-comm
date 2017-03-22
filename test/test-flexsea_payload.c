@@ -2,6 +2,7 @@
 extern "C" {
 #endif
 
+#include <string.h>
 #include <flexsea_payload.h>
 #include "flexsea-comm_test-all.h"
 #include <flexsea_sys_def.h>
@@ -81,12 +82,12 @@ void test_packetType(void)
 
 void test_flexsea_payload(void)
 {
-	UNITY_BEGIN();
 	//RUN_TEST(test_payload_parse_str);
 	RUN_TEST(test_prepare_empty_payload);
 	RUN_TEST(test_sent_from_a_slave);
 	RUN_TEST(test_packetType);
-	UNITY_END();
+
+	fflush(stdout);
 }
 
 #ifdef __cplusplus

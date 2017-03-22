@@ -161,12 +161,12 @@ void test_buffer_circular(void)
 
 void test_flexsea_buffers(void)
 {
-	UNITY_BEGIN();
 	//RUN_TEST(test_update_rx_buf_byte_1);
 	RUN_TEST(test_update_rx_buf_array_1);
 	RUN_TEST(test_buffer_stack);
 	RUN_TEST(test_buffer_circular);
-	UNITY_END();
+
+	fflush(stdout);
 }
 
 

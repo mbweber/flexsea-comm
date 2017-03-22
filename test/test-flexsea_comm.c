@@ -222,13 +222,13 @@ void test_unpack_payload_2(void)
 
 void test_flexsea_comm(void)
 {
-	UNITY_BEGIN();
 	RUN_TEST(test_comm_gen_str_simple);
 	RUN_TEST(test_comm_gen_str_tooLong1);
 	RUN_TEST(test_comm_gen_str_tooLong2);
 	RUN_TEST(test_unpack_payload_1);
 	RUN_TEST(test_unpack_payload_2);
-	UNITY_END();
+
+	fflush(stdout);
 }
 
 #ifdef __cplusplus

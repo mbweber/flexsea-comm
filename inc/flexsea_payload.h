@@ -60,13 +60,6 @@ void flexsea_payload_catchall(uint8_t *buf, uint8_t *info);
 uint8_t tryUnpacking(CommPeriph *cp, PacketWrapper *pw);
 uint8_t tryUnpacking1(CommPeriph *cp, PacketWrapper *pw);
 
-//Weak function definition - real one will come from flexsea-system:
-uint8_t getBoardID(void) __attribute__((weak));
-uint8_t getBoardUpID(void) __attribute__((weak));
-uint8_t getBoardSubID(uint8_t sub, uint8_t idx) __attribute__((weak));
-uint8_t getSlaveCnt(uint8_t sub) __attribute__((weak));
-
-
 //****************************************************************************
 // Definition(s):
 //****************************************************************************
