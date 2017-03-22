@@ -34,13 +34,6 @@ extern "C" {
 #include <flexsea_circular_buffer.h>
 #include <string.h>
 
-//struct circularBuffer {
-//	uint8_t bytes[CB_BUF_LEN];
-//	int head;
-//	int tail;
-//	int size;
-//};
-
 void circ_buff_init(circularBuffer_t* cb)
 {
 	cb->head = -1;
@@ -53,36 +46,37 @@ void circ_buff_init(circularBuffer_t* cb)
 		b[i]=0;
 }
 
-int circ_buff_write(circularBuffer_t* cb, uint8_t *new_array, int len)
+int circ_buff_write(circularBuffer_t* cb, uint8_t *writeFrom, uint16_t numBytes)
 {
     const int MSG_BIGGER_THAN_BUFFER = 1;
     const int SUCCESS = 0;
     const int OVERWROTE = 2;
 
-    if(len > CB_BUF_LEN) { return MSG_BIGGER_THAN_BUFFER; }
-    int i = 0;
+	if(numBytes > CB_BUF_LEN) { return MSG_BIGGER_THAN_BUFFER; }
 
-    while(cb->head < cb->tail && cb->tail < CB_BUF_LEN && i < len)
-		(cb->bytes)[cb->tail++] = new_array[i++];
-
-    cb->tail %= CB_BUF_LEN;
-    if(cb->head < 0) { cb->head = 0; }
-
-    while(i < len)
+	if(cb->tail + numBytes <= CB_BUF_LEN)
 	{
-		(cb->bytes)[cb->tail] = new_array[i++];
-		cb->tail = (cb->tail + 1) % CB_BUF_LEN;
+		memcpy(cb->bytes + cb->tail, writeFrom, numBytes);
+	}
+	else
+	{
+		uint16_t bytesUntilEnd = CB_BUF_LEN - cb->tail;
+		memcpy(cb->bytes + cb->tail, writeFrom, bytesUntilEnd);
+		memcpy(cb->bytes, writeFrom + bytesUntilEnd, numBytes - bytesUntilEnd);
 	}
 
-    cb->size += i;
-    if(cb->size > CB_BUF_LEN)
-    {   // In this case we have overwritten data
-        cb->head = (cb->tail) % CB_BUF_LEN;
-        cb->size = CB_BUF_LEN;
-        return OVERWROTE;
-    }
+	if(cb->head < 0) cb->head = 0;
+	cb->tail = (cb->tail + numBytes) % CB_BUF_LEN;
+	cb->size += numBytes;
 
-    return SUCCESS;	
+	if(cb->size > CB_BUF_LEN)
+	{
+		//we've overwritten
+		cb->size = CB_BUF_LEN;
+		cb->head = cb->tail;
+		return OVERWROTE;
+	}
+	return SUCCESS;
 }
 
 uint8_t circ_buff_peak(circularBuffer_t* cb, uint16_t offset)
@@ -149,7 +143,7 @@ int circ_buff_read(circularBuffer_t* cb, uint8_t* readInto, uint16_t numBytes)
     }
     else
     {
-        int bytesUntilEnd = CB_BUF_LEN - 1 - cb->head;
+		uint16_t bytesUntilEnd = CB_BUF_LEN - cb->head;
         memcpy(readInto, cb->bytes + cb->head, bytesUntilEnd);
         memcpy(readInto + bytesUntilEnd, cb->bytes, numBytes - bytesUntilEnd);
     }
@@ -172,7 +166,7 @@ int circ_buff_read_section(circularBuffer_t* cb, uint8_t* readInto, uint16_t sta
     }
     else
     {
-        int bytesUntilEnd = CB_BUF_LEN - 1 - startOffset;
+		int bytesUntilEnd = CB_BUF_LEN - startOffset;
         memcpy(readInto, cb->bytes + cb->head, bytesUntilEnd);
         memcpy(readInto + bytesUntilEnd, cb->bytes, numBytes - bytesUntilEnd);
     }

@@ -139,41 +139,43 @@ void test_buffer_circular(void)
 
 	circularBuffer_t cb;
 	circ_buff_init(&cb);
-    uint8_t buf[RX_BUF_LEN];
+	uint8_t buf[CB_BUF_LEN];
 
 	uint8_t v;
-	for(i = 0; i < RX_BUF_LEN; i++)
+	for(i = 0; i < CB_BUF_LEN; i++)
 	{
 		v = i;
 		circ_buff_write(&cb, &v, 1);
 	}
 
-    circ_buff_read(&cb, buf, RX_BUF_LEN);
+	circ_buff_read(&cb, buf, CB_BUF_LEN);
 
     int fail = 0;
-    for(i = 0; i < RX_BUF_LEN; i++)
+	for(i = 0; i < CB_BUF_LEN; i++)
     {
-        fail = i != buf[i];
-        if(fail) break;
+		v = i;
+		fail = (v != buf[i]);
+		if(fail)
+			break;
     }
     TEST_ASSERT_FALSE_MESSAGE(fail, "READ/WRITE fail");
 
-	for(i = 0; i < RX_BUF_LEN/2; i++)
+	for(i = 0; i < CB_BUF_LEN/2; i++)
 	{
 		v = i;
 		circ_buff_write(&cb, &v, 1);
 	}
 
-	int expectedSize = RX_BUF_LEN;
+	int expectedSize = CB_BUF_LEN;
 	int actualSize = circ_buff_get_size(&cb);
 	TEST_ASSERT_EQUAL(expectedSize, actualSize);
 
 
-	TEST_ASSERT_EQUAL(0, circ_buff_read(&cb, buf, RX_BUF_LEN));
-    int firstVal = RX_BUF_LEN/2;
+	TEST_ASSERT_EQUAL(0, circ_buff_read(&cb, buf, CB_BUF_LEN));
+	int firstVal = CB_BUF_LEN/2;
     int lastVal = i-1;
     TEST_ASSERT_EQUAL(firstVal, buf[0]);
-    TEST_ASSERT_EQUAL(lastVal, buf[RX_BUF_LEN-1]);
+	TEST_ASSERT_EQUAL(lastVal, buf[CB_BUF_LEN-1]);
 
 	circ_buff_init(&cb);
 	//random tests
@@ -184,23 +186,23 @@ void test_buffer_circular(void)
 	for(i = 0; i < 5000; i++)
 	{
 		int shouldWrite = rand() % 2;
-		int l = rand() % (RX_BUF_LEN + 10);
+		int l = rand() % (CB_BUF_LEN + 10);
 		int result;
 		if(shouldWrite)
 		{
 			result = circ_buff_write(&cb, buf, l);
-			if(l > RX_BUF_LEN)
+			if(l > CB_BUF_LEN)
 			{ //expect
 				TEST_ASSERT_EQUAL_MESSAGE(1, result, "Expected to fail on write of size larger than buffer");
 			}
 			else
 			{
 				expectedSize += l;
-				expectedTail = (expectedTail + l) % RX_BUF_LEN;
-				if(expectedSize > RX_BUF_LEN)
+				expectedTail = (expectedTail + l) % CB_BUF_LEN;
+				if(expectedSize > CB_BUF_LEN)
 				{
 					expectedHead = expectedTail;
-					expectedSize = RX_BUF_LEN;
+					expectedSize = CB_BUF_LEN;
 					TEST_ASSERT_EQUAL_MESSAGE(2, result, "Expected overwrite");
 				}
 				else
@@ -217,7 +219,7 @@ void test_buffer_circular(void)
 		else
 		{
 			result = circ_buff_move_head(&cb, l);
-			if(l > RX_BUF_LEN)
+			if(l > CB_BUF_LEN)
 			{ //expect to fail
 
 				TEST_ASSERT_EQUAL_MESSAGE(1, result, "Expected to over reset buffer");
@@ -242,7 +244,7 @@ void test_buffer_circular(void)
 				}
 				else
 				{
-					expectedHead = (expectedHead + l) % RX_BUF_LEN;
+					expectedHead = (expectedHead + l) % CB_BUF_LEN;
 				}
 			}
 		}
