@@ -212,7 +212,7 @@ void test_buffer_circular(void)
 					{
 						printf("ASdf");
 					}
-					TEST_ASSERT_EQUAL_MESSAGE(0, result, "Expected success");
+					TEST_ASSERT_EQUAL_MESSAGE(0, result, "Expected write success");
 				}
 			}
 		}
@@ -222,14 +222,22 @@ void test_buffer_circular(void)
 			if(l > CB_BUF_LEN)
 			{ //expect to fail
 
-				TEST_ASSERT_EQUAL_MESSAGE(1, result, "Expected to over reset buffer");
+				TEST_ASSERT_EQUAL_MESSAGE(2, result, "Expected move more than max error");
 				expectedHead = -1;
 				expectedTail = 0;
 				expectedSize = 0;
 			}
 			else
 			{
-				TEST_ASSERT_EQUAL_MESSAGE(0, result, "Expected success");
+				if(lastSize - l >= 0)
+				{
+					if(0!=result)
+						printf("Asdf");
+					TEST_ASSERT_EQUAL_MESSAGE(0, result, "Expected move success");
+				}
+				else
+					TEST_ASSERT_EQUAL_MESSAGE(1, result, "Expected move more than buffered error");
+
 				expectedSize -= l;
 				if(expectedSize < 1)
 				{
