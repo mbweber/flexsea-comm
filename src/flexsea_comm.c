@@ -381,73 +381,63 @@ int8_t unpack_payload(uint8_t *buf, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAY
 
 uint16_t unpack_payload_cb(circularBuffer_t *cb, uint8_t *packed, uint8_t unpacked[PACKAGED_PAYLOAD_LEN])
 {
-	uint8_t buf[RX_BUF_LEN];
-	int bufSize = circ_buff_get_size(cb);
-	circ_buff_read(cb, buf, bufSize);
+    int bufSize = circ_buff_get_size(cb);
 
-	int i = 0, foundString = 0, foundFrame = 0, bytes, possibleFooterPos;
-	uint8_t checksum = 0;
+    int foundString = 0, foundFrame = 0, bytes, possibleFooterPos;
 	int lastPossibleHeaderIndex = bufSize - 4;
+    int headerPos = -1, lastHeaderPos = -1;
+    uint8_t checksum = 0;
 
-	while(!foundString && i < lastPossibleHeaderIndex)
+    while(!foundString && lastHeaderPos < lastPossibleHeaderIndex)
 	{
-		while(buf[i] != HEADER && i < lastPossibleHeaderIndex)
-			i++;
+        headerPos = circ_buff_search(cb, HEADER, lastHeaderPos+1);
+        //if we can't find a header, we quit searching for strings
+        if(headerPos == -1) break;
 
         foundFrame = 0;
-        if(buf[i] == HEADER)
+        if(headerPos <= lastPossibleHeaderIndex)
         {
-            bytes = buf[i+1];
-            possibleFooterPos = i + 3 + bytes;
-            foundFrame = (possibleFooterPos < bufSize && buf[possibleFooterPos] == FOOTER);
+            bytes = circ_buff_peak(cb, headerPos + 1);
+            possibleFooterPos = headerPos + 3 + bytes;
+            foundFrame = (possibleFooterPos < bufSize && circ_buff_peak(cb, possibleFooterPos) == FOOTER);
         }
 
-		if(foundFrame)
+        if(foundFrame)
 		{
-			checksum = 0;
-			int k;
-			for(k = 0; k < bytes; k++)
-				checksum += buf[i+2+k];
+            checksum = circ_buff_checksum(cb, headerPos+2, possibleFooterPos-1);
 
 			//if checksum is valid than we found a valid string
-			foundString = (checksum == buf[i+2+bytes]);
+            foundString = (checksum == circ_buff_peak(cb, possibleFooterPos-1));
 		}
 
 		//either we found a frame and it had a valid checksum, or we want to try the next value of i
-		if(!foundString)
-			i++;
+        lastHeaderPos = headerPos;
 	}
 
 	int numBytesInPackedString = 0;
 	if(foundString)
 	{
-        static int iLast = -1;
-        if(iLast != -1 && iLast == 0 && i != 0)
-        {
-            printf("DunGoofed\n");
-        }
-        iLast = i;
+        numBytesInPackedString = headerPos + bytes + 4;
 
-		// hopefully i is 0, if not we consider previous bytes as part of this string
-		// + 4 accounts for header, 'bytes', checksum, and footer
-		numBytesInPackedString = i + bytes + 4;
-		int k, skip = 0, unpacked_idx = 0;
+        circ_buff_read_section(cb, packed, headerPos, possibleFooterPos+1);
+
+        int k, skip = 0, unpacked_idx = 0;
 		for(k = 0; k < bytes; k++)
 		{
-			int index = i+k+2; //i points to header, next value is bytes, next value is first data
-			if(buf[index] == ESCAPE && skip == 0)
+            int index = k+2; //first value is header, next value is bytes, next value is first data
+            if(packed[index] == ESCAPE && skip == 0)
 			{
 				skip = 1;
 			}
 			else
 			{
 				skip = 0;
-				unpacked[unpacked_idx++] = buf[index];
+                unpacked[unpacked_idx++] = packed[index];
 			}
 		}
-		for(k = 0; k < bytes+4; k++)
-			packed[k] = buf[i+k];
 	}
+
+//    printf("hdrs: %d, ftrs: %d, strings: %d \n", headers, footers, numBytesInPackedString > 0);
 	return numBytesInPackedString;
 }
 
