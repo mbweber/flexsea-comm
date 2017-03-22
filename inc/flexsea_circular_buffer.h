@@ -33,7 +33,7 @@ extern "C" {
 
 #include <flexsea.h>
 
-#define CB_BUF_LEN RX_BUF_LEN
+#define CB_BUF_LEN (2*RX_BUF_LEN)
 
 typedef struct circularBuffer {
 	uint8_t bytes[CB_BUF_LEN];
@@ -47,7 +47,11 @@ typedef struct circularBuffer {
 
 void circ_buff_init(circularBuffer_t* cb);
 int circ_buff_write(circularBuffer_t* cb, uint8_t *new_array, int len);
+uint8_t circ_buff_peak(circularBuffer_t* cb, uint16_t offset);
+int32_t circ_buff_search(circularBuffer_t* cb, uint8_t value, uint16_t start);
+uint8_t circ_buff_checksum(circularBuffer_t* cb, uint16_t start, uint16_t end);
 int circ_buff_read(circularBuffer_t* cb, uint8_t* readInto, uint16_t numBytes);
+int circ_buff_read_section(circularBuffer_t* cb, uint8_t* readInto, uint16_t start, uint16_t end);
 int circ_buff_move_head(circularBuffer_t* cb, uint16_t numBytes);
 int circ_buff_get_size(circularBuffer_t* cb);
 int circ_buff_get_space(circularBuffer_t* cb);
