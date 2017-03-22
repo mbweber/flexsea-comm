@@ -62,13 +62,16 @@ int circ_buff_write(circularBuffer_t* cb, uint8_t *new_array, int len)
     int i = 0;
 
     while(cb->head < cb->tail && cb->tail < CB_BUF_LEN && i < len)
-        (cb->bytes)[cb->tail++] = new_array[i++];
+		(cb->bytes)[cb->tail++] = new_array[i++];
 
     cb->tail %= CB_BUF_LEN;
     if(cb->head < 0) { cb->head = 0; }
 
     while(i < len)
-        (cb->bytes)[cb->tail++] = new_array[i++];
+	{
+		(cb->bytes)[cb->tail] = new_array[i++];
+		cb->tail = (cb->tail + 1) % CB_BUF_LEN;
+	}
 
     cb->size += i;
     if(cb->size > CB_BUF_LEN)
@@ -109,6 +112,9 @@ int circ_buff_move_head(circularBuffer_t* cb, uint16_t numBytes)
 
     int originalNumBytes = numBytes;
     numBytes = numBytes < CB_BUF_LEN ? numBytes : CB_BUF_LEN;
+
+	if(cb->head < 0) //buffer is already empty
+		return (numBytes == originalNumBytes ? SUCCESS : MOVED_MORE_THAN_BUFFERED);
 
     //write zeros
 	int h = cb->head;

@@ -5,6 +5,9 @@ extern "C" {
 #include "flexsea-comm_test-all.h"
 #include <stdio.h>
 
+#include <time.h>
+#include <stdlib.h>
+
 //Definitions and variables used by some/all tests:
 //...
 
@@ -168,6 +171,95 @@ void test_buffer_circular(void)
     int lastVal = i-1;
     TEST_ASSERT_EQUAL(firstVal, buf[0]);
     TEST_ASSERT_EQUAL(lastVal, buf[RX_BUF_LEN-1]);
+
+	circ_buff_init(&cb);
+	//random tests
+	srand(time(NULL));
+	int lastSize = 0, lastHead = -1, lastTail = 0, firstTime = 1;
+	expectedSize = 0;
+	int expectedHead = -1, expectedTail = 0;
+	for(i = 0; i < 5000; i++)
+	{
+		int shouldWrite = rand() % 2;
+		int l = rand() % (RX_BUF_LEN + 10);
+		int result;
+		if(shouldWrite)
+		{
+			result = circ_buff_write(&cb, buf, l);
+			if(l > RX_BUF_LEN)
+			{ //expect
+				TEST_ASSERT_EQUAL_MESSAGE(1, result, "Expected to fail on write of size larger than buffer");
+			}
+			else
+			{
+				expectedSize += l;
+				expectedTail = (expectedTail + l) % RX_BUF_LEN;
+				if(expectedSize > RX_BUF_LEN)
+				{
+					expectedHead = expectedTail;
+					expectedSize = RX_BUF_LEN;
+					TEST_ASSERT_EQUAL_MESSAGE(2, result, "Expected overwrite");
+				}
+				else
+				{
+					expectedHead = expectedHead < 0 ? 0 : expectedHead;
+					if(result != 0)
+					{
+						printf("ASdf");
+					}
+					TEST_ASSERT_EQUAL_MESSAGE(0, result, "Expected success");
+				}
+			}
+		}
+		else
+		{
+			result = circ_buff_move_head(&cb, l);
+			if(l > RX_BUF_LEN)
+			{ //expect to fail
+
+				TEST_ASSERT_EQUAL_MESSAGE(1, result, "Expected to over reset buffer");
+				expectedHead = -1;
+				expectedTail = 0;
+				expectedSize = 0;
+			}
+			else
+			{
+				TEST_ASSERT_EQUAL_MESSAGE(0, result, "Expected success");
+				expectedSize -= l;
+				if(expectedSize < 1)
+				{
+					expectedHead = -1;
+					expectedTail = 0;
+					expectedSize = 0;
+
+					if(expectedHead != cb.head || expectedTail != cb.tail || expectedSize != cb.size)
+					{
+						printf("AsdfSD");
+					}
+				}
+				else
+				{
+					expectedHead = (expectedHead + l) % RX_BUF_LEN;
+				}
+			}
+		}
+
+
+
+		if(expectedHead != cb.head || expectedTail != cb.tail || expectedSize != cb.size)
+		{
+			printf("AsdfSD");
+		}
+
+
+		TEST_ASSERT_EQUAL_MESSAGE(expectedHead, cb.head, "Heads did not match");
+		TEST_ASSERT_EQUAL_MESSAGE(expectedTail, cb.tail, "Tails did not match");
+		TEST_ASSERT_EQUAL_MESSAGE(expectedSize, cb.size, "Sizes did not match");
+		lastSize = expectedSize;
+		lastHead = expectedHead;
+		lastTail = expectedTail;
+		firstTime = 0;
+	}
 }
 
 void test_flexsea_buffers(void)
