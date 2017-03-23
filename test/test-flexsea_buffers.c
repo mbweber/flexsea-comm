@@ -4,6 +4,7 @@ extern "C" {
 #include <flexsea_buffers.h>
 #include "flexsea-comm_test-all.h"
 #include <stdio.h>
+#include <string.h>
 
 #include <time.h>
 #include <stdlib.h>
@@ -444,7 +445,6 @@ void test_buffer_circular_checksum(void)
 
 void test_flexsea_buffers(void)
 {
-	UNITY_BEGIN();
 	//RUN_TEST(test_update_rx_buf_byte_1);
 	RUN_TEST(test_update_rx_buf_array_1);
 	RUN_TEST(test_buffer_stack);
@@ -453,7 +453,8 @@ void test_flexsea_buffers(void)
 	RUN_TEST(test_buffer_circular_write_erase);
 	RUN_TEST(test_buffer_circular_search);
 	RUN_TEST(test_buffer_circular_checksum);
-	UNITY_END();
+
+	fflush(stdout);
 }
 
 

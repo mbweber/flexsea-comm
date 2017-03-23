@@ -58,12 +58,10 @@ extern "C" {
 //****************************************************************************
 // Include(s)
 //****************************************************************************
-#include "flexsea_buffers.h"
+
 #include <string.h>
 #include <stdlib.h>
-#include "../inc/flexsea.h"
-#include "flexsea_board.h"
-#include "flexsea_system.h"
+#include <stdint.h>
 #include <flexsea_comm.h>
 
 #include <stdio.h>
@@ -74,42 +72,32 @@ extern "C" {
 
 uint8_t comm_str_tmp[COMM_STR_BUF_LEN];
 
-#ifdef ENABLE_FLEXSEA_BUF_1
 uint8_t comm_str_1[COMM_STR_BUF_LEN];
 uint8_t packed_1[COMM_STR_BUF_LEN];
 uint8_t rx_command_1[PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_1
 
-#ifdef ENABLE_FLEXSEA_BUF_2
 uint8_t comm_str_2[COMM_STR_BUF_LEN];
 uint8_t packed_2[COMM_STR_BUF_LEN];
 uint8_t rx_command_2[PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_2
 
-#ifdef ENABLE_FLEXSEA_BUF_3
 uint8_t comm_str_3[COMM_STR_BUF_LEN];
 uint8_t packed_3[COMM_STR_BUF_LEN];
 uint8_t rx_command_3[PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_3
 
-#ifdef ENABLE_FLEXSEA_BUF_4
 uint8_t comm_str_4[COMM_STR_BUF_LEN];
 uint8_t packed_4[COMM_STR_BUF_LEN];
 uint8_t rx_command_4[PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_4
 
-#ifdef ENABLE_FLEXSEA_BUF_5
 uint8_t comm_str_5[COMM_STR_BUF_LEN];
 uint8_t packed_5[COMM_STR_BUF_LEN];
 uint8_t rx_command_5[PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_5
 
 uint32_t cmd_valid = 0;
 uint32_t cmd_bad_checksum = 0;
 
 //ToDo: being replaced...
-struct comm_s slaveComm[COMM_SLAVE_BUS];	//ToDo remove
-struct comm_s masterComm[COMM_MASTERS];		//ToDo remove
+struct comm_s slaveComm[COMM_SLAVE_BUS_DEFAULT];	//ToDo remove
+struct comm_s masterComm[COMM_MASTERS_DEFAULT];		//ToDo remove
 
 PacketWrapper packet[NUMBER_OF_PORTS][2];
 CommPeriph commPeriph[NUMBER_OF_PORTS];
@@ -191,40 +179,30 @@ uint8_t comm_gen_str(uint8_t payload[], uint8_t *cstr, uint8_t bytes)
 
 //To avoid sharing buffers in multiple files we use specific functions:
 
-#ifdef ENABLE_FLEXSEA_BUF_1
 int8_t unpack_payload_1(void)
 {
 	return unpack_payload(rx_buf_1, packed_1, rx_command_1);
 }
-#endif	//ENABLE_FLEXSEA_BUF_1
 
-#ifdef ENABLE_FLEXSEA_BUF_2
 int8_t unpack_payload_2(void)
 {
 	return unpack_payload(rx_buf_2, packed_2, rx_command_2);
 }
-#endif	//ENABLE_FLEXSEA_BUF_2
 
-#ifdef ENABLE_FLEXSEA_BUF_3
 int8_t unpack_payload_3(void)
 {
 	return unpack_payload(rx_buf_3, packed_3, rx_command_3);
 }
-#endif	//ENABLE_FLEXSEA_BUF_3
 
-#ifdef ENABLE_FLEXSEA_BUF_4
 int8_t unpack_payload_4(void)
 {
 	return unpack_payload(rx_buf_4, packed_4, rx_command_4);
 }
-#endif	//ENABLE_FLEXSEA_BUF_4
 
-#ifdef ENABLE_FLEXSEA_BUF_5
 int8_t unpack_payload_5(void)
 {
 	return unpack_payload(rx_buf_5, packed_5, rx_command_5);
 }
-#endif	//ENABLE_FLEXSEA_BUF_5
 
 //Special wrapper for unit test code:
 int8_t unpack_payload_test(uint8_t *buf, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN])

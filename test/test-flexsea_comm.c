@@ -2,9 +2,11 @@
 extern "C" {
 #endif
 
+#include <string.h>
 #include "../inc/flexsea.h"
 #include "flexsea-comm_test-all.h"
 #include <flexsea_comm.h>
+#include <flexsea_sys_def.h>
 
 #include <time.h>
 #include <stdlib.h>
@@ -340,14 +342,14 @@ void test_circ_unpack(void)
 
 void test_flexsea_comm(void)
 {
-	UNITY_BEGIN();
 	RUN_TEST(test_comm_gen_str_simple);
 	RUN_TEST(test_comm_gen_str_tooLong1);
 	RUN_TEST(test_comm_gen_str_tooLong2);
 	RUN_TEST(test_unpack_payload_1);
 	RUN_TEST(test_unpack_payload_2);
 	RUN_TEST(test_circ_unpack);
-	UNITY_END();
+
+	fflush(stdout);
 }
 
 #ifdef __cplusplus

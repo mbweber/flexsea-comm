@@ -41,8 +41,6 @@ extern "C" {
 
 #include "flexsea.h"
 #include "flexsea_buffers.h"
-#include "flexsea_system.h"
-#include <flexsea_board.h>
 
 //****************************************************************************
 // Public Function Prototype(s):
@@ -52,18 +50,11 @@ uint8_t comm_gen_str(uint8_t payload[], uint8_t *cstr, uint8_t bytes);
 int8_t unpack_payload(uint8_t *buf, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN]);
 uint16_t unpack_payload_cb(circularBuffer_t *cb, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN]);
 
-#ifdef ENABLE_FLEXSEA_BUF_1
 int8_t unpack_payload_1(void);
-#endif	//ENABLE_FLEXSEA_BUF_1
-#ifdef ENABLE_FLEXSEA_BUF_2
 int8_t unpack_payload_2(void);
-#endif	//ENABLE_FLEXSEA_BUF_2
-#ifdef ENABLE_FLEXSEA_BUF_3
 int8_t unpack_payload_3(void);
-#endif	//ENABLE_FLEXSEA_BUF_3
-#ifdef ENABLE_FLEXSEA_BUF_4
 int8_t unpack_payload_4(void);
-#endif	//ENABLE_FLEXSEA_BUF_4
+
 int8_t unpack_payload_test(uint8_t *buf, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN]);
 
 //Random numbers and arrays:
@@ -171,34 +162,26 @@ struct comm_s
 
 extern uint8_t comm_str_tmp[COMM_STR_BUF_LEN];
 
-#ifdef ENABLE_FLEXSEA_BUF_1
 extern uint8_t comm_str_1[COMM_STR_BUF_LEN];
 extern uint8_t rx_command_1[PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_1
 
-#ifdef ENABLE_FLEXSEA_BUF_2
 extern uint8_t comm_str_2[COMM_STR_BUF_LEN];
 extern uint8_t rx_command_2[PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_2
 
-#ifdef ENABLE_FLEXSEA_BUF_3
 extern uint8_t comm_str_3[COMM_STR_BUF_LEN];
 extern uint8_t rx_command_3[PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_3
 
-#ifdef ENABLE_FLEXSEA_BUF_4
 extern uint8_t comm_str_4[COMM_STR_BUF_LEN];
 extern uint8_t rx_command_4[PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_4
 
-#ifdef ENABLE_FLEXSEA_BUF_5
 extern uint8_t comm_str_5[COMM_STR_BUF_LEN];
 extern uint8_t rx_command_5[PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_5
 
 //ToDo: being replaced...
-extern struct comm_s slaveComm[COMM_SLAVE_BUS];
-extern struct comm_s masterComm[COMM_MASTERS];
+#define COMM_SLAVE_BUS_DEFAULT 	5
+#define COMM_MASTERS_DEFAULT 	5
+extern struct comm_s slaveComm[COMM_SLAVE_BUS_DEFAULT];
+extern struct comm_s masterComm[COMM_MASTERS_DEFAULT];
 
 extern PacketWrapper packet[NUMBER_OF_PORTS][2];
 extern CommPeriph commPeriph[NUMBER_OF_PORTS];
@@ -229,6 +212,7 @@ extern struct commSpy_s commSpy1;
 
 #endif
 
+/*
 #ifdef BOARD_TYPE_FLEXSEA_PLAN
 
 //Overload buffer & function names (for user convenience):
@@ -249,6 +233,7 @@ extern struct commSpy_s commSpy1;
 #define update_rx_buf_array_spi		update_rx_buf_array_2
 
 #endif
+*/
 
 #ifdef __cplusplus
 }

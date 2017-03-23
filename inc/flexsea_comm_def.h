@@ -21,51 +21,80 @@
 	Biomechatronics research group <http://biomech.media.mit.edu/>
 	[Contributors]
 *****************************************************************************
-	[This file] flexsea_payload: deals with the "intelligent" data packaged
-	in a comm_str
+	[This file] flexsea: Master file for the FlexSEA stack.
 *****************************************************************************
 	[Change log] (Convention: YYYY-MM-DD | author | comment)
 	* 2016-09-09 | jfduval | Initial GPL-3.0 release
 	*
 ****************************************************************************/
 
-#ifndef INC_FX_PAYLOAD_H
-#define INC_FX_PAYLOAD_H
+#ifndef INC_FLEXSEA_COMM_DEF_H_
+#define INC_FLEXSEA_COMM_DEF_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 //****************************************************************************
-// Include(s)
+// Core features:
 //****************************************************************************
 
-#include <stdint.h>
-#include "flexsea_comm.h"
+//Buffers and packets:
+#define RX_BUF_LEN						100		//Reception buffer (flexsea_comm)
+#define PAYLOAD_BUF_LEN					36		//Number of bytes in a payload string
+#define PAYLOAD_BYTES					(PAYLOAD_BUF_LEN - 4)
+#define COMM_STR_BUF_LEN				48		//Number of bytes in a comm. string
+#define PACKAGED_PAYLOAD_LEN			48		//Temporary
+#define PAYLOAD_BUFFERS					4		//Max # of payload strings we expect to find
+#define MAX_CMD_CODE					127
+#define PACKET_WRAPPER_LEN				RX_BUF_LEN
+#define COMM_PERIPH_ARR_LEN				RX_BUF_LEN
+
+//Packet types:
+#define RX_PTYPE_READ					0
+#define RX_PTYPE_WRITE					1
+#define RX_PTYPE_REPLY					2
+#define RX_PTYPE_INVALID				3
+#define RX_PTYPE_MAX_INDEX				2
+
+//Board ID related defines:
+#define ID_MATCH						1		//Addressed to me
+#define ID_SUB1_MATCH					2		//Addressed to a board on slave bus #1
+#define ID_SUB2_MATCH					3		//Addressed to a board on slave bus #2
+#define ID_UP_MATCH						4		//Addressed to my master
+#define ID_NO_MATCH						0
+
+#define NUMBER_OF_PORTS		5	//Has to match enum!
+
+//Communication protocol payload fields:
+#define P_XID							0		//Emitter ID
+#define P_RID							1		//Receiver ID
+#define P_CMDS							2		//Number of Commands sent
+#define P_CMD1							3		//First command
+#define P_DATA1							4		//First data
+
+//Parser definitions:
+#define PARSE_DEFAULT					0
+#define PARSE_ID_NO_MATCH				1
+#define PARSE_SUCCESSFUL				2
+#define PARSE_UNKNOWN_CMD				3
+
+#define CMD_READ						1
+#define CMD_WRITE						2
+
+#define KEEP							0
+#define CHANGE							1
+
+//Read, Write, or Read&Write?
+#define WRITE							0
+#define READ							1
 
 //****************************************************************************
-// Shared variable(s)
-//****************************************************************************
-
-extern uint8_t payload_str[PAYLOAD_BUF_LEN];
-
-//****************************************************************************
-// Public Function Prototype(s):
-//****************************************************************************
-uint8_t payload_parse_str(PacketWrapper* foo);
-uint8_t sent_from_a_slave(uint8_t *buf);
-uint8_t packetType(uint8_t *buf);
-void prepare_empty_payload(uint8_t from, uint8_t to, uint8_t *buf, uint32_t len);
-void flexsea_payload_catchall(uint8_t *buf, uint8_t *info);
-uint8_t tryUnpacking(CommPeriph *cp, PacketWrapper *pw);
-uint8_t tryUnpacking1(CommPeriph *cp, PacketWrapper *pw);
-
-//****************************************************************************
-// Definition(s):
+// User implementation:
 //****************************************************************************
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif	//INC_FLEXSEA_COMM_DEF_H_
