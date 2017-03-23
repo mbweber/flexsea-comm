@@ -244,85 +244,96 @@ int testCircPackUnpack(circularBuffer_t* cb, uint8_t* comm_str, uint8_t* packed,
 	return unpack_payload_cb(cb, packed, unpacked);
 }
 
+int fillFakeReadAll(uint8_t* fakePayload)
+{
+	int index = 0;
+	fakePayload[index++] = FLEXSEA_PLAN_1;
+	fakePayload[index++] = FLEXSEA_MANAGE_1;
+	fakePayload[index++] = 1;
+	fakePayload[index++] = CMD_R(CMD_READ_ALL);
+
+	uint8_t value;
+	while(index < 44)
+	{
+		do { value = rand(); }
+		while(value == HEADER || value == FOOTER || value == ESCAPE);
+
+		fakePayload[index++] = value;
+	}
+
+	return index;
+}
+
 void test_circ_unpack(void)
 {
 	//First, we generate a comm_str:
 	//==============================
+	srand(time(NULL));
 
 	//Empty strings:
 	memset(fakePayload, 0, PAYLOAD_BUF_LEN);
 	memset(fakeCommStr, 0, COMM_STR_BUF_LEN);
 
-	//We build a fake "Read All" command:
-	fakePayload[P_XID] = FLEXSEA_PLAN_1;
-	fakePayload[P_RID] = FLEXSEA_MANAGE_1;
-	fakePayload[P_CMDS] = 1;
-	fakePayload[P_DATA1] = CMD_R(CMD_READ_ALL);
-
-	resetCommStats();
-	const int PAYLOAD_LEN = 4;
-	int comm_str_last_ind = comm_gen_str(fakePayload, fakeCommStr, PAYLOAD_LEN);
-
-	//We make copies for different tests:
-	memcpy(fakeCommStrArray0, fakeCommStr, COMM_STR_BUF_LEN);
-
-	srand(time(NULL));
-
 	circularBuffer_t cb;
 	circ_buff_init(&cb);
 
 	//Positive tests, it should find a comm str
-	int preOffsetMax = CB_BUF_LEN - COMM_STR_BUF_LEN;
+	int preOffsetMax;
 	uint8_t tPacked[RX_BUF_LEN];
 	uint8_t tUnpacked[RX_BUF_LEN];
-	int i, j, preoffset, postoffset, expected, result;
-	for(i = 0; i < 10; i++)
+	int i, j, preoffset, postoffset, expected, result, lengthUnpacked, comm_str_last_ind;
+	for(i = 0; i < 100; i++)
 	{
+		lengthUnpacked = fillFakeReadAll(fakePayload);
+		resetCommStats();
+		comm_str_last_ind = comm_gen_str(fakePayload, fakeCommStr, lengthUnpacked);
+		preOffsetMax = CB_BUF_LEN - comm_str_last_ind - 1;
 		preoffset = rand() % preOffsetMax;
 		postoffset = CB_BUF_LEN - COMM_STR_BUF_LEN - preoffset;
-		result = testCircPackUnpack(&cb, fakeCommStrArray0, tPacked, tUnpacked, preoffset, postoffset);
+		result = testCircPackUnpack(&cb, fakeCommStr, tPacked, tUnpacked, preoffset, postoffset);
 		expected = preoffset + comm_str_last_ind + 1;
 		TEST_ASSERT_EQUAL(expected, result);
-		for(j = 0; j < PAYLOAD_LEN; j++)
+		for(j = 0; j < lengthUnpacked; j++)
 		{
-			TEST_ASSERT_EQUAL(fakePayload[j], tUnpacked[j]);
+			TEST_ASSERT_EQUAL_MESSAGE(fakePayload[j], tUnpacked[j], "Positive case, unpacked strings mismatch");
 		}
 		for(j = 0; j <= comm_str_last_ind; j++)
 		{
-			TEST_ASSERT_EQUAL(fakeCommStrArray0[j], tPacked[j]);
+			TEST_ASSERT_EQUAL_MESSAGE(fakeCommStr[j], tPacked[j], "Positive case, packed strings mismatch");
 		}
 	}
+
 	//Negative tests, invalid comm str
 	//numbytes is wrong
-	fakeCommStrArray0[1] = fakeCommStrArray0[1] * 2;
+	fakeCommStr[1] = fakeCommStr[1] * 2;
 	expected = 0;
 	for(i = 0; i < 10; i++)
 	{
 		preoffset = rand() % preOffsetMax;
 		postoffset = CB_BUF_LEN - COMM_STR_BUF_LEN - preoffset;
-		result = testCircPackUnpack(&cb, fakeCommStrArray0, tPacked, tUnpacked, preoffset, postoffset);
+		result = testCircPackUnpack(&cb, fakeCommStr, tPacked, tUnpacked, preoffset, postoffset);
 		TEST_ASSERT_EQUAL(expected, result);
 	}
-	fakeCommStrArray0[1] = fakeCommStrArray0[1] / 2;
+	fakeCommStr[1] = fakeCommStr[1] / 2;
 	//footer is wrong
-	fakeCommStrArray0[comm_str_last_ind] = 0;
+	fakeCommStr[comm_str_last_ind] = 0;
 	expected = 0;
 	for(i = 0; i < 10; i++)
 	{
 		preoffset = rand() % preOffsetMax;
 		postoffset = CB_BUF_LEN - COMM_STR_BUF_LEN - preoffset;
-		result = testCircPackUnpack(&cb, fakeCommStrArray0, tPacked, tUnpacked, preoffset, postoffset);
+		result = testCircPackUnpack(&cb, fakeCommStr, tPacked, tUnpacked, preoffset, postoffset);
 		TEST_ASSERT_EQUAL(expected, result);
 	}
 	//checksum is wrong
-	fakeCommStrArray0[comm_str_last_ind] = FOOTER;
-	fakeCommStrArray0[comm_str_last_ind-1] *= 2;
+	fakeCommStr[comm_str_last_ind] = FOOTER;
+	fakeCommStr[comm_str_last_ind-1] *= 2;
 	expected = 0;
 	for(i = 0; i < 10; i++)
 	{
 		preoffset = rand() % preOffsetMax;
 		postoffset = CB_BUF_LEN - COMM_STR_BUF_LEN - preoffset;
-		result = testCircPackUnpack(&cb, fakeCommStrArray0, tPacked, tUnpacked, preoffset, postoffset);
+		result = testCircPackUnpack(&cb, fakeCommStr, tPacked, tUnpacked, preoffset, postoffset);
 		TEST_ASSERT_EQUAL(expected, result);
 	}
 }
@@ -334,7 +345,7 @@ void test_flexsea_comm(void)
 	RUN_TEST(test_comm_gen_str_tooLong1);
 	RUN_TEST(test_comm_gen_str_tooLong2);
 	RUN_TEST(test_unpack_payload_1);
-//	RUN_TEST(test_unpack_payload_2);
+	RUN_TEST(test_unpack_payload_2);
 	RUN_TEST(test_circ_unpack);
 	UNITY_END();
 }

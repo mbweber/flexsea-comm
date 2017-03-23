@@ -33,7 +33,7 @@ extern "C" {
 
 #include <flexsea.h>
 
-#define CB_BUF_LEN (48*2-1)
+#define CB_BUF_LEN (RX_BUF_LEN)
 
 typedef struct circularBuffer {
 	uint8_t bytes[CB_BUF_LEN];

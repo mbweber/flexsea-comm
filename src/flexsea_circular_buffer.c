@@ -158,59 +158,20 @@ int circ_buff_read_section(circularBuffer_t* cb, uint8_t* readInto, uint16_t sta
     const int SUCCESS = 0;
     const int INVALID_ARGS = 1;
 
-    if(!cb || !readInto || start + numBytes > cb->size) { return INVALID_ARGS; }
+	if(!cb || !readInto || start + numBytes > cb->size) { return INVALID_ARGS; }
 
-    uint16_t s = (cb->head + start) % CB_BUF_LEN;
-    if(s + numBytes > CB_BUF_LEN)
-    {
-        uint16_t bytesUntilEnd = CB_BUF_LEN - s;
-        memcpy(readInto, cb->bytes + s, bytesUntilEnd);
-        memcpy(readInto + bytesUntilEnd, cb->bytes, numBytes - bytesUntilEnd);
-    }
-    else
-    {
-        memcpy(readInto, cb->bytes + s, numBytes);
-    }
-    return SUCCESS;
-
-//    if(cb->head + start > CB_BUF_LEN)
-//    {
-
-//    }
-//    else
-//    {
-//        if(cb->head + start + numBytes > CB_BUF_LEN)
-//        {
-
-//        }
-//    }
-
-
-//    if(cb->head + end < CB_BUF_LEN || startOffset >= CB_BUF_LEN)
-//    {
-//        memcpy(readInto, cb->bytes + (startOffset % CB_BUF_LEN), numBytes);
-//    }
-//    else
-//    {
-//		uint16_t bytesUntilEnd = CB_BUF_LEN - startOffset;
-//        memcpy(readInto, cb->bytes + cb->head, bytesUntilEnd);
-//        memcpy(readInto + bytesUntilEnd, cb->bytes, numBytes - bytesUntilEnd);
-//    }
-
-//    return SUCCESS;
-
-//    int i = 0;
-//    int h = cb->head + start; // no modulo on purpose, it would have same affect
-
-//    while(i < numBytes && h < CB_BUF_LEN)
-//        readInto[i++] = (cb->bytes)[h++];
-
-//    h %= CB_BUF_LEN;
-
-//    while(i < numBytes)
-//        readInto[i++] = (cb->bytes)[h++];
-
-//    return SUCCESS;
+	uint16_t s = (cb->head + start) % CB_BUF_LEN;
+	if(s + numBytes > CB_BUF_LEN)
+	{
+		uint16_t bytesUntilEnd = CB_BUF_LEN - s;
+		memcpy(readInto, cb->bytes + s, bytesUntilEnd);
+		memcpy(readInto + bytesUntilEnd, cb->bytes, numBytes - bytesUntilEnd);
+	}
+	else
+	{
+		memcpy(readInto, cb->bytes + s, numBytes);
+	}
+	return SUCCESS;
 }
 
 
@@ -256,35 +217,6 @@ int circ_buff_move_head(circularBuffer_t* cb, uint16_t numBytes)
 	}
 
 	return result;
-
-//    //write zeros
-//	int h = cb->head;
-//    int i = 0;
-    
-//    while(h < CB_BUF_LEN && i < numBytes)
-//    {
-//    	(cb->bytes)[h++] = 0;
-//    	i++;
-//    }
-    
-//    h %= CB_BUF_LEN;
-    
-//    while(i < numBytes)
-//    {
-//    	(cb->bytes)[h++] = 0;
-//    	i++;
-//    }
-    
-//    cb->head = h;
-//    cb->size -= numBytes;
-//    if(cb->size < 1) //if the buffer is empty, we can reinitialize the buffer
-//    {
-//    	cb->head = -1;
-//    	cb->tail = 0;
-//    	cb->size = 0;
-//    }
-
-//    return (numBytes == originalNumBytes ? SUCCESS : MOVED_MORE_THAN_BUFFERED);
 }
 
 int circ_buff_get_size(circularBuffer_t* cb)  { return cb->size; }

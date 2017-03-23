@@ -422,7 +422,7 @@ uint16_t unpack_payload_cb(circularBuffer_t *cb, uint8_t *packed, uint8_t unpack
 	{
         numBytesInPackedString = headerPos + bytes + 4;
 
-        circ_buff_read_section(cb, packed, headerPos, possibleFooterPos+1);
+		circ_buff_read_section(cb, packed, headerPos, bytes + 4);
 
         int k, skip = 0, unpacked_idx = 0;
 		for(k = 0; k < bytes; k++)
@@ -440,8 +440,6 @@ uint16_t unpack_payload_cb(circularBuffer_t *cb, uint8_t *packed, uint8_t unpack
 		}
 	}
 
-//    printf("hdrs: %d, ftrs: %d, strings: %d \n", headers, footers, numBytesInPackedString > 0);
-//    fflush(stdout);
 	return numBytesInPackedString;
 }
 
