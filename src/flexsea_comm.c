@@ -184,7 +184,7 @@ uint8_t comm_gen_str(uint8_t payload[], uint8_t *cstr, uint8_t bytes)
 	cstr[2 + total_bytes] = checksum;
 	cstr[3 + total_bytes] = FOOTER;
 
-	//Return the length of the valid data
+	//Return the last index of the valid data
 	commSpy1.retVal = 3 + (uint8_t)total_bytes;
 	return (3 + total_bytes);
 }
