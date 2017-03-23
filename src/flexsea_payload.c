@@ -252,7 +252,6 @@ static void route(PacketWrapper * p, PortType to)
 			p->destinationPort = PORT_USB;
 			copyPacket(p, &packet[idx][OUTBOUND], UPSTREAM);
 			//packet[idx][OUTBOUND].cmd = packet[idx][OUTBOUND].unpaked[P_CMD1];
-			//slaveCommPeriph[idx].tx.packetReady = 1;
 			flexsea_send_serial_master(p);
 		}
 

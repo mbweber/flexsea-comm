@@ -73,29 +73,21 @@ uint8_t comm_str_tmp[COMM_STR_BUF_LEN];
 uint8_t comm_str_1[COMM_STR_BUF_LEN];
 uint8_t packed_1[COMM_STR_BUF_LEN];
 uint8_t rx_command_1[PACKAGED_PAYLOAD_LEN];
-
 uint8_t comm_str_2[COMM_STR_BUF_LEN];
 uint8_t packed_2[COMM_STR_BUF_LEN];
 uint8_t rx_command_2[PACKAGED_PAYLOAD_LEN];
-
 uint8_t comm_str_3[COMM_STR_BUF_LEN];
 uint8_t packed_3[COMM_STR_BUF_LEN];
 uint8_t rx_command_3[PACKAGED_PAYLOAD_LEN];
-
 uint8_t comm_str_4[COMM_STR_BUF_LEN];
 uint8_t packed_4[COMM_STR_BUF_LEN];
 uint8_t rx_command_4[PACKAGED_PAYLOAD_LEN];
-
 uint8_t comm_str_5[COMM_STR_BUF_LEN];
 uint8_t packed_5[COMM_STR_BUF_LEN];
 uint8_t rx_command_5[PACKAGED_PAYLOAD_LEN];
 
 uint32_t cmd_valid = 0;
 uint32_t cmd_bad_checksum = 0;
-
-//ToDo: being replaced...
-struct comm_s slaveComm[COMM_SLAVE_BUS_DEFAULT];	//ToDo remove
-struct comm_s masterComm[COMM_MASTERS_DEFAULT];		//ToDo remove
 
 PacketWrapper packet[NUMBER_OF_PORTS][2];
 CommPeriph commPeriph[NUMBER_OF_PORTS];
