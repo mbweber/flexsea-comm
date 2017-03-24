@@ -64,8 +64,6 @@ extern "C" {
 #include <stdint.h>
 #include <flexsea_comm.h>
 
-#include <stdio.h>
-
 //****************************************************************************
 // Variable(s)
 //****************************************************************************
@@ -445,7 +443,7 @@ void copyPacket(PacketWrapper *from, PacketWrapper *to, TravelDirection td)
 
 //Initialize CommPeriph to defaults:
 void initCommPeriph(CommPeriph *cp, Port port, PortType pt, uint8_t *input, \
-                    uint8_t *packed, uint8_t *unpacked, \
+					uint8_t *unpacked, uint8_t *packed, circularBuffer_t* rx_cb, \
 					PacketWrapper *inbound, PacketWrapper *outbound)
 {
 	cp->port = port;
@@ -457,15 +455,19 @@ void initCommPeriph(CommPeriph *cp, Port port, PortType pt, uint8_t *input, \
 	cp->rx.inputBufferPtr = input;
 	cp->rx.unpackedPtr = unpacked;
 	cp->rx.packedPtr = packed;
-	memset(cp->rx.packed, 0, COMM_PERIPH_ARR_LEN);
-	memset(cp->rx.unpacked, 0, COMM_PERIPH_ARR_LEN);
+	memset(cp->rx.packedPtr, 0, COMM_PERIPH_ARR_LEN);
+	memset(cp->rx.unpackedPtr, 0, COMM_PERIPH_ARR_LEN);
+
+	circ_buff_init(rx_cb);
+	cp->rx.circularBuff = rx_cb;
+
 
 	cp->tx.bytesReadyFlag = 0;
 	cp->tx.unpackedPacketsAvailable = 0;
-	cp->tx.unpackedPtr = cp->tx.unpacked;
-	cp->tx.packedPtr = cp->tx.packed;
-	memset(cp->tx.packed, 0, COMM_PERIPH_ARR_LEN);
-	memset(cp->tx.unpacked, 0, COMM_PERIPH_ARR_LEN);
+//	cp->tx.unpackedPtr = cp->tx.unpacked;
+//	cp->tx.packedPtr = cp->tx.packed;
+//	memset(cp->tx.packed, 0, COMM_PERIPH_ARR_LEN);
+//	memset(cp->tx.unpacked, 0, COMM_PERIPH_ARR_LEN);
 
 	linkCommPeriphPacketWrappers(cp, inbound, outbound);
 }

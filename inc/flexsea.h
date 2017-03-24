@@ -37,6 +37,7 @@ extern "C" {
 
 #include <stdint.h>
 #include "flexsea_comm_def.h"
+#include <flexsea_circular_buffer.h>
 
 //#define USE_DEBUG_PRINTF			//Enable this to debug with the terminal
 
@@ -181,8 +182,9 @@ typedef struct
 	uint8_t *inputBufferPtr;	//Points to rx_buf_
 	uint8_t *unpackedPtr;		//Points to comm_str_
 	uint8_t *packedPtr;			//Points to rx_cmd_
-	uint8_t unpacked[COMM_PERIPH_ARR_LEN];
-	uint8_t packed[COMM_PERIPH_ARR_LEN];
+	circularBuffer_t* circularBuff;
+//	uint8_t unpacked[COMM_PERIPH_ARR_LEN];
+//	uint8_t packed[COMM_PERIPH_ARR_LEN];
 
 	//Note: using both pointers and arrays to ease the refactoring
 }CommPeriphSub;

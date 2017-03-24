@@ -197,36 +197,30 @@ uint8_t tryUnpacking(CommPeriph *cp, PacketWrapper *pw)
 	return retVal;
 }
 
-uint8_t tryUnpacking1(CommPeriph *cp, PacketWrapper *pw)
+inline uint8_t tryParseRx(CommPeriph *cp, PacketWrapper *pw)
 {
-	uint8_t retVal = 0;
 
-	if(cp->rx.bytesReadyFlag > 0)
+	uint8_t successfulParse = 0, error;
+
+	uint16_t numBytesConverted = unpack_payload_cb(\
+			cp->rx.circularBuff, \
+			cp->rx.packedPtr, \
+			cp->rx.unpackedPtr);
+
+	if(numBytesConverted > 0)
 	{
-		//Try unpacking. This is the only way to know if we have a packet and
-		//not just random bytes, or an incomplete packet.
+		error = circ_buff_move_head(cp->rx.circularBuff, numBytesConverted);
 
-		int numBytesConverted;
-		do {
-			numBytesConverted = unpack_payload_cb(\
-					&rx_buf_circ_1, \
-					cp->rx.packedPtr, \
-					cp->rx.unpackedPtr);
-
-			if(numBytesConverted > 0)
-			{
-				circ_buff_move_head(&rx_buf_circ_1, numBytesConverted);
-				cp->rx.unpackedPacketsAvailable = 1;
-				fillPacketFromCommPeriph(cp, pw);
-				retVal = 1;
-			}
-        } while(0);
-
-		//Drop flag
-		cp->rx.bytesReadyFlag = 0;
+#ifdef USE_PRINTF
+		if(error)
+			printf() << "circ_buff_move_head error:" << error;
+#endif
+		fillPacketFromCommPeriph(cp, pw);
+		// payload_parse_str returns 2 on successful parse
+		successfulParse = payload_parse_str(pw) == 2;
 	}
 
-	return retVal;
+	return successfulParse;
 }
 
 //****************************************************************************

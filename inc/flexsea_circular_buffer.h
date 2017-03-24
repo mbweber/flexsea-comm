@@ -27,11 +27,15 @@
 	* 2017-03-21 | dudds4 | Initial GPL-3.0 release
 ****************************************************************************/
 
+#ifndef FLEXSEA_CIRCULAR_BUFFER_H
+#define FLEXSEA_CIRCULAR_BUFFER_H
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <flexsea.h>
+#include <flexsea_comm_def.h>
+#include <stdint.h>
 
 #define CB_BUF_LEN (RX_BUF_LEN)
 
@@ -59,3 +63,5 @@ uint8_t circ_buff_checksum(circularBuffer_t* cb, uint16_t start, uint16_t end);
 #ifdef __cplusplus
 }
 #endif
+
+#endif //FLEXSEA_CIRCULAR_BUFFER_H

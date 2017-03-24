@@ -65,7 +65,7 @@ void generateRandomUint8Array(uint8_t *arr, uint8_t size);
 void fillPacketFromCommPeriph(CommPeriph *cp, PacketWrapper *pw);
 void copyPacket(PacketWrapper *from, PacketWrapper *to, TravelDirection td);
 void initCommPeriph(CommPeriph *cp, Port port, PortType pt, uint8_t *input, \
-					uint8_t *unpacked, uint8_t *packed, \
+					uint8_t *unpacked, uint8_t *packed, circularBuffer_t* rx_cb, \
 					PacketWrapper *inbound, PacketWrapper *outbound);
 void linkCommPeriphPacketWrappers(CommPeriph *cp, PacketWrapper *inbound, \
 					PacketWrapper *outbound);
