@@ -39,6 +39,17 @@ extern "C" {
 // Core features:
 //****************************************************************************
 
+//Framing:
+#define HEADER  						0xED	//237d
+#define FOOTER  						0xEE	//238d
+#define ESCAPE  						0xE9	//233d
+
+//Return codes:
+#define UNPACK_ERR_HEADER				-1
+#define UNPACK_ERR_FOOTER				-2
+#define UNPACK_ERR_LEN					-3
+#define UNPACK_ERR_CHECKSUM				-4
+
 //Buffers and packets:
 #define RX_BUF_LEN						100		//Reception buffer (flexsea_comm)
 #define PAYLOAD_BUF_LEN					36		//Number of bytes in a payload string
@@ -88,6 +99,10 @@ extern "C" {
 //Read, Write, or Read&Write?
 #define WRITE							0
 #define READ							1
+
+//Update buffer
+#define UPDATE_BYTE						0
+#define UPDATE_ARRAY					1
 
 //****************************************************************************
 // User implementation:

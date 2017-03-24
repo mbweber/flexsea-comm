@@ -74,26 +74,6 @@ void linkCommPeriphPacketWrappers(CommPeriph *cp, PacketWrapper *inbound, \
 // Definition(s):
 //****************************************************************************
 
-//Framing:
-#define HEADER  				0xED	//237d
-#define FOOTER  				0xEE	//238d
-#define ESCAPE  				0xE9	//233d
-
-//Return codes:
-#define UNPACK_ERR_HEADER		-1
-#define UNPACK_ERR_FOOTER		-2
-#define UNPACK_ERR_LEN			-3
-#define UNPACK_ERR_CHECKSUM		-4
-
-//Generic transceiver state:	//ToDo being replaced by TransceiverSate
-#define TRANS_STATE_UNKNOWN		0
-#define TRANS_STATE_TX			1
-#define TRANS_STATE_TX_THEN_RX	2
-#define TRANS_STATE_PREP_RX		3
-#define TRANS_STATE_RX			4
-//Pure write: stays TRANS_STATE_TX
-//Read: TRANS_STATE_TX_THEN_RX => TRANS_STATE_PREP_RX => TRANS_STATE_RX
-
 //Enable this to debug with the terminal:
 //#define DEBUG_COMM_PRINTF_
 
@@ -120,42 +100,6 @@ struct commSpy_s
 	uint8_t error;
 };
 
-struct comm_rx_s
-{
-	int8_t cmdReady;
-	uint16_t bytesReady;
-
-	//Pointers to buffers:
-	uint8_t *rxBuf;
-	uint8_t *commStr;
-	uint8_t *rxCmd;
-};
-
-struct comm_tx_s
-{
-	//ToDo: this is a copy of what I had before. I'm expecting that it will
-	//be reworked soon
-
-	uint8_t txBuf[COMM_STR_BUF_LEN];
-	uint8_t cmd;
-	uint8_t len;
-	uint8_t inject;
-
-};
-
-struct comm_s
-{
-	uint8_t port;
-	uint8_t reply_port;
-	int8_t transceiverState;
-
-	//Reception:
-	struct comm_rx_s rx;
-
-	//Transmission:
-	struct comm_tx_s tx;
-};
-
 //****************************************************************************
 // Shared variable(s)
 //****************************************************************************
@@ -164,76 +108,19 @@ extern uint8_t comm_str_tmp[COMM_STR_BUF_LEN];
 
 extern uint8_t comm_str_1[COMM_STR_BUF_LEN];
 extern uint8_t rx_command_1[PACKAGED_PAYLOAD_LEN];
-
 extern uint8_t comm_str_2[COMM_STR_BUF_LEN];
 extern uint8_t rx_command_2[PACKAGED_PAYLOAD_LEN];
-
 extern uint8_t comm_str_3[COMM_STR_BUF_LEN];
 extern uint8_t rx_command_3[PACKAGED_PAYLOAD_LEN];
-
 extern uint8_t comm_str_4[COMM_STR_BUF_LEN];
 extern uint8_t rx_command_4[PACKAGED_PAYLOAD_LEN];
-
 extern uint8_t comm_str_5[COMM_STR_BUF_LEN];
 extern uint8_t rx_command_5[PACKAGED_PAYLOAD_LEN];
-
-//ToDo: being replaced...
-#define COMM_SLAVE_BUS_DEFAULT 	5
-#define COMM_MASTERS_DEFAULT 	5
-extern struct comm_s slaveComm[COMM_SLAVE_BUS_DEFAULT];
-extern struct comm_s masterComm[COMM_MASTERS_DEFAULT];
 
 extern PacketWrapper packet[NUMBER_OF_PORTS][2];
 extern CommPeriph commPeriph[NUMBER_OF_PORTS];
 
 extern struct commSpy_s commSpy1;
-
-//Overload buffer & function names (for user convenience):
-
-#ifdef BOARD_TYPE_FLEXSEA_EXECUTE
-
-#define comm_str_485_1 					comm_str_1
-#define unpack_payload_485 				unpack_payload_1
-#define rx_command_485 					rx_command_1
-#define update_rx_buf_byte_485 			update_rx_buf_byte_1
-#define update_rx_buf_array_485 		update_rx_buf_array_1
-
-#define comm_str_usb 					comm_str_2
-#define unpack_payload_usb			 	unpack_payload_2
-#define rx_command_usb 					rx_command_2
-#define update_rx_buf_byte_usb 			update_rx_buf_byte_2
-#define update_rx_buf_array_usb 		update_rx_buf_array_2
-
-#define comm_str_wireless				comm_str_3
-#define unpack_payload_wireless			unpack_payload_3
-#define rx_command_wireless				rx_command_3
-#define update_rx_buf_byte_wireless		update_rx_buf_byte_3
-#define update_rx_buf_array_wireless	update_rx_buf_array_3
-
-#endif
-
-/*
-#ifdef BOARD_TYPE_FLEXSEA_PLAN
-
-//Overload buffer & function names (for user convenience):
-
-#define comm_str_usb				comm_str_1
-#define unpack_payload_usb			unpack_payload_1
-#define rx_command_usb				rx_command_1
-
-#define update_rx_buf_byte_usb		update_rx_buf_byte_1
-#define update_rx_buf_array_usb		update_rx_buf_array_1
-
-#define update_rx_buf_usb(x, y)		circ_buff_write(&rx_buf_circ_1, (x), (y))
-
-#define comm_str_spi				comm_str_2
-#define unpack_payload_spi			unpack_payload_2
-#define rx_command_spi				rx_command_2
-#define update_rx_buf_byte_spi		update_rx_buf_byte_2
-#define update_rx_buf_array_spi		update_rx_buf_array_2
-
-#endif
-*/
 
 #ifdef __cplusplus
 }
