@@ -59,8 +59,8 @@ int8_t unpack_payload_test(uint8_t *buf, uint8_t *packed, uint8_t rx_cmd[PACKAGE
 
 //Random numbers and arrays:
 void initRandomGenerator(int seed);
-uint8_t generateRandomUint8(void);
-void generateRandomUint8Array(uint8_t *arr, uint8_t size);
+uint8_t generateRandomUint8_t(void);
+void generateRandomUint8_tArray(uint8_t *arr, uint8_t size);
 
 void fillPacketFromCommPeriph(CommPeriph *cp, PacketWrapper *pw);
 void copyPacket(PacketWrapper *from, PacketWrapper *to, TravelDirection td);

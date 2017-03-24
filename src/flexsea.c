@@ -35,7 +35,7 @@
 // - The board config is pretty much fixed, at compile time.
 // - Only 1 command per transmission
 // - Fixed payload length: ? bytes (allows you to send 1 command with up to
-//   ? arguments (uint8) (update this)
+//   ? arguments (uint8_t) (update this)
 // - Fixed comm_str length: 24 bytes (min. to accomodate a payload where all the
 //   data bytes need escaping)
 // - In comm_str #OfBytes isn't escaped. Ok as long as the count is less than

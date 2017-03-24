@@ -205,19 +205,19 @@ void initRandomGenerator(int seed)
 	srand(seed);
 }
 
-uint8_t generateRandomUint8(void)
+uint8_t generateRandomUint8_t(void)
 {
 	int r = rand();
 	return (uint8_t)(r % 255);
 }
 
-void generateRandomUint8Array(uint8_t *arr, uint8_t size)
+void generateRandomUint8_tArray(uint8_t *arr, uint8_t size)
 {
 	int i = 0;
 
 	for(i = 0; i < size; i++)
 	{
-		arr[i] = generateRandomUint8();
+		arr[i] = generateRandomUint8_t();
 	}
 }
 
