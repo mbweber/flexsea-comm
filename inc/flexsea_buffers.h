@@ -86,7 +86,8 @@ void test_upd(void);
 // New code - not integrated - test in progress:
 //****************************************************************************
 
-extern circularBuffer_t rx_buf_circ_1, rx_buf_circ_2, rx_buf_circ_3;
+extern circularBuffer_t rx_buf_circ_1, rx_buf_circ_2;
+extern circularBuffer_t rx_buf_circ_3, rx_buf_circ_4;
 
 #ifdef __cplusplus
 }
