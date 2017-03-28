@@ -197,9 +197,12 @@ uint8_t tryUnpacking(CommPeriph *cp, PacketWrapper *pw)
 	return retVal;
 }
 
+// Using these ifdefs is a non ideal approach
+// plan should refactor to use manage's tryParseRx
+// done this way so that this commit doesn't break plan, but it should be removed ASAP
+#ifdef BOARD_TYPE_FLEXSEA_PLAN
 inline uint8_t tryParseRx(CommPeriph *cp, PacketWrapper *pw)
 {
-
 	uint8_t successfulParse = 0, error;
 
 	uint16_t numBytesConverted = unpack_payload_cb(\
@@ -222,7 +225,35 @@ inline uint8_t tryParseRx(CommPeriph *cp, PacketWrapper *pw)
 
 	return successfulParse;
 }
+#endif
+#ifndef BOARD_TYPE_FLEXSEA_PLAN
+inline uint8_t tryParseRx(CommPeriph *cp, PacketWrapper *pw)
+{
+	if(!(cp->rx.bytesReadyFlag > 0)) return 0;
+	cp->rx.bytesReadyFlag = 0;
+	uint8_t error = 0;
 
+	uint16_t numBytesConverted = unpack_payload_cb(\
+			cp->rx.circularBuff, \
+			cp->rx.packedPtr, \
+			cp->rx.unpackedPtr);
+
+	if(numBytesConverted > 0)
+	{
+		error = circ_buff_move_head(cp->rx.circularBuff, numBytesConverted);
+
+#ifdef USE_PRINTF
+		if(error)
+			printf() << "circ_buff_move_head error:" << error;
+#endif
+		fillPacketFromCommPeriph(cp, pw);
+		// payload_parse_str returns 2 on successful parse
+		//successfulParse = payload_parse_str(pw) == 2;
+	}
+
+	return numBytesConverted > 0 && !error;
+}
+#endif
 //****************************************************************************
 // Private Function(s):
 //****************************************************************************
