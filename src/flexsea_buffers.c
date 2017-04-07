@@ -351,4 +351,5 @@ static void update_rx_buf_5(uint8_t byte_array, uint8_t new_byte, \
 // New circular buffers - not integrated - test in progress:
 //****************************************************************************
 
-circularBuffer_t rx_buf_circ_1, rx_buf_circ_2, rx_buf_circ_3, rx_buf_circ_4;
+circularBuffer_t rx_buf_circ_1, rx_buf_circ_2, rx_buf_circ_3;
+circularBuffer_t rx_buf_circ_4, rx_buf_circ_5;
