@@ -178,11 +178,16 @@ uint8_t tryUnpacking(CommPeriph *cp, PacketWrapper *pw)
 	{
 		//Try unpacking. This is the only way to know if we have a packet and
 		//not just random bytes, or an incomplete packet.
-		cp->rx.unpackedPacketsAvailable = unpack_payload( \
+		int8_t result = unpack_payload( \
 				cp->rx.inputBufferPtr, \
 				cp->rx.packedPtr, \
 				cp->rx.unpackedPtr);
 
+		if(result > 0)
+			cp->rx.unpackedPacketsAvailable = result;
+		else
+			cp->rx.unpackedPacketsAvailable = 0;
+		
 		if(cp->rx.unpackedPacketsAvailable > 0)
 		{
 			//Transition from CommInterface to PacketWrapper:
