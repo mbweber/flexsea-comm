@@ -104,6 +104,12 @@ uint8_t payload_parse_str(PacketWrapper* p)
 		p->destinationPort = PORT_RS485_2;
 		route(p, SLAVE);
 	}
+	else if(id == ID_SUB3_MATCH)
+	{
+		//For a slave on the expansion port:
+		p->destinationPort = PORT_EXP;
+		route(p, SLAVE);
+	}
 	else if(id == ID_UP_MATCH)
 	{
 		//For my master:
@@ -187,7 +193,7 @@ uint8_t tryUnpacking(CommPeriph *cp, PacketWrapper *pw)
 			cp->rx.unpackedPacketsAvailable = result;
 		else
 			cp->rx.unpackedPacketsAvailable = 0;
-		
+
 		if(cp->rx.unpackedPacketsAvailable > 0)
 		{
 			//Transition from CommInterface to PacketWrapper:
@@ -316,7 +322,6 @@ static uint8_t get_rid(uint8_t *pldata)
 		//Search on slave bus #1:
 		for(i = 0; i < getSlaveCnt(0); i++)
 		{
-			//if(cp_rid == board_sub1_id[i])
 			if(cp_rid == getBoardSubID(0,i))
 			{
 				return ID_SUB1_MATCH;
@@ -326,10 +331,18 @@ static uint8_t get_rid(uint8_t *pldata)
 		//Then on bus #2:
 		for(i = 0; i < getSlaveCnt(1); i++)
 		{
-			//if(cp_rid == board_sub2_id[i])
 			if(cp_rid == getBoardSubID(1,i))
 			{
 				return ID_SUB2_MATCH;
+			}
+		}
+
+		//Then on bus #3:
+		for(i = 0; i < getSlaveCnt(2); i++)
+		{
+			if(cp_rid == getBoardSubID(2,i))
+			{
+				return ID_SUB3_MATCH;
 			}
 		}
 	}

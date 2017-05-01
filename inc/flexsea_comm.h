@@ -54,6 +54,8 @@ int8_t unpack_payload_1(void);
 int8_t unpack_payload_2(void);
 int8_t unpack_payload_3(void);
 int8_t unpack_payload_4(void);
+int8_t unpack_payload_5(void);
+int8_t unpack_payload_6(void);
 
 int8_t unpack_payload_test(uint8_t *buf, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN]);
 
@@ -116,6 +118,8 @@ extern uint8_t comm_str_4[COMM_STR_BUF_LEN];
 extern uint8_t rx_command_4[PACKAGED_PAYLOAD_LEN];
 extern uint8_t comm_str_5[COMM_STR_BUF_LEN];
 extern uint8_t rx_command_5[PACKAGED_PAYLOAD_LEN];
+extern uint8_t comm_str_6[COMM_STR_BUF_LEN];
+extern uint8_t rx_command_6[PACKAGED_PAYLOAD_LEN];
 
 extern PacketWrapper packet[NUMBER_OF_PORTS][2];
 extern CommPeriph commPeriph[NUMBER_OF_PORTS];

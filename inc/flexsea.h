@@ -66,6 +66,7 @@ typedef enum {
 	PORT_USB = 2,
 	PORT_SPI = 3,
 	PORT_WIRELESS = 4,
+	PORT_EXP = 5,
 	//None
 	PORT_NONE	//PORT_NONE always has to be the last item
 }Port;

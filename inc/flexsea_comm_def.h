@@ -72,10 +72,11 @@ extern "C" {
 #define ID_MATCH						1		//Addressed to me
 #define ID_SUB1_MATCH					2		//Addressed to a board on slave bus #1
 #define ID_SUB2_MATCH					3		//Addressed to a board on slave bus #2
-#define ID_UP_MATCH						4		//Addressed to my master
+#define ID_SUB3_MATCH					4		//Addressed to a board on slave bus #3
+#define ID_UP_MATCH						6		//Addressed to my master
 #define ID_NO_MATCH						0
 
-#define NUMBER_OF_PORTS		5	//Has to match enum!
+#define NUMBER_OF_PORTS					6		//Has to match enum!
 
 //Communication protocol payload fields:
 #define P_XID							0		//Emitter ID

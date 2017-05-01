@@ -51,6 +51,7 @@ extern uint8_t rx_buf_2[RX_BUF_LEN];
 extern uint8_t rx_buf_3[RX_BUF_LEN];
 extern uint8_t rx_buf_4[RX_BUF_LEN];
 extern uint8_t rx_buf_5[RX_BUF_LEN];
+extern uint8_t rx_buf_6[RX_BUF_LEN];
 
 //****************************************************************************
 // Public Function Prototype(s):
@@ -71,6 +72,10 @@ void update_rx_buf_array_4(uint8_t *new_array, uint32_t len);
 void update_rx_buf_byte_5(uint8_t new_byte);
 void update_rx_buf_array_5(uint8_t *new_array, uint32_t len);
 
+void update_rx_buf_byte_6(uint8_t new_byte);
+void update_rx_buf_array_6(uint8_t *new_array, uint32_t len);
+
+
 uint8_t unwrap_buffer(uint8_t *array, uint8_t *new_array, uint32_t len);
 void resetInputBuffer(uint8_t idx);
 
@@ -87,7 +92,7 @@ void test_upd(void);
 //****************************************************************************
 
 extern circularBuffer_t rx_buf_circ_1, rx_buf_circ_2, rx_buf_circ_3;
-extern circularBuffer_t rx_buf_circ_4, rx_buf_circ_5;
+extern circularBuffer_t rx_buf_circ_4, rx_buf_circ_5, rx_buf_circ_6;
 
 #ifdef __cplusplus
 }

@@ -49,6 +49,7 @@ uint8_t rx_buf_2[RX_BUF_LEN];
 uint8_t rx_buf_3[RX_BUF_LEN];
 uint8_t rx_buf_4[RX_BUF_LEN];
 uint8_t rx_buf_5[RX_BUF_LEN];
+uint8_t rx_buf_6[RX_BUF_LEN];
 
 //****************************************************************************
 // Private Function Prototype(s):
@@ -69,6 +70,8 @@ static void update_rx_buf_3(uint8_t byte_array, uint8_t new_byte, \
 static void update_rx_buf_4(uint8_t byte_array, uint8_t new_byte, \
 							uint8_t *new_array, uint32_t len);
 static void update_rx_buf_5(uint8_t byte_array, uint8_t new_byte, \
+							uint8_t *new_array, uint32_t len);
+static void update_rx_buf_6(uint8_t byte_array, uint8_t new_byte, \
 							uint8_t *new_array, uint32_t len);
 
 //****************************************************************************
@@ -138,6 +141,19 @@ void update_rx_buf_byte_5(uint8_t new_byte)
 void update_rx_buf_array_5(uint8_t *new_array, uint32_t len)
 {
 	update_rx_buf_5(UPDATE_ARRAY, 0, new_array, len);
+}
+
+//Add one byte to buffer #6
+void update_rx_buf_byte_6(uint8_t new_byte)
+{
+	uint8_t empty_array[1] = {0};
+	update_rx_buf_6(UPDATE_BYTE, new_byte, empty_array, 0);
+}
+
+//Add an array of bytes to buffer #6
+void update_rx_buf_array_6(uint8_t *new_array, uint32_t len)
+{
+	update_rx_buf_6(UPDATE_ARRAY, 0, new_array, len);
 }
 
 #ifdef __cplusplus
@@ -347,9 +363,32 @@ static void update_rx_buf_5(uint8_t byte_array, uint8_t new_byte, \
 	}
 }
 
+//See comment above update_rx_buf_1()
+static void update_rx_buf_6(uint8_t byte_array, uint8_t new_byte, \
+							uint8_t *new_array, uint32_t len)
+{
+	static uint32_t idx_6 = 0;
+
+	if(byte_array == UPDATE_BYTE)
+	{
+		//Updating buffer with one byte
+		update_rx_buf_byte(rx_buf_6, &idx_6, new_byte);
+	}
+	else if(byte_array == UPDATE_ARRAY)
+	{
+		//Updating buffer with an array
+		update_rx_buf_array(rx_buf_6, &idx_6, new_array, len);
+	}
+	else
+	{
+		//Error
+		//flexsea_error(0);	ToDo
+	}
+}
+
 //****************************************************************************
 // New circular buffers - not integrated - test in progress:
 //****************************************************************************
 
 circularBuffer_t rx_buf_circ_1, rx_buf_circ_2, rx_buf_circ_3;
-circularBuffer_t rx_buf_circ_4, rx_buf_circ_5;
+circularBuffer_t rx_buf_circ_4, rx_buf_circ_5, rx_buf_circ_6;

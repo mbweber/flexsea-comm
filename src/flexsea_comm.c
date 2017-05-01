@@ -85,6 +85,9 @@ uint8_t rx_command_4[PACKAGED_PAYLOAD_LEN];
 uint8_t comm_str_5[COMM_STR_BUF_LEN];
 uint8_t packed_5[COMM_STR_BUF_LEN];
 uint8_t rx_command_5[PACKAGED_PAYLOAD_LEN];
+uint8_t comm_str_6[COMM_STR_BUF_LEN];
+uint8_t packed_6[COMM_STR_BUF_LEN];
+uint8_t rx_command_6[PACKAGED_PAYLOAD_LEN];
 
 uint32_t cmd_valid = 0;
 uint32_t cmd_bad_checksum = 0;
@@ -192,6 +195,11 @@ int8_t unpack_payload_4(void)
 int8_t unpack_payload_5(void)
 {
 	return unpack_payload(rx_buf_5, packed_5, rx_command_5);
+}
+
+int8_t unpack_payload_6(void)
+{
+	return unpack_payload(rx_buf_6, packed_6, rx_command_6);
 }
 
 //Special wrapper for unit test code:
