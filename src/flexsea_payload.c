@@ -287,7 +287,7 @@ static void route(PacketWrapper * p, PortType to)
 			idx = PORT_USB;	//Hack, forcing USB ToDo fix *************
 			p->destinationPort = PORT_USB;
 			copyPacket(p, &packet[idx][OUTBOUND], UPSTREAM);
-			//packet[idx][OUTBOUND].cmd = packet[idx][OUTBOUND].unpaked[P_CMD1];
+			packet[idx][OUTBOUND].cmd = packet[idx][OUTBOUND].unpaked[P_CMD1];
 			flexsea_send_serial_master(p);
 		}
 
