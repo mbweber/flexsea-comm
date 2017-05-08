@@ -94,9 +94,15 @@ uint8_t payload_parse_str(PacketWrapper* p)
 	}
 	else if(id == ID_SUB1_MATCH)
 	{
+		#ifndef USB_SPI_BRIDGE
 		//For a slave on bus #1:
 		p->destinationPort = PORT_RS485_1;
 		route(p, SLAVE);
+		#else
+		//This will redirect the EX1 requests to SPI:
+		p->destinationPort = PORT_EXP;
+		route(p, SLAVE);
+		#endif
 	}
 	else if(id == ID_SUB2_MATCH)
 	{
@@ -118,7 +124,6 @@ uint8_t payload_parse_str(PacketWrapper* p)
 
 		//Manage is the only board that can receive a package destined to his master
 		//p->port = PORT_USB;	//ToDo fix, ugly hack! *****************
-		//flexsea_send_serial_master(p);
 		route(p, MASTER);
 
 		#endif	//BOARD_TYPE_FLEXSEA_MANAGE
@@ -280,12 +285,15 @@ static void route(PacketWrapper * p, PortType to)
 			idx = p->destinationPort;
 			copyPacket(p, &packet[idx][OUTBOUND], DOWNSTREAM);
 			packet[idx][OUTBOUND].cmd = packet[idx][OUTBOUND].unpaked[P_CMD1];
+
+			//Next line is a test:
+			packet[idx][INBOUND].destinationPort = packet[idx][OUTBOUND].sourcePort;
+
 			commPeriph[idx].tx.packetReady = 1;
 		}
 		else
 		{
-			idx = PORT_USB;	//Hack, forcing USB ToDo fix *************
-			p->destinationPort = PORT_USB;
+			idx = p->destinationPort;
 			copyPacket(p, &packet[idx][OUTBOUND], UPSTREAM);
 			packet[idx][OUTBOUND].cmd = packet[idx][OUTBOUND].unpaked[P_CMD1];
 			flexsea_send_serial_master(p);
