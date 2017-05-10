@@ -116,14 +116,13 @@ uint8_t payload_parse_str(PacketWrapper* p)
 		p->destinationPort = PORT_EXP;
 		route(p, SLAVE);
 	}
-	else if(id == ID_UP_MATCH)
+	else if((id == ID_UP_MATCH) || (id == ID_OTHER_MASTER))
 	{
-		//For my master:
+		//For a master:
 
 		#ifdef BOARD_TYPE_FLEXSEA_MANAGE
 
 		//Manage is the only board that can receive a package destined to his master
-		//p->port = PORT_USB;	//ToDo fix, ugly hack! *****************
 		route(p, MASTER);
 
 		#endif	//BOARD_TYPE_FLEXSEA_MANAGE
@@ -313,15 +312,18 @@ static uint8_t get_rid(uint8_t *pldata)
 	uint8_t cp_rid = pldata[P_RID];
 	uint8_t i = 0;
 
-	//if(cp_rid == board_id)				//This board?
 	if(cp_rid == getBoardID()) //This board?
 	{
 		return ID_MATCH;
 	}
-	//else if(cp_rid == board_up_id)		//Master?
 	else if(cp_rid == getBoardUpID())		//Master?
 	{
 		return ID_UP_MATCH;
+	}
+	else if(cp_rid < getBoardID())
+	{
+		//Special case: it's for a master that's not "our" master
+		return ID_OTHER_MASTER;
 	}
 	else
 	{

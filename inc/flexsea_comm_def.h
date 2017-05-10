@@ -74,6 +74,7 @@ extern "C" {
 #define ID_SUB2_MATCH					3		//Addressed to a board on slave bus #2
 #define ID_SUB3_MATCH					4		//Addressed to a board on slave bus #3
 #define ID_UP_MATCH						6		//Addressed to my master
+#define ID_OTHER_MASTER					7		//Addressed to "a" master (special use case)
 #define ID_NO_MATCH						0
 
 #define NUMBER_OF_PORTS					6		//Has to match enum!
