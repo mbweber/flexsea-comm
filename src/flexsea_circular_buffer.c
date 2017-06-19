@@ -174,8 +174,6 @@ int circ_buff_read_section(circularBuffer_t* cb, uint8_t* readInto, uint16_t sta
 	return SUCCESS;
 }
 
-
-
 int circ_buff_move_head(circularBuffer_t* cb, uint16_t numBytes)
 {
     const int SUCCESS = 0;
