@@ -245,7 +245,7 @@ inline uint8_t tryParseRx(CommPeriph *cp, PacketWrapper *pw)
 inline uint8_t tryParseRx(CommPeriph *cp, PacketWrapper *pw)
 {
 	if(!(cp->rx.bytesReadyFlag > 0)) return 0;
-	cp->rx.bytesReadyFlag = 0;
+	cp->rx.bytesReadyFlag--;	// = 0;
 	uint8_t error = 0;
 
 	uint16_t numBytesConverted = unpack_payload_cb(\
