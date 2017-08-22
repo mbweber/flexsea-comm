@@ -51,7 +51,7 @@ extern "C" {
 #define UNPACK_ERR_CHECKSUM				-4
 
 //Buffers and packets:
-#define RX_BUF_LEN						100		//Reception buffer (flexsea_comm)
+#define RX_BUF_LEN						150		//Reception buffer (flexsea_comm)
 #define PAYLOAD_BUF_LEN					36		//Number of bytes in a payload string
 #define PAYLOAD_BYTES					(PAYLOAD_BUF_LEN - 4)
 #define COMM_STR_BUF_LEN				48		//Number of bytes in a comm. string
