@@ -213,11 +213,13 @@ uint8_t tryUnpacking(CommPeriph *cp, PacketWrapper *pw)
 }
 
 // Using these ifdefs is a non ideal approach
-// plan should refactor to use manage's tryParseRx
-// done this way so that this commit doesn't break plan, but it should be removed ASAP
+// plan should refactor to use Manage's tryParseRx
+// done this way so that this commit doesn't break plan, but it should be removed ASAP (ToDo)
 #ifdef BOARD_TYPE_FLEXSEA_PLAN
 inline uint8_t tryParseRx(CommPeriph *cp, PacketWrapper *pw)
 {
+	if(!(cp->rx.bytesReadyFlag > 0)) return 0;
+	cp->rx.bytesReadyFlag--;
 	uint8_t successfulParse = 0, error;
 
 	uint16_t numBytesConverted = unpack_payload_cb(\
