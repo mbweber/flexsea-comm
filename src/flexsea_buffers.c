@@ -56,10 +56,13 @@ uint8_t rx_buf_6[RX_BUF_LEN];
 //****************************************************************************
 
 //For all the buffers:
+/*
 static void update_rx_buf_byte(uint8_t *buf, uint32_t *idx, uint8_t new_byte);
 static void update_rx_buf_array(uint8_t *buf, uint32_t *idx, \
 								uint8_t *new_data, uint32_t len);
+								*/
 
+/*
 //Specific:
 static void update_rx_buf_1(uint8_t byte_array, uint8_t new_byte, \
 							uint8_t *new_array, uint32_t len);
@@ -73,11 +76,13 @@ static void update_rx_buf_5(uint8_t byte_array, uint8_t new_byte, \
 							uint8_t *new_array, uint32_t len);
 static void update_rx_buf_6(uint8_t byte_array, uint8_t new_byte, \
 							uint8_t *new_array, uint32_t len);
+*/
 
 //****************************************************************************
 // Public Function(s)
 //****************************************************************************
 
+/*
 //Add one byte to buffer #1
 void update_rx_buf_byte_1(uint8_t new_byte)
 {
@@ -155,6 +160,7 @@ void update_rx_buf_array_6(uint8_t *new_array, uint32_t len)
 {
 	update_rx_buf_6(UPDATE_ARRAY, 0, new_array, len);
 }
+*/
 
 #ifdef __cplusplus
 }
@@ -164,6 +170,7 @@ void update_rx_buf_array_6(uint8_t *new_array, uint32_t len)
 // Private function(s)
 //****************************************************************************
 
+/*
 //Add one byte to the FIFO buffer
 //Do not call that function directly, call update_rx_buf_byte_n() where n is
 //your communication port/buffer name
@@ -385,6 +392,7 @@ static void update_rx_buf_6(uint8_t byte_array, uint8_t new_byte, \
 		//flexsea_error(0);	ToDo
 	}
 }
+*/
 
 //****************************************************************************
 // New circular buffers - partially integrated - test in progress:
