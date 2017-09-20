@@ -46,6 +46,7 @@ extern "C" {
 //****************************************************************************
 
 uint8_t payload_str[PAYLOAD_BUF_LEN];
+uint8_t lastPayloadParsed[2] = {0, 0};
 
 //****************************************************************************
 // Private Function Prototype(s):
@@ -84,6 +85,10 @@ uint8_t payload_parse_str(PacketWrapper* p)
 		//the appropriate handler (as defined in flexsea_system):
 		if((cmd_7bits <= MAX_CMD_CODE) && (pType <= RX_PTYPE_MAX_INDEX))
 		{
+			//Save info about the last success:
+			lastPayloadParsed[0] = cmd_7bits;
+			lastPayloadParsed[0] = pType;
+			//Call handler:
 			(*flexsea_payload_ptr[cmd_7bits][pType]) (cp_str, info);
 			return PARSE_SUCCESSFUL;
 		}
@@ -277,6 +282,14 @@ inline uint8_t tryParseRx(CommPeriph *cp, PacketWrapper *pw)
 	return numBytesConverted > 0 && !error;
 }
 #endif
+
+//Accessor function for the API: what did we last parse?
+void getSignatureOfLastPayloadParsed(uint8_t *cmd, uint8_t *type)
+{
+	(*cmd) = lastPayloadParsed[0];
+	(*type) = lastPayloadParsed[1];
+}
+
 //****************************************************************************
 // Private Function(s):
 //****************************************************************************
