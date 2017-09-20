@@ -231,10 +231,16 @@ inline uint8_t tryParseRx(CommPeriph *cp, PacketWrapper *pw)
 	{
 		error = circ_buff_move_head(cp->rx.circularBuff, numBytesConverted);
 
-#ifdef USE_PRINTF
-		if(error)
-			printf() << "circ_buff_move_head error:" << error;
-#endif
+		#ifdef USE_PRINTF
+
+			if(error){printf() << "circ_buff_move_head error:" << error;}
+
+		#else
+
+			(void)error;
+
+		#endif
+
 		fillPacketFromCommPeriph(cp, pw);
 		// payload_parse_str returns 2 on successful parse
 		successfulParse = payload_parse_str(pw) == 2;
