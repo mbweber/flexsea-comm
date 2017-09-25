@@ -360,61 +360,61 @@ int8_t unpack_payload(uint8_t *buf, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAY
 
 uint16_t unpack_payload_cb(circularBuffer_t *cb, uint8_t *packed, uint8_t unpacked[PACKAGED_PAYLOAD_LEN])
 {
-    int bufSize = circ_buff_get_size(cb);
+	int bufSize = circ_buff_get_size(cb);
 
-    int foundString = 0, foundFrame = 0, bytes, possibleFooterPos;
+	int foundString = 0, foundFrame = 0, bytes, possibleFooterPos;
 	int lastPossibleHeaderIndex = bufSize - 4;
-    int headerPos = -1, lastHeaderPos = -1;
-    uint8_t checksum = 0;
+	int headerPos = -1, lastHeaderPos = -1;
+	uint8_t checksum = 0;
 
-    int headers = 0, footers = 0;
-    while(!foundString && lastHeaderPos < lastPossibleHeaderIndex)
+	int headers = 0, footers = 0;
+	while(!foundString && lastHeaderPos < lastPossibleHeaderIndex)
 	{
-        headerPos = circ_buff_search(cb, HEADER, lastHeaderPos+1);
-        //if we can't find a header, we quit searching for strings
-        if(headerPos == -1) break;
+		headerPos = circ_buff_search(cb, HEADER, lastHeaderPos+1);
+		//if we can't find a header, we quit searching for strings
+		if(headerPos == -1) break;
 
-        headers++;
-        foundFrame = 0;
-        if(headerPos <= lastPossibleHeaderIndex)
-        {
-            bytes = circ_buff_peak(cb, headerPos + 1);
-            possibleFooterPos = headerPos + 3 + bytes;
-            foundFrame = (possibleFooterPos < bufSize && circ_buff_peak(cb, possibleFooterPos) == FOOTER);
-        }
-
-        if(foundFrame)
+		headers++;
+		foundFrame = 0;
+		if(headerPos <= lastPossibleHeaderIndex)
 		{
-            footers++;
-            checksum = circ_buff_checksum(cb, headerPos+2, possibleFooterPos-1);
+			bytes = circ_buff_peak(cb, headerPos + 1);
+			possibleFooterPos = headerPos + 3 + bytes;
+			foundFrame = (possibleFooterPos < bufSize && circ_buff_peak(cb, possibleFooterPos) == FOOTER);
+		}
+
+		if(foundFrame)
+		{
+			footers++;
+			checksum = circ_buff_checksum(cb, headerPos+2, possibleFooterPos-1);
 
 			//if checksum is valid than we found a valid string
-            foundString = (checksum == circ_buff_peak(cb, possibleFooterPos-1));
+			foundString = (checksum == circ_buff_peak(cb, possibleFooterPos-1));
 		}
 
 		//either we found a frame and it had a valid checksum, or we want to try the next value of i
-        lastHeaderPos = headerPos;
+		lastHeaderPos = headerPos;
 	}
 
 	int numBytesInPackedString = 0;
 	if(foundString)
 	{
-        numBytesInPackedString = headerPos + bytes + 4;
+		numBytesInPackedString = headerPos + bytes + 4;
 
 		circ_buff_read_section(cb, packed, headerPos, bytes + 4);
 
-        int k, skip = 0, unpacked_idx = 0;
+		int k, skip = 0, unpacked_idx = 0;
 		for(k = 0; k < bytes; k++)
 		{
-            int index = k+2; //first value is header, next value is bytes, next value is first data
-            if(packed[index] == ESCAPE && skip == 0)
+			int index = k+2; //first value is header, next value is bytes, next value is first data
+			if(packed[index] == ESCAPE && skip == 0)
 			{
 				skip = 1;
 			}
 			else
 			{
 				skip = 0;
-                unpacked[unpacked_idx++] = packed[index];
+				unpacked[unpacked_idx++] = packed[index];
 			}
 		}
 	}
@@ -442,9 +442,10 @@ void fillPacketFromCommPeriph(CommPeriph *cp, PacketWrapper *pw)
 }
 
 //Functions that can copy packets between PacketWrapper objects:
-
+//ToDo: delete 'TravelDirection td'?
 void copyPacket(PacketWrapper *from, PacketWrapper *to, TravelDirection td)
 {
+	(void)td;
 	to->sourcePort = from->sourcePort;
 	to->destinationPort = from->destinationPort;
 	to->travelDir = from->travelDir;
