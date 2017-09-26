@@ -38,11 +38,13 @@ extern "C" {
 #include "flexsea.h"
 #include "flexsea_comm.h"
 #include "flexsea_payload.h"
+#include "flexsea_circular_buffer.h"
 
 //****************************************************************************
 // Variable(s)
 //****************************************************************************
 
+uint8_t npFlag = 0, ppFlag = 0;
 
 //****************************************************************************
 // Private Function Prototype(s)
@@ -52,6 +54,8 @@ extern "C" {
 // Public Function(s)
 //****************************************************************************
 
+//This function replaces flexsea_receive_from_X() and parseXCommands()
+//ToDo: add support for 1) RS-485 transceivers reception, 2) SPI error handling
 void receiveFlexSEAPacket(Port p, uint8_t *newPacketFlag, uint8_t *parsedPacketFlag)
 {
 	uint8_t parseResult = 0;
@@ -67,6 +71,19 @@ void receiveFlexSEAPacket(Port p, uint8_t *newPacketFlag, uint8_t *parsedPacketF
 		parseResult = payload_parse_str(&packet[p][INBOUND]);
 		(*parsedPacketFlag) += (parseResult == PARSE_SUCCESSFUL) ? 1 : 0;
 	}
+}
+
+//Host program can use this to feed bytes into a reception buffer
+//When autoParse is > 0 we parse the new data
+uint8_t receiveFlexSEABytes(uint8_t *d, uint8_t len, uint8_t autoParse)
+{
+	circ_buff_write(commPeriph[PORT_USB].rx.circularBuff, d, len);
+	commPeriph[PORT_USB].rx.bytesReadyFlag++;
+
+	//Parse if needed:
+	if(autoParse){receiveFlexSEAPacket(PORT_USB, &npFlag, &ppFlag);}
+
+	return ppFlag;
 }
 
 //****************************************************************************

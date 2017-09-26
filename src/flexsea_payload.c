@@ -87,7 +87,7 @@ uint8_t payload_parse_str(PacketWrapper* p)
 		{
 			//Save info about the last success:
 			lastPayloadParsed[0] = cmd_7bits;
-			lastPayloadParsed[0] = pType;
+			lastPayloadParsed[1] = pType;
 			//Call handler:
 			(*flexsea_payload_ptr[cmd_7bits][pType]) (cp_str, info);
 			return PARSE_SUCCESSFUL;
