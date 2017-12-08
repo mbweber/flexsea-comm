@@ -42,7 +42,7 @@ extern "C" {
 //****************************************************************************
 
 void receiveFlexSEAPacket(Port p, uint8_t *newPacketFlag, \
-							uint8_t *parsedPacketFlag);
+							uint8_t *parsedPacketFlag, uint8_t *watch);
 uint8_t receiveFlexSEABytes(uint8_t *d, uint8_t len, uint8_t autoParse);
 
 //****************************************************************************

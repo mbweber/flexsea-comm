@@ -45,6 +45,7 @@ extern "C" {
 //****************************************************************************
 
 uint8_t npFlag = 0, ppFlag = 0;
+uint8_t noWatch = 0;
 
 //****************************************************************************
 // Private Function Prototype(s)
@@ -56,7 +57,8 @@ uint8_t npFlag = 0, ppFlag = 0;
 
 //This function replaces flexsea_receive_from_X() and parseXCommands()
 //ToDo: add support for 1) RS-485 transceivers reception, 2) SPI error handling
-void receiveFlexSEAPacket(Port p, uint8_t *newPacketFlag, uint8_t *parsedPacketFlag)
+void receiveFlexSEAPacket(Port p, uint8_t *newPacketFlag,  \
+							uint8_t *parsedPacketFlag, uint8_t *watch)
 {
 	uint8_t parseResult = 0;
 
@@ -70,6 +72,7 @@ void receiveFlexSEAPacket(Port p, uint8_t *newPacketFlag, uint8_t *parsedPacketF
 		commPeriph[p].rx.unpackedPacketsAvailable = 0;
 		parseResult = payload_parse_str(&packet[p][INBOUND]);
 		(*parsedPacketFlag) += (parseResult == PARSE_SUCCESSFUL) ? 1 : 0;
+		(*watch) = 0; //Valid packets restart the watch count
 	}
 }
 
@@ -81,7 +84,7 @@ uint8_t receiveFlexSEABytes(uint8_t *d, uint8_t len, uint8_t autoParse)
 	commPeriph[PORT_USB].rx.bytesReadyFlag++;
 
 	//Parse if needed:
-	if(autoParse){receiveFlexSEAPacket(PORT_USB, &npFlag, &ppFlag);}
+	if(autoParse){receiveFlexSEAPacket(PORT_USB, &npFlag, &ppFlag, &noWatch);}
 
 	return ppFlag;
 }
