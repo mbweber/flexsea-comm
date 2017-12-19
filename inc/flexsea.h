@@ -36,6 +36,8 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include "flexsea_comm_def.h"
+#include <flexsea_circular_buffer.h>
 
 //#define USE_DEBUG_PRINTF			//Enable this to debug with the terminal
 
@@ -53,55 +55,21 @@ uint32_t REBUILD_UINT32(uint8_t *buf, uint16_t *index);
 // Definition(s):
 //****************************************************************************
 
-//Buffers and packets:
-#define RX_BUF_LEN						100		//Reception buffer (flexsea_comm)
-#define PAYLOAD_BUF_LEN					36		//Number of bytes in a payload string
-#define PAYLOAD_BYTES					(PAYLOAD_BUF_LEN - 4)
-#define COMM_STR_BUF_LEN				48		//Number of bytes in a comm. string
-#define PACKAGED_PAYLOAD_LEN			48		//Temporary
-#define PAYLOAD_BUFFERS					4		//Max # of payload strings we expect to find
-#define MAX_CMD_CODE					127
-
-//Packet types:
-#define RX_PTYPE_READ					0
-#define RX_PTYPE_WRITE					1
-#define RX_PTYPE_REPLY					2
-#define RX_PTYPE_INVALID				3
-#define RX_PTYPE_MAX_INDEX				2
-
-//Board ID related defines:
-#define ID_MATCH						1		//Addressed to me
-#define ID_SUB1_MATCH					2		//Addressed to a board on slave bus #1
-#define ID_SUB2_MATCH					3		//Addressed to a board on slave bus #2
-#define ID_UP_MATCH						4		//Addressed to my master
-#define ID_NO_MATCH						0
-
-//Communication ports:
-#define PORT_485_1						0
-#define PORT_485_2						1
-#define PORT_SPI						2
-#define PORT_USB						3
-#define PORT_SUB1						PORT_485_1
-#define PORT_SUB2						PORT_485_2
-
-//Communication protocol payload fields:
-#define P_XID							0		//Emitter ID
-#define P_RID							1		//Receiver ID
-#define P_CMDS							2		//Number of Commands sent
-#define P_CMD1							3		//First command
-#define P_DATA1							4		//First data
-
-//Parser definitions:
-#define PARSE_DEFAULT					0
-#define PARSE_ID_NO_MATCH				1
-#define PARSE_SUCCESSFUL				2
-#define PARSE_UNKNOWN_CMD				3
-
-#define CMD_READ						1
-#define CMD_WRITE						2
-
-#define KEEP							0
-#define CHANGE							1
+//Communication port/interface:
+typedef enum {
+	//Slave:
+	PORT_RS485_1 = 0,
+	PORT_SUB1  = PORT_RS485_1,
+	PORT_RS485_2 = 1,
+	PORT_SUB2 = PORT_RS485_2,
+	//Master:
+	PORT_USB = 2,
+	PORT_SPI = 3,
+	PORT_WIRELESS = 4,
+	PORT_EXP = 5,
+	//None
+	PORT_NONE	//PORT_NONE always has to be the last item
+}Port;
 
 //****************************************************************************
 // Shared variable(s)
@@ -139,10 +107,6 @@ extern void (*flexsea_payload_ptr[MAX_CMD_CODE][RX_PTYPE_MAX_INDEX+1]) \
 #define CMD_7BITS(x)	((x & 0xFF)>>1)
 #define IS_CMD_RW(x)	(x & 0x01)
 
-//Read, Write, or Read&Write?
-#define WRITE			0
-#define READ			1
-
 //Conditional printf() statement - debugging only
 #ifdef USE_DEBUG_PRINTF
 	#define DEBUG_PRINTF(...) printf(__VA_ARGS__)
@@ -157,16 +121,92 @@ extern void (*flexsea_payload_ptr[MAX_CMD_CODE][RX_PTYPE_MAX_INDEX+1]) \
 	#define _USE_PRINTF(...) do {} while (0)
 #endif	//USE__PRINTF
 
-//****************************************************************************
-// Include(s) - at the end to make sure that the included files can access
-// all the project wide #define.
-//****************************************************************************
+typedef enum {
+	TS_UNKNOWN = 0,
+	TS_TRANSMIT,
+	TS_TRANSMIT_THEN_RECEIVE,
+	TS_PREP_TO_RECEIVE,
+	TS_RECEIVE
+}TransceiverSate;
 
-//All the FlexSEA stack includes:
+typedef enum {
+	UNKNOWN_TRAVEL_DIR = 0,
+	DOWNSTREAM,
+	UPSTREAM
+}TravelDirection;
 
-#include "flexsea_buffers.h"
-#include "flexsea_comm.h"
-#include "flexsea_payload.h"
+typedef enum {
+	MASTER = 0,
+	SLAVE
+}PortType;
+
+typedef enum {
+	INBOUND = 0,
+	OUTBOUND = 1
+}Dir;
+
+//New approach - 03/2017. This will replace comm_s.
+//================================================
+
+//Struct to store a packet, in both packed and unpacked
+typedef struct
+{
+	Port port;
+	Port reply_port;
+
+	Port sourcePort;
+	Port destinationPort;
+	TravelDirection travelDir;
+
+	uint8_t cmd;
+	uint8_t numb;
+
+	// bytes as received on the wire
+	uint8_t packed[PACKET_WRAPPER_LEN];
+
+	//Unpacked packet ready to be parsed.
+	uint8_t unpaked[PACKET_WRAPPER_LEN];	//ToDo fix typo
+
+	//Hold info about parent (if applicable):
+	void *parent;
+} PacketWrapper;
+
+typedef struct
+{
+	//State:
+	uint8_t bytesReadyFlag;
+	uint8_t unpackedPacketsAvailable;
+	uint8_t packetReady;
+	uint8_t timeStamp;
+
+	//Data:
+	uint8_t *inputBufferPtr;	//Points to rx_buf_
+	uint8_t *unpackedPtr;		//Points to comm_str_
+	uint8_t *packedPtr;			//Points to rx_cmd_
+	circularBuffer_t* circularBuff;
+//	uint8_t unpacked[COMM_PERIPH_ARR_LEN];
+//	uint8_t packed[COMM_PERIPH_ARR_LEN];
+
+	//Note: using both pointers and arrays to ease the refactoring
+}CommPeriphSub;
+
+//Forward declaration:
+
+typedef struct
+{
+	//Peripheral state and info:
+	Port port;
+	PortType portType;
+	TransceiverSate transState;
+
+	//Specific for RX or TX:
+	CommPeriphSub rx;
+	CommPeriphSub tx;
+
+	//Attach PacketWrappers:
+	PacketWrapper *in;
+	PacketWrapper *out;
+}CommPeriph;
 
 #ifdef __cplusplus
 }

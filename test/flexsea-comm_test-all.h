@@ -5,7 +5,6 @@ extern "C" {
 #ifndef TEST_ALL_FX_COMM_H
 #define TEST_ALL_FX_COMM_H
 
-#include "main.h"
 #include "unity.h"
 #include "../inc/flexsea.h"
 //#include "../inc/flexsea_comm.h"

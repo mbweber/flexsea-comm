@@ -61,9 +61,8 @@ extern "C" {
 
 #include <string.h>
 #include <stdlib.h>
-#include "../inc/flexsea.h"
-#include "flexsea_board.h"
-#include "flexsea_system.h"
+#include <stdint.h>
+#include <flexsea_comm.h>
 
 //****************************************************************************
 // Variable(s)
@@ -71,36 +70,30 @@ extern "C" {
 
 uint8_t comm_str_tmp[COMM_STR_BUF_LEN];
 
-#ifdef ENABLE_FLEXSEA_BUF_1
 uint8_t comm_str_1[COMM_STR_BUF_LEN];
-uint8_t rx_command_1[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_1
-
-#ifdef ENABLE_FLEXSEA_BUF_2
+uint8_t packed_1[COMM_STR_BUF_LEN];
+uint8_t rx_command_1[PACKAGED_PAYLOAD_LEN];
 uint8_t comm_str_2[COMM_STR_BUF_LEN];
-uint8_t rx_command_2[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_2
-
-#ifdef ENABLE_FLEXSEA_BUF_3
+uint8_t packed_2[COMM_STR_BUF_LEN];
+uint8_t rx_command_2[PACKAGED_PAYLOAD_LEN];
 uint8_t comm_str_3[COMM_STR_BUF_LEN];
-uint8_t rx_command_3[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_3
-
-#ifdef ENABLE_FLEXSEA_BUF_4
+uint8_t packed_3[COMM_STR_BUF_LEN];
+uint8_t rx_command_3[PACKAGED_PAYLOAD_LEN];
 uint8_t comm_str_4[COMM_STR_BUF_LEN];
-uint8_t rx_command_4[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_4
-
-#ifdef ENABLE_FLEXSEA_BUF_5
+uint8_t packed_4[COMM_STR_BUF_LEN];
+uint8_t rx_command_4[PACKAGED_PAYLOAD_LEN];
 uint8_t comm_str_5[COMM_STR_BUF_LEN];
-uint8_t rx_command_5[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_5
+uint8_t packed_5[COMM_STR_BUF_LEN];
+uint8_t rx_command_5[PACKAGED_PAYLOAD_LEN];
+uint8_t comm_str_6[COMM_STR_BUF_LEN];
+uint8_t packed_6[COMM_STR_BUF_LEN];
+uint8_t rx_command_6[PACKAGED_PAYLOAD_LEN];
 
 uint32_t cmd_valid = 0;
 uint32_t cmd_bad_checksum = 0;
 
-struct comm_s slaveComm[COMM_SLAVE_BUS];
-struct comm_s masterComm[COMM_MASTERS];
+PacketWrapper packet[NUMBER_OF_PORTS][2];
+CommPeriph commPeriph[NUMBER_OF_PORTS];
 
 struct commSpy_s commSpy1 = {0,0,0,0,0,0,0};
 
@@ -108,7 +101,6 @@ struct commSpy_s commSpy1 = {0,0,0,0,0,0,0};
 // Private Function Prototype(s):
 //****************************************************************************
 
-static int8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN]);
 
 //****************************************************************************
 // Public Function(s)
@@ -173,52 +165,47 @@ uint8_t comm_gen_str(uint8_t payload[], uint8_t *cstr, uint8_t bytes)
 	cstr[2 + total_bytes] = checksum;
 	cstr[3 + total_bytes] = FOOTER;
 
-	//Return the length of the valid data
+	//Return the last index of the valid data
 	commSpy1.retVal = 3 + (uint8_t)total_bytes;
 	return (3 + total_bytes);
 }
 
 //To avoid sharing buffers in multiple files we use specific functions:
 
-#ifdef ENABLE_FLEXSEA_BUF_1
 int8_t unpack_payload_1(void)
 {
-	return unpack_payload(rx_buf_1, rx_command_1);
+	return unpack_payload(rx_buf_1, packed_1, rx_command_1);
 }
-#endif	//ENABLE_FLEXSEA_BUF_1
 
-#ifdef ENABLE_FLEXSEA_BUF_2
 int8_t unpack_payload_2(void)
 {
-	return unpack_payload(rx_buf_2, rx_command_2);
+	return unpack_payload(rx_buf_2, packed_2, rx_command_2);
 }
-#endif	//ENABLE_FLEXSEA_BUF_2
 
-#ifdef ENABLE_FLEXSEA_BUF_3
 int8_t unpack_payload_3(void)
 {
-	return unpack_payload(rx_buf_3, rx_command_3);
+	return unpack_payload(rx_buf_3, packed_3, rx_command_3);
 }
-#endif	//ENABLE_FLEXSEA_BUF_3
 
-#ifdef ENABLE_FLEXSEA_BUF_4
 int8_t unpack_payload_4(void)
 {
-	return unpack_payload(rx_buf_4, rx_command_4);
+	return unpack_payload(rx_buf_4, packed_4, rx_command_4);
 }
-#endif	//ENABLE_FLEXSEA_BUF_4
 
-#ifdef ENABLE_FLEXSEA_BUF_5
 int8_t unpack_payload_5(void)
 {
-	return unpack_payload(rx_buf_5, rx_command_5);
+	return unpack_payload(rx_buf_5, packed_5, rx_command_5);
 }
-#endif	//ENABLE_FLEXSEA_BUF_5
+
+int8_t unpack_payload_6(void)
+{
+	return unpack_payload(rx_buf_6, packed_6, rx_command_6);
+}
 
 //Special wrapper for unit test code:
-int8_t unpack_payload_test(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN])
+int8_t unpack_payload_test(uint8_t *buf, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN])
 {
-	return unpack_payload(buf, rx_cmd);
+	return unpack_payload(buf, packed, rx_cmd);
 }
 
 void initRandomGenerator(int seed)
@@ -226,31 +213,26 @@ void initRandomGenerator(int seed)
 	srand(seed);
 }
 
-uint8_t generateRandomUint8(void)
+uint8_t generateRandomUint8_t(void)
 {
 	int r = rand();
 	return (uint8_t)(r % 255);
 }
 
-void generateRandomUint8Array(uint8_t *arr, uint8_t size)
+void generateRandomUint8_tArray(uint8_t *arr, uint8_t size)
 {
 	int i = 0;
 
 	for(i = 0; i < size; i++)
 	{
-		arr[i] = generateRandomUint8();
+		arr[i] = generateRandomUint8_t();
 	}
 }
 
-//****************************************************************************
-// Private Function(s)
-//****************************************************************************
-
-//New version of comm_decode_str
 //Take a buffer as an argument, returns the number of decoded payload packets
 //ToDo: The error codes are not always right, but if it's < 0 you know it didn't
 //find a valid string
-static int8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN])
+int8_t unpack_payload(uint8_t *buf, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN])
 {
 	uint32_t i = 0, j = 0, k = 0, idx = 0, h = 0;
 	uint32_t bytes = 0, possible_footer = 0, possible_footer_pos = 0;
@@ -307,7 +289,7 @@ static int8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN
 							else
 							{
 								skip = 0;
-								rx_cmd[payload_strings][idx] = rx_buf_tmp[k];
+								rx_cmd[idx] = rx_buf_tmp[k];
 								idx++;
 							}
 						}
@@ -316,9 +298,12 @@ static int8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN
 						payload_strings++;
 						cmd_valid++;
 
-						//Remove the string to avoid double detection
+						//Remove the string to avoid double detection, and
+						//save a copy of it
+						int cnt = 0;
 						for(h = i; h <= possible_footer_pos; h++)
 						{
+							packed[cnt++] = buf[h];
 							buf[h] = 0;
 						}
 
@@ -368,6 +353,164 @@ static int8_t unpack_payload(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN
 
 	//Default
 	return 0;
+}
+
+uint16_t unpack_payload_cb(circularBuffer_t *cb, uint8_t *packed, uint8_t unpacked[PACKAGED_PAYLOAD_LEN])
+{
+    int bufSize = circ_buff_get_size(cb);
+
+    int foundString = 0, foundFrame = 0, bytes, possibleFooterPos;
+	int lastPossibleHeaderIndex = bufSize - 4;
+    int headerPos = -1, lastHeaderPos = -1;
+    uint8_t checksum = 0;
+
+    int headers = 0, footers = 0;
+    while(!foundString && lastHeaderPos < lastPossibleHeaderIndex)
+	{
+        headerPos = circ_buff_search(cb, HEADER, lastHeaderPos+1);
+        //if we can't find a header, we quit searching for strings
+        if(headerPos == -1) break;
+
+        headers++;
+        foundFrame = 0;
+        if(headerPos <= lastPossibleHeaderIndex)
+        {
+            bytes = circ_buff_peak(cb, headerPos + 1);
+            possibleFooterPos = headerPos + 3 + bytes;
+            foundFrame = (possibleFooterPos < bufSize && circ_buff_peak(cb, possibleFooterPos) == FOOTER);
+        }
+
+        if(foundFrame)
+		{
+            footers++;
+            checksum = circ_buff_checksum(cb, headerPos+2, possibleFooterPos-1);
+
+			//if checksum is valid than we found a valid string
+            foundString = (checksum == circ_buff_peak(cb, possibleFooterPos-1));
+		}
+
+		//either we found a frame and it had a valid checksum, or we want to try the next value of i
+        lastHeaderPos = headerPos;
+	}
+
+	int numBytesInPackedString = 0;
+	if(foundString)
+	{
+        numBytesInPackedString = headerPos + bytes + 4;
+
+		circ_buff_read_section(cb, packed, headerPos, bytes + 4);
+
+        int k, skip = 0, unpacked_idx = 0;
+		for(k = 0; k < bytes; k++)
+		{
+            int index = k+2; //first value is header, next value is bytes, next value is first data
+            if(packed[index] == ESCAPE && skip == 0)
+			{
+				skip = 1;
+			}
+			else
+			{
+				skip = 0;
+                unpacked[unpacked_idx++] = packed[index];
+			}
+		}
+	}
+
+	return numBytesInPackedString;
+}
+
+//From CommPeriph to PacketWrapper:
+void fillPacketFromCommPeriph(CommPeriph *cp, PacketWrapper *pw)
+{
+	pw->sourcePort = cp->port;
+	if(cp->portType == MASTER)
+	{
+		pw->travelDir = DOWNSTREAM;
+	}
+	else
+	{
+		pw->travelDir = UPSTREAM;
+	}
+
+	//Copy data. As the source is the peripheral, we always use rx.
+	uint16_t len = COMM_STR_BUF_LEN;	//ToDo something smarter!
+	memcpy(pw->packed, cp->rx.packedPtr, len);
+	memcpy(pw->unpaked, cp->rx.unpackedPtr, len);
+}
+
+//Functions that can copy packets between PacketWrapper objects:
+
+void copyPacket(PacketWrapper *from, PacketWrapper *to, TravelDirection td)
+{
+	to->sourcePort = from->sourcePort;
+	to->destinationPort = from->destinationPort;
+	to->travelDir = from->travelDir;
+	memcpy(to->packed, from->packed, PACKET_WRAPPER_LEN);
+	memcpy(to->unpaked, from->unpaked, PACKET_WRAPPER_LEN);
+}
+
+//Initialize CommPeriph to defaults:
+void initCommPeriph(CommPeriph *cp, Port port, PortType pt, uint8_t *input, \
+					uint8_t *unpacked, uint8_t *packed, circularBuffer_t* rx_cb, \
+					PacketWrapper *inbound, PacketWrapper *outbound)
+{
+	cp->port = port;
+	cp->portType = pt;
+	cp->transState = TS_UNKNOWN;
+
+	cp->rx.bytesReadyFlag = 0;
+	cp->rx.unpackedPacketsAvailable = 0;
+	cp->rx.inputBufferPtr = input;
+	cp->rx.unpackedPtr = unpacked;
+	cp->rx.packedPtr = packed;
+	memset(cp->rx.packedPtr, 0, COMM_PERIPH_ARR_LEN);
+	memset(cp->rx.unpackedPtr, 0, COMM_PERIPH_ARR_LEN);
+
+	circ_buff_init(rx_cb);
+	cp->rx.circularBuff = rx_cb;
+
+
+	cp->tx.bytesReadyFlag = 0;
+	cp->tx.unpackedPacketsAvailable = 0;
+//	cp->tx.unpackedPtr = cp->tx.unpacked;
+//	cp->tx.packedPtr = cp->tx.packed;
+//	memset(cp->tx.packed, 0, COMM_PERIPH_ARR_LEN);
+//	memset(cp->tx.unpacked, 0, COMM_PERIPH_ARR_LEN);
+
+	linkCommPeriphPacketWrappers(cp, inbound, outbound);
+}
+
+//Each CommPeriph is associated to two PacketWrappers (inbound & outbound)
+void linkCommPeriphPacketWrappers(CommPeriph *cp, PacketWrapper *inbound, \
+					PacketWrapper *outbound)
+{
+	//Force family:
+	cp->in = inbound;
+	cp->out = outbound;
+	inbound->parent = (CommPeriph*)cp;
+	outbound->parent = (CommPeriph*)cp;
+
+	//Children inherit from parent:
+	if(cp->portType == MASTER)
+	{
+		inbound->travelDir = DOWNSTREAM;
+		inbound->sourcePort = cp->port;
+		inbound->destinationPort = PORT_NONE;
+
+		outbound->travelDir = UPSTREAM;
+		outbound->sourcePort = PORT_NONE;
+		outbound->destinationPort = cp->port;
+	}
+	else
+	{
+		inbound->travelDir = UPSTREAM;
+		inbound->sourcePort = cp->port;
+		inbound->destinationPort = PORT_NONE;
+
+		outbound->travelDir = DOWNSTREAM;
+		outbound->sourcePort = PORT_NONE;
+		outbound->destinationPort = cp->port;
+	}
 }
 
 #ifdef __cplusplus

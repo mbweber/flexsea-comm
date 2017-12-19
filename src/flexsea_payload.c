@@ -37,13 +37,9 @@ extern "C" {
 // Include(s)
 //****************************************************************************
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include "../inc/flexsea.h"
-#include "../../flexsea-comm/inc/flexsea_comm.h"
-#include "../../flexsea-system/inc/flexsea_system.h"
-#include "flexsea_board.h"
+#include <flexsea_payload.h>
+#include <flexsea_board.h>
 
 //****************************************************************************
 // Variable(s)
@@ -56,7 +52,7 @@ uint8_t payload_str[PAYLOAD_BUF_LEN];
 //****************************************************************************
 
 static uint8_t get_rid(uint8_t *pldata);
-static void route_to_slave(uint8_t port, uint8_t *buf, uint32_t len);
+static void route(PacketWrapper * p, PortType to);
 
 //****************************************************************************
 // Public Function(s):
@@ -64,11 +60,14 @@ static void route_to_slave(uint8_t port, uint8_t *buf, uint32_t len);
 
 //Decode/parse received string
 //ToDo improve: for now, supports only one command per string
-uint8_t payload_parse_str(uint8_t *cp_str, uint8_t *info)
+uint8_t payload_parse_str(PacketWrapper* p)
 {
+	uint8_t *cp_str = p->unpaked;
+	uint8_t info[2] = {0,0};
 	uint8_t cmd = 0, cmd_7bits = 0;
 	unsigned int id = 0;
 	uint8_t pType = RX_PTYPE_INVALID;
+	info[0] = (uint8_t)p->sourcePort;
 
 	//Command
 	cmd = cp_str[P_CMD1];		//CMD w/ R/W bit
@@ -78,6 +77,7 @@ uint8_t payload_parse_str(uint8_t *cp_str, uint8_t *info)
 	id = get_rid(cp_str);
 	if(id == ID_MATCH)
 	{
+		p->destinationPort = PORT_NONE;	//We are home
 		pType = packetType(cp_str);
 
 		//It's addressed to me. Function pointer array will call
@@ -85,7 +85,6 @@ uint8_t payload_parse_str(uint8_t *cp_str, uint8_t *info)
 		if((cmd_7bits <= MAX_CMD_CODE) && (pType <= RX_PTYPE_MAX_INDEX))
 		{
 			(*flexsea_payload_ptr[cmd_7bits][pType]) (cp_str, info);
-
 			return PARSE_SUCCESSFUL;
 		}
 		else
@@ -95,32 +94,36 @@ uint8_t payload_parse_str(uint8_t *cp_str, uint8_t *info)
 	}
 	else if(id == ID_SUB1_MATCH)
 	{
+		#ifndef USB_SPI_BRIDGE
 		//For a slave on bus #1:
-		route_to_slave(PORT_SUB1, cp_str, PAYLOAD_BUF_LEN);
-		//ToDo compute length rather then sending the max
+		p->destinationPort = PORT_RS485_1;
+		route(p, SLAVE);
+		#else
+		//This will redirect the EX1 requests to SPI:
+		p->destinationPort = PORT_EXP;
+		route(p, SLAVE);
+		#endif
 	}
 	else if(id == ID_SUB2_MATCH)
 	{
 		//For a slave on bus #2:
-		route_to_slave(PORT_SUB2, cp_str, PAYLOAD_BUF_LEN);
-		//ToDo compute length rather then sending the max
+		p->destinationPort = PORT_RS485_2;
+		route(p, SLAVE);
 	}
-	else if(id == ID_UP_MATCH)
+	else if(id == ID_SUB3_MATCH)
 	{
-		//For my master:
+		//For a slave on the expansion port:
+		p->destinationPort = PORT_EXP;
+		route(p, SLAVE);
+	}
+	else if((id == ID_UP_MATCH) || (id == ID_OTHER_MASTER))
+	{
+		//For a master:
 
 		#ifdef BOARD_TYPE_FLEXSEA_MANAGE
 
-		uint8_t numb  = 0;
-
 		//Manage is the only board that can receive a package destined to his master
-
-		//Repackages the payload. ToDo: would be more efficient to just resend the comm_str, but it's not passed
-		//to this function (cp_str is a payload, not a comm_str)
-		numb = comm_gen_str(cp_str, comm_str_usb, PAYLOAD_BUF_LEN);		//ToDo: shouldn't be fixed at spi or usb
-		numb = COMM_STR_BUF_LEN;    //Fixed length for now
-		flexsea_send_serial_master(PORT_USB, comm_str_usb, numb);	//Same comment here - ToDo fix
-		//(the SPI driver will grab comm_str_spi directly)
+		route(p, MASTER);
 
 		#endif	//BOARD_TYPE_FLEXSEA_MANAGE
 	}
@@ -176,47 +179,129 @@ uint8_t packetType(uint8_t *buf)
 	return RX_PTYPE_INVALID;
 }
 
+//Do you have bytes ready? Can they be unpacked? Let's give it a shot.
+uint8_t tryUnpacking(CommPeriph *cp, PacketWrapper *pw)
+{
+	uint8_t retVal = 0;
+
+	if(cp->rx.bytesReadyFlag > 0)
+	{
+		//Try unpacking. This is the only way to know if we have a packet and
+		//not just random bytes, or an incomplete packet.
+		int8_t result = unpack_payload( \
+				cp->rx.inputBufferPtr, \
+				cp->rx.packedPtr, \
+				cp->rx.unpackedPtr);
+
+		if(result > 0)
+			cp->rx.unpackedPacketsAvailable = result;
+		else
+			cp->rx.unpackedPacketsAvailable = 0;
+
+		if(cp->rx.unpackedPacketsAvailable > 0)
+		{
+			//Transition from CommInterface to PacketWrapper:
+			fillPacketFromCommPeriph(cp, pw);
+			retVal = 1;
+		}
+
+		//Drop flag
+		cp->rx.bytesReadyFlag = 0;
+	}
+
+	return retVal;
+}
+
+// Using these ifdefs is a non ideal approach
+// plan should refactor to use manage's tryParseRx
+// done this way so that this commit doesn't break plan, but it should be removed ASAP
+#ifdef BOARD_TYPE_FLEXSEA_PLAN
+inline uint8_t tryParseRx(CommPeriph *cp, PacketWrapper *pw)
+{
+	uint8_t successfulParse = 0, error;
+
+	uint16_t numBytesConverted = unpack_payload_cb(\
+			cp->rx.circularBuff, \
+			cp->rx.packedPtr, \
+			cp->rx.unpackedPtr);
+
+	if(numBytesConverted > 0)
+	{
+		error = circ_buff_move_head(cp->rx.circularBuff, numBytesConverted);
+
+#ifdef USE_PRINTF
+		if(error)
+			printf() << "circ_buff_move_head error:" << error;
+#endif
+		fillPacketFromCommPeriph(cp, pw);
+		// payload_parse_str returns 2 on successful parse
+		successfulParse = payload_parse_str(pw) == 2;
+	}
+
+	return successfulParse;
+}
+#endif
+#ifndef BOARD_TYPE_FLEXSEA_PLAN
+inline uint8_t tryParseRx(CommPeriph *cp, PacketWrapper *pw)
+{
+	if(!(cp->rx.bytesReadyFlag > 0)) return 0;
+	cp->rx.bytesReadyFlag = 0;
+	uint8_t error = 0;
+
+	uint16_t numBytesConverted = unpack_payload_cb(\
+			cp->rx.circularBuff, \
+			cp->rx.packedPtr, \
+			cp->rx.unpackedPtr);
+
+	if(numBytesConverted > 0)
+	{
+		error = circ_buff_move_head(cp->rx.circularBuff, numBytesConverted);
+
+#ifdef USE_PRINTF
+		if(error)
+			printf() << "circ_buff_move_head error:" << error;
+#endif
+		fillPacketFromCommPeriph(cp, pw);
+		// payload_parse_str returns 2 on successful parse
+		//successfulParse = payload_parse_str(pw) == 2;
+	}
+
+	return numBytesConverted > 0 && !error;
+}
+#endif
 //****************************************************************************
 // Private Function(s):
 //****************************************************************************
 
-//ToDo not the greatest function...
-static void route_to_slave(uint8_t port, uint8_t *buf, uint32_t len)
+static void route(PacketWrapper * p, PortType to)
 {
 	#ifdef BOARD_TYPE_FLEXSEA_MANAGE
 
-		uint32_t numb = 0;
-		uint8_t *comm_str_ptr = slaveComm[0].tx.txBuf;
+		Port idx = PORT_NONE;
 
-		//Repackages the payload. ToDo: would be more efficient to just resend the comm_str,
-		//but it's not passed to this function
-		numb = comm_gen_str(buf, comm_str_tmp, len);
-		numb = COMM_STR_BUF_LEN;    //Fixed length for now
-
-		//Port specific flags and buffer:
-		if(port == PORT_RS485_1)
+		if(to == SLAVE)
 		{
-			comm_str_ptr = slaveComm[0].tx.txBuf;
-			slaveComm[0].tx.cmd = buf[P_CMD1];
-			slaveComm[0].tx.inject = 1;
-			slaveComm[0].tx.len = numb;
-		}
-		else if(port == PORT_RS485_2)
-		{
-			comm_str_ptr = slaveComm[1].tx.txBuf;
-			slaveComm[1].tx.cmd = buf[P_CMD1];
-			slaveComm[1].tx.inject = 1;
-			slaveComm[1].tx.len = numb;
-		}
+			idx = p->destinationPort;
+			copyPacket(p, &packet[idx][OUTBOUND], DOWNSTREAM);
+			packet[idx][OUTBOUND].cmd = packet[idx][OUTBOUND].unpaked[P_CMD1];
 
-		//Copy string:
-		memcpy(comm_str_ptr, comm_str_tmp, numb);
+			//Next line is a test:
+			packet[idx][INBOUND].destinationPort = packet[idx][OUTBOUND].sourcePort;
+
+			commPeriph[idx].tx.packetReady = 1;
+		}
+		else
+		{
+			idx = p->destinationPort;
+			copyPacket(p, &packet[idx][OUTBOUND], UPSTREAM);
+			packet[idx][OUTBOUND].cmd = packet[idx][OUTBOUND].unpaked[P_CMD1];
+			flexsea_send_serial_master(p);
+		}
 
 	#else
 
-		(void)port;
-		(void)buf;
-		(void) len;
+		(void)p;
+		(void)to;
 
 	#endif 	//BOARD_TYPE_FLEXSEA_MANAGE
 }
@@ -227,33 +312,47 @@ static uint8_t get_rid(uint8_t *pldata)
 	uint8_t cp_rid = pldata[P_RID];
 	uint8_t i = 0;
 
-	if(cp_rid == board_id)				//This board?
+	if(cp_rid == getBoardID()) //This board?
 	{
 		return ID_MATCH;
 	}
-	else if(cp_rid == board_up_id)		//Master?
+	else if(cp_rid == getBoardUpID())		//Master?
 	{
 		return ID_UP_MATCH;
+	}
+	else if(cp_rid < getBoardID())
+	{
+		//Special case: it's for a master that's not "our" master
+		return ID_OTHER_MASTER;
 	}
 	else
 	{
 		//Can be on a slave bus, or can be invalid.
 
 		//Search on slave bus #1:
-		for(i = 0; i < SLAVE_BUS_1_CNT; i++)
+		for(i = 0; i < getSlaveCnt(0); i++)
 		{
-			if(cp_rid == board_sub1_id[i])
+			if(cp_rid == getBoardSubID(0,i))
 			{
 				return ID_SUB1_MATCH;
 			}
 		}
 
 		//Then on bus #2:
-		for(i = 0; i < SLAVE_BUS_1_CNT; i++)
+		for(i = 0; i < getSlaveCnt(1); i++)
 		{
-			if(cp_rid == board_sub2_id[i])
+			if(cp_rid == getBoardSubID(1,i))
 			{
 				return ID_SUB2_MATCH;
+			}
+		}
+
+		//Then on bus #3:
+		for(i = 0; i < getSlaveCnt(2); i++)
+		{
+			if(cp_rid == getBoardSubID(2,i))
+			{
+				return ID_SUB3_MATCH;
 			}
 		}
 	}

@@ -40,57 +40,41 @@ extern "C" {
 //****************************************************************************
 
 #include "flexsea.h"
-#include "flexsea_board.h"
-#include "flexsea_system.h"
+#include "flexsea_buffers.h"
 
 //****************************************************************************
 // Public Function Prototype(s):
 //****************************************************************************
 
 uint8_t comm_gen_str(uint8_t payload[], uint8_t *cstr, uint8_t bytes);
+int8_t unpack_payload(uint8_t *buf, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN]);
+uint16_t unpack_payload_cb(circularBuffer_t *cb, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN]);
 
-#ifdef ENABLE_FLEXSEA_BUF_1
 int8_t unpack_payload_1(void);
-#endif	//ENABLE_FLEXSEA_BUF_1
-#ifdef ENABLE_FLEXSEA_BUF_2
 int8_t unpack_payload_2(void);
-#endif	//ENABLE_FLEXSEA_BUF_2
-#ifdef ENABLE_FLEXSEA_BUF_3
 int8_t unpack_payload_3(void);
-#endif	//ENABLE_FLEXSEA_BUF_3
-#ifdef ENABLE_FLEXSEA_BUF_4
 int8_t unpack_payload_4(void);
-#endif	//ENABLE_FLEXSEA_BUF_4
-int8_t unpack_payload_test(uint8_t *buf, uint8_t rx_cmd[][PACKAGED_PAYLOAD_LEN]);
+int8_t unpack_payload_5(void);
+int8_t unpack_payload_6(void);
+
+int8_t unpack_payload_test(uint8_t *buf, uint8_t *packed, uint8_t rx_cmd[PACKAGED_PAYLOAD_LEN]);
 
 //Random numbers and arrays:
 void initRandomGenerator(int seed);
-uint8_t generateRandomUint8(void);
-void generateRandomUint8Array(uint8_t *arr, uint8_t size);
+uint8_t generateRandomUint8_t(void);
+void generateRandomUint8_tArray(uint8_t *arr, uint8_t size);
+
+void fillPacketFromCommPeriph(CommPeriph *cp, PacketWrapper *pw);
+void copyPacket(PacketWrapper *from, PacketWrapper *to, TravelDirection td);
+void initCommPeriph(CommPeriph *cp, Port port, PortType pt, uint8_t *input, \
+					uint8_t *unpacked, uint8_t *packed, circularBuffer_t* rx_cb, \
+					PacketWrapper *inbound, PacketWrapper *outbound);
+void linkCommPeriphPacketWrappers(CommPeriph *cp, PacketWrapper *inbound, \
+					PacketWrapper *outbound);
 
 //****************************************************************************
 // Definition(s):
 //****************************************************************************
-
-//Framing:
-#define HEADER  				0xED	//237d
-#define FOOTER  				0xEE	//238d
-#define ESCAPE  				0xE9	//233d
-
-//Return codes:
-#define UNPACK_ERR_HEADER		-1
-#define UNPACK_ERR_FOOTER		-2
-#define UNPACK_ERR_LEN			-3
-#define UNPACK_ERR_CHECKSUM		-4
-
-//Generic transceiver state:
-#define TRANS_STATE_UNKNOWN		0
-#define TRANS_STATE_TX			1
-#define TRANS_STATE_TX_THEN_RX	2
-#define TRANS_STATE_PREP_RX		3
-#define TRANS_STATE_RX			4
-//Pure write: stays TRANS_STATE_TX
-//Read: TRANS_STATE_TX_THEN_RX => TRANS_STATE_PREP_RX => TRANS_STATE_RX
 
 //Enable this to debug with the terminal:
 //#define DEBUG_COMM_PRINTF_
@@ -106,6 +90,7 @@ void generateRandomUint8Array(uint8_t *arr, uint8_t size);
 // Structure(s):
 //****************************************************************************
 
+//Communication test tools:
 struct commSpy_s
 {
 	uint8_t counter;
@@ -117,75 +102,27 @@ struct commSpy_s
 	uint8_t error;
 };
 
-struct comm_rx_s
-{
-	int8_t cmdReady;
-	uint16_t bytesReady;
-
-	//Pointers to buffers:
-	uint8_t *rxBuf;
-	uint8_t *commStr;
-	uint8_t (*rxCmd)[PACKAGED_PAYLOAD_LEN];
-};
-
-struct comm_tx_s
-{
-	//ToDo: this is a copy of what I had before. I'm expecting that it will
-	//be reworked soon
-
-	uint8_t txBuf[COMM_STR_BUF_LEN];
-	uint8_t cmd;
-	uint8_t len;
-	uint8_t inject;
-
-};
-
-struct comm_s
-{
-	uint8_t port;
-	int8_t transceiverState;
-
-	//Reception:
-	struct comm_rx_s rx;
-
-	//Transmission:
-	struct comm_tx_s tx;
-};
-
-
 //****************************************************************************
 // Shared variable(s)
 //****************************************************************************
 
 extern uint8_t comm_str_tmp[COMM_STR_BUF_LEN];
 
-#ifdef ENABLE_FLEXSEA_BUF_1
 extern uint8_t comm_str_1[COMM_STR_BUF_LEN];
-extern uint8_t rx_command_1[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_1
-
-#ifdef ENABLE_FLEXSEA_BUF_2
+extern uint8_t rx_command_1[PACKAGED_PAYLOAD_LEN];
 extern uint8_t comm_str_2[COMM_STR_BUF_LEN];
-extern uint8_t rx_command_2[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_2
-
-#ifdef ENABLE_FLEXSEA_BUF_3
+extern uint8_t rx_command_2[PACKAGED_PAYLOAD_LEN];
 extern uint8_t comm_str_3[COMM_STR_BUF_LEN];
-extern uint8_t rx_command_3[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_3
-
-#ifdef ENABLE_FLEXSEA_BUF_4
+extern uint8_t rx_command_3[PACKAGED_PAYLOAD_LEN];
 extern uint8_t comm_str_4[COMM_STR_BUF_LEN];
-extern uint8_t rx_command_4[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_4
-
-#ifdef ENABLE_FLEXSEA_BUF_5
+extern uint8_t rx_command_4[PACKAGED_PAYLOAD_LEN];
 extern uint8_t comm_str_5[COMM_STR_BUF_LEN];
-extern uint8_t rx_command_5[PAYLOAD_BUFFERS][PACKAGED_PAYLOAD_LEN];
-#endif	//ENABLE_FLEXSEA_BUF_5
+extern uint8_t rx_command_5[PACKAGED_PAYLOAD_LEN];
+extern uint8_t comm_str_6[COMM_STR_BUF_LEN];
+extern uint8_t rx_command_6[PACKAGED_PAYLOAD_LEN];
 
-extern struct comm_s slaveComm[COMM_SLAVE_BUS];
-extern struct comm_s masterComm[COMM_MASTERS];
+extern PacketWrapper packet[NUMBER_OF_PORTS][2];
+extern CommPeriph commPeriph[NUMBER_OF_PORTS];
 
 extern struct commSpy_s commSpy1;
 

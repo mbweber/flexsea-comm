@@ -21,51 +21,47 @@
 	Biomechatronics research group <http://biomech.media.mit.edu/>
 	[Contributors]
 *****************************************************************************
-	[This file] flexsea_payload: deals with the "intelligent" data packaged
-	in a comm_str
+	[This file] flexsea_circular_buffer.c: simple circular buffer implementation
 *****************************************************************************
 	[Change log] (Convention: YYYY-MM-DD | author | comment)
-	* 2016-09-09 | jfduval | Initial GPL-3.0 release
-	*
+	* 2017-03-21 | dudds4 | Initial GPL-3.0 release
 ****************************************************************************/
 
-#ifndef INC_FX_PAYLOAD_H
-#define INC_FX_PAYLOAD_H
+#ifndef FLEXSEA_CIRCULAR_BUFFER_H
+#define FLEXSEA_CIRCULAR_BUFFER_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-//****************************************************************************
-// Include(s)
-//****************************************************************************
-
+#include <flexsea_comm_def.h>
 #include <stdint.h>
-#include "flexsea_comm.h"
 
-//****************************************************************************
-// Shared variable(s)
-//****************************************************************************
+#define CB_BUF_LEN (RX_BUF_LEN)
 
-extern uint8_t payload_str[PAYLOAD_BUF_LEN];
+typedef struct circularBuffer {
+	uint8_t bytes[CB_BUF_LEN];
+	int head;
+	int tail;
+	int size;
+} circularBuffer_t;
 
-//****************************************************************************
-// Public Function Prototype(s):
-//****************************************************************************
-uint8_t payload_parse_str(PacketWrapper* foo);
-uint8_t sent_from_a_slave(uint8_t *buf);
-uint8_t packetType(uint8_t *buf);
-void prepare_empty_payload(uint8_t from, uint8_t to, uint8_t *buf, uint32_t len);
-void flexsea_payload_catchall(uint8_t *buf, uint8_t *info);
-uint8_t tryUnpacking(CommPeriph *cp, PacketWrapper *pw);
-uint8_t tryParseRx(CommPeriph *cp, PacketWrapper *pw);
+// Basic Circular Buffer Operations
+void circ_buff_init(circularBuffer_t* cb);
+int circ_buff_write(circularBuffer_t* cb, uint8_t *writeFrom, uint16_t len);
+int circ_buff_read(circularBuffer_t* cb, uint8_t* readInto, uint16_t numBytes);
+int circ_buff_read_section(circularBuffer_t* cb, uint8_t* readInto, uint16_t start, uint16_t numBytes);
+int circ_buff_move_head(circularBuffer_t* cb, uint16_t numBytes);
+int circ_buff_get_size(circularBuffer_t* cb);
+int circ_buff_get_space(circularBuffer_t* cb);
 
-//****************************************************************************
-// Definition(s):
-//****************************************************************************
+// Convenience Operations for Parsing Buffer Data
+uint8_t circ_buff_peak(circularBuffer_t* cb, uint16_t offset);
+int32_t circ_buff_search(circularBuffer_t* cb, uint8_t value, uint16_t start);
+uint8_t circ_buff_checksum(circularBuffer_t* cb, uint16_t start, uint16_t end);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif //FLEXSEA_CIRCULAR_BUFFER_H
